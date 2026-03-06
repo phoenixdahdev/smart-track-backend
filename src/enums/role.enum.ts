@@ -15,6 +15,9 @@ export enum AgencyRole {
   BILLING_SPECIALIST = 'BILLING_SPECIALIST',
   FINANCE_MANAGER = 'FINANCE_MANAGER',
   GUARDIAN = 'GUARDIAN',
+  AGENCY_OWNER = 'AGENCY_OWNER',
+  SCHEDULER = 'SCHEDULER',
+  HR_MANAGER = 'HR_MANAGER',
 }
 
 export type UserRole = PlatformRole | AgencyRole;

@@ -25,10 +25,13 @@ describe('Role Enums', () => {
       expect(AgencyRole.BILLING_SPECIALIST).toBe('BILLING_SPECIALIST');
       expect(AgencyRole.FINANCE_MANAGER).toBe('FINANCE_MANAGER');
       expect(AgencyRole.GUARDIAN).toBe('GUARDIAN');
+      expect(AgencyRole.AGENCY_OWNER).toBe('AGENCY_OWNER');
+      expect(AgencyRole.SCHEDULER).toBe('SCHEDULER');
+      expect(AgencyRole.HR_MANAGER).toBe('HR_MANAGER');
     });
 
-    it('should have exactly 7 agency roles', () => {
-      expect(Object.keys(AgencyRole)).toHaveLength(7);
+    it('should have exactly 10 agency roles', () => {
+      expect(Object.keys(AgencyRole)).toHaveLength(10);
     });
   });
 

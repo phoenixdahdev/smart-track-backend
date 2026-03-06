@@ -1,0 +1,6 @@
+export enum RemittanceStatus {
+  RECEIVED = 'RECEIVED',
+  FULLY_POSTED = 'FULLY_POSTED',
+  PARTIAL = 'PARTIAL',
+  UNMATCHED = 'UNMATCHED',
+}
