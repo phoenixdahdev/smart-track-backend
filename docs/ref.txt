@@ -1,0 +1,11 @@
+To be clear on scope: SmartTrack does not process or handle payments on behalf of agencies. Money moves directly from payers to agency bank accounts via standard EFT — we are not in that flow.
+
+What SmartTrack does handle is the full claims and reconciliation workflow:
+
+  • Claim Generation: Users create and submit both Professional (837P) and Institutional (837I) claims directly to Medicaid and Managed Care Organizations (MCOs)
+
+  • Reconciliation & Reporting: SmartTrack provides reconciliation reports and analytic dashboards to track every claim through its full lifecycle — billable, submitted, paid, rejected, and denied
+
+  • Documentation Integration: Billing data is generated automatically from existing records, including EVV data, ISP data, attendance records, and case notes — no manual re-entry
+
+We are not a billing intermediary. We are a billing workflow and documentation platform.
