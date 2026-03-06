@@ -39,7 +39,11 @@ describe('OrganizationService', () => {
   describe('create', () => {
     it('should create org and update user', async () => {
       const result = await service.create(
-        { legal_name: 'Sunrise Care LLC', npi: '1234567890', ein: '12-3456789' },
+        {
+          legal_name: 'Sunrise Care LLC',
+          npi: '1234567890',
+          ein: '12-3456789',
+        },
         'user-uuid',
       );
 

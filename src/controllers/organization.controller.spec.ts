@@ -36,7 +36,11 @@ describe('OrganizationController', () => {
   describe('POST /organizations', () => {
     it('should create org and return it', async () => {
       const result = await controller.create(
-        { legal_name: 'Sunrise Care LLC', npi: '1234567890', ein: '12-3456789' },
+        {
+          legal_name: 'Sunrise Care LLC',
+          npi: '1234567890',
+          ein: '12-3456789',
+        },
         'user-uuid',
       );
 

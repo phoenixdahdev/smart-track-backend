@@ -272,7 +272,7 @@
 | Phase                      | Progress   | Key Blocker                              |
 | -------------------------- | ---------- | ---------------------------------------- |
 | 0 - Foundation             | 20/21      | CI/CD pipeline remaining                 |
-| 1 - Auth & Multi-Tenancy   | 11/11      | Complete — local JWT + Google OAuth       |
+| 1 - Auth & Multi-Tenancy   | 11/11      | Complete — local JWT + Google OAuth      |
 | 2 - Core Entities          | 0/9        | Entities ready, services/controllers TBD |
 | 3 - Service Documentation  | 0/10       | Entities ready, services/controllers TBD |
 | 4 - EVV                    | 0/7        | Entities ready                           |

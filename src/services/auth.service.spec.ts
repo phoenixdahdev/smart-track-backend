@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
@@ -340,9 +337,9 @@ describe('AuthService', () => {
         reset_token_expires_at: new Date(Date.now() - 1000),
       });
 
-      await expect(
-        service.resetPassword('raw', 'newpass123'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword('raw', 'newpass123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -368,7 +365,13 @@ describe('AuthService', () => {
 
   describe('signout', () => {
     it('should log audit event when org_id present', async () => {
-      await service.signout('user-uuid', 'org-uuid', 'ADMIN', '127.0.0.1', 'Agent');
+      await service.signout(
+        'user-uuid',
+        'org-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'Agent',
+      );
 
       expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
         expect.objectContaining({ action: 'LOGOUT' }),

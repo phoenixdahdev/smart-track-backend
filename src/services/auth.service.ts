@@ -299,10 +299,7 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await this.userDal.get({
       identifierOptions: { reset_token: hashedToken },
@@ -312,7 +309,10 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
-    if (!user.reset_token_expires_at || new Date() > user.reset_token_expires_at) {
+    if (
+      !user.reset_token_expires_at ||
+      new Date() > user.reset_token_expires_at
+    ) {
       throw new BadRequestException('Invalid or expired reset token');
     }
 

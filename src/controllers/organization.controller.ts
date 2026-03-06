@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { OrganizationService } from '@services/organization.service';
 import { CreateOrganizationDto } from '@dtos/create-organization.dto';
 import { UpdateOrganizationDto } from '@dtos/update-organization.dto';

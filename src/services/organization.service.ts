@@ -22,7 +22,9 @@ export class OrganizationService {
       identifierOptions: { npi: dto.npi },
     });
     if (existingNpi) {
-      throw new BadRequestException('An organization with this NPI already exists');
+      throw new BadRequestException(
+        'An organization with this NPI already exists',
+      );
     }
 
     const org = await this.organizationDal.create({

@@ -41,12 +41,18 @@ describe('AuthController', () => {
   beforeEach(() => {
     authService = {
       signup: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
-      verifyEmail: jest.fn().mockResolvedValue({ message: 'Email verified successfully' }),
+      verifyEmail: jest
+        .fn()
+        .mockResolvedValue({ message: 'Email verified successfully' }),
       resendOtp: jest.fn().mockResolvedValue({ message: 'OTP sent' }),
       signin: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
-      googleSignin: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
+      googleSignin: jest
+        .fn()
+        .mockResolvedValue({ user: mockUser, ...mockTokens }),
       getMe: jest.fn().mockResolvedValue(mockUser),
-      forgotPassword: jest.fn().mockResolvedValue({ message: 'Reset link sent' }),
+      forgotPassword: jest
+        .fn()
+        .mockResolvedValue({ message: 'Reset link sent' }),
       resetPassword: jest.fn().mockResolvedValue({ message: 'Password reset' }),
       refreshToken: jest.fn().mockResolvedValue(mockTokens),
       signout: jest.fn().mockResolvedValue(undefined),
@@ -123,7 +129,9 @@ describe('AuthController', () => {
 
   describe('POST /auth/forgot-password', () => {
     it('should return success message', async () => {
-      const result = await controller.forgotPassword({ email: 'test@test.com' });
+      const result = await controller.forgotPassword({
+        email: 'test@test.com',
+      });
 
       expect(result.message).toBe('Reset link sent');
     });

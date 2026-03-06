@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class CreateOrganizationDto {
   @ApiProperty({ example: 'Sunrise Care Services LLC' })
@@ -18,7 +24,10 @@ export class CreateOrganizationDto {
   @Matches(/^\d{10}$/, { message: 'NPI must be a 10-digit number' })
   npi: string;
 
-  @ApiProperty({ example: '12-3456789', description: 'Employer Identification Number' })
+  @ApiProperty({
+    example: '12-3456789',
+    description: 'Employer Identification Number',
+  })
   @IsString()
   @IsNotEmpty()
   ein: string;
