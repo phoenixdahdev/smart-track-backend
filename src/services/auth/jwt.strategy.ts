@@ -44,6 +44,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       sub_permissions: user.sub_permissions as Record<string, boolean>,
       session_timeout: user.session_timeout,
       mfa_enabled: user.mfa_enabled,
+      email_verified: user.email_verified,
     };
   }
 }

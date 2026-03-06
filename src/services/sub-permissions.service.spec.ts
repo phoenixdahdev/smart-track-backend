@@ -14,6 +14,7 @@ describe('SubPermissionsService', () => {
     sub_permissions: perms,
     session_timeout: 30,
     mfa_enabled: false,
+    email_verified: true,
   });
 
   beforeEach(() => {

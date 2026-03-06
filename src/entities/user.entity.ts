@@ -6,18 +6,20 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { TenantBaseEntity } from './tenant-base.entity';
+import { BaseEntity } from './base.entity';
 import { AgencyRole } from '@enums/role.enum';
 import { UserStatus } from '@enums/user-status.enum';
 import { MfaType } from '@enums/mfa-type.enum';
 import { OrganizationEntity } from './organization.entity';
 
 @Entity('users')
-@Index('idx_users_email', ['email'])
+@Index('idx_users_email', ['email'], { unique: true })
 @Index('idx_users_role', ['role'])
 @Index('idx_users_status', ['status'])
-@Index('idx_users_auth0_sub', ['auth0_sub'], { unique: true })
-export class UserEntity extends TenantBaseEntity {
+export class UserEntity extends BaseEntity {
+  @Column({ type: 'uuid', nullable: true })
+  org_id: string | null;
+
   @Column({ type: 'varchar', length: 255 })
   email: string;
 
@@ -30,7 +32,7 @@ export class UserEntity extends TenantBaseEntity {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
-  @Column({ type: 'enum', enum: AgencyRole })
+  @Column({ type: 'enum', enum: AgencyRole, default: AgencyRole.DSP })
   role: AgencyRole;
 
   @Column({ type: 'jsonb', default: '{}' })
@@ -39,18 +41,30 @@ export class UserEntity extends TenantBaseEntity {
   @Column({
     type: 'enum',
     enum: UserStatus,
-    default: UserStatus.PENDING_INVITE,
+    default: UserStatus.ACTIVE,
   })
   status: UserStatus;
+
+  @Column({ type: 'boolean', default: false })
+  email_verified: boolean;
+
+  @Column({ type: 'varchar', length: 6, nullable: true })
+  otp_code: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  otp_expires_at: Date | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  reset_token: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  reset_token_expires_at: Date | null;
 
   @Column({ type: 'boolean', default: false })
   mfa_enabled: boolean;
 
   @Column({ type: 'enum', enum: MfaType, default: MfaType.NONE })
   mfa_type: MfaType;
-
-  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
-  auth0_sub: string | null;
 
   @Column({ type: 'integer', default: 30 })
   session_timeout: number;
@@ -67,9 +81,9 @@ export class UserEntity extends TenantBaseEntity {
   @Column({ type: 'uuid', nullable: true })
   supervisor_id: string | null;
 
-  @ManyToOne(() => OrganizationEntity, (org) => org.users)
+  @ManyToOne(() => OrganizationEntity, (org) => org.users, { nullable: true })
   @JoinColumn({ name: 'org_id' })
-  organization: OrganizationEntity;
+  organization: OrganizationEntity | null;
 
   @ManyToOne(() => UserEntity, (user) => user.subordinates, { nullable: true })
   @JoinColumn({ name: 'supervisor_id' })

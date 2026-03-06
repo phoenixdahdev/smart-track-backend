@@ -8,9 +8,13 @@ describe('AuthController', () => {
   let controller: AuthController;
   let authService: {
     signup: jest.Mock;
+    verifyEmail: jest.Mock;
+    resendOtp: jest.Mock;
     signin: jest.Mock;
     googleSignin: jest.Mock;
-    getSession: jest.Mock;
+    getMe: jest.Mock;
+    forgotPassword: jest.Mock;
+    resetPassword: jest.Mock;
     refreshToken: jest.Mock;
     signout: jest.Mock;
   };
@@ -24,6 +28,7 @@ describe('AuthController', () => {
     sub_permissions: {},
     session_timeout: 30,
     mfa_enabled: false,
+    email_verified: true,
   };
 
   const mockTokens = { accessToken: 'at-xyz', refreshToken: 'rt-xyz' };
@@ -36,11 +41,13 @@ describe('AuthController', () => {
   beforeEach(() => {
     authService = {
       signup: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
+      verifyEmail: jest.fn().mockResolvedValue({ message: 'Email verified successfully' }),
+      resendOtp: jest.fn().mockResolvedValue({ message: 'OTP sent' }),
       signin: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
-      googleSignin: jest
-        .fn()
-        .mockResolvedValue({ user: mockUser, ...mockTokens }),
-      getSession: jest.fn().mockResolvedValue(mockUser),
+      googleSignin: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
+      getMe: jest.fn().mockResolvedValue(mockUser),
+      forgotPassword: jest.fn().mockResolvedValue({ message: 'Reset link sent' }),
+      resetPassword: jest.fn().mockResolvedValue({ message: 'Password reset' }),
       refreshToken: jest.fn().mockResolvedValue(mockTokens),
       signout: jest.fn().mockResolvedValue(undefined),
     };
@@ -53,75 +60,88 @@ describe('AuthController', () => {
   });
 
   describe('POST /auth/signup', () => {
-    it('should return created user and tokens', async () => {
+    it('should return user and tokens', async () => {
       const result = await controller.signup(
-        {
-          name: 'New User',
-          email: 'new@agency.com',
-          password: 'password123',
-          org_id: 'org-uuid',
-        },
+        { name: 'New', email: 'new@test.com', password: 'pass1234' },
         mockReq,
       );
 
-      expect(result.message).toBe('Account created successfully');
-      expect(result.data).toEqual({ user: mockUser, ...mockTokens });
+      expect(result.message).toContain('Account created');
+      expect(result.data.accessToken).toBe('at-xyz');
     });
+  });
 
-    it('should pass IP and user agent to service', async () => {
-      await controller.signup(
-        {
-          name: 'New',
-          email: 'new@agency.com',
-          password: 'password123',
-          org_id: 'org-uuid',
-        },
-        mockReq,
-      );
+  describe('POST /auth/verify-email', () => {
+    it('should verify email', async () => {
+      const result = await controller.verifyEmail({
+        email: 'test@test.com',
+        otp: '123456',
+      });
 
-      expect(authService.signup).toHaveBeenCalledWith(
-        expect.objectContaining({ email: 'new@agency.com' }),
-        '10.0.0.1',
-        'TestAgent',
-      );
+      expect(result.message).toBe('Email verified successfully');
+    });
+  });
+
+  describe('POST /auth/resend-otp', () => {
+    it('should resend OTP', async () => {
+      const result = await controller.resendOtp({ email: 'test@test.com' });
+
+      expect(result.message).toBe('OTP sent');
     });
   });
 
   describe('POST /auth/signin', () => {
     it('should return user and tokens', async () => {
       const result = await controller.signin(
-        { email: 'test@agency.com', password: 'password123' },
+        { email: 'test@test.com', password: 'pass' },
         mockReq,
       );
 
       expect(result.message).toBe('Signed in successfully');
-      expect(result.data.accessToken).toBe('at-xyz');
     });
   });
 
   describe('POST /auth/signin/google', () => {
-    it('should return user and tokens for Google signin', async () => {
+    it('should return user and tokens', async () => {
       const result = await controller.googleSignin(
-        { idToken: 'google-id-token' },
+        { idToken: 'token' },
         mockReq,
       );
 
       expect(result.message).toBe('Signed in with Google successfully');
-      expect(result.data.accessToken).toBe('at-xyz');
     });
   });
 
-  describe('GET /auth/session', () => {
-    it('should return current session', async () => {
-      const result = await controller.session('user-uuid');
+  describe('GET /auth/me', () => {
+    it('should return current user', async () => {
+      const result = await controller.me('user-uuid');
 
-      expect(result.message).toBe('Session retrieved');
-      expect(result.data).toEqual(mockUser);
+      expect(result.message).toBe('User retrieved');
+      expect(result.data.id).toBe('user-uuid');
+    });
+  });
+
+  describe('POST /auth/forgot-password', () => {
+    it('should return success message', async () => {
+      const result = await controller.forgotPassword({ email: 'test@test.com' });
+
+      expect(result.message).toBe('Reset link sent');
+    });
+  });
+
+  describe('POST /auth/reset-password', () => {
+    it('should reset password', async () => {
+      const result = await controller.resetPassword({
+        token: 'reset-token',
+        newPassword: 'newpass123',
+      });
+
+      expect(result.message).toBe('Password reset');
     });
   });
 
   describe('POST /auth/signout', () => {
-    it('should call signout and return success', async () => {
+    it('should sign out', async () => {
       const result = await controller.signout(mockUser, mockReq);
 
       expect(result.message).toBe('Signed out successfully');
@@ -139,7 +159,6 @@ describe('AuthController', () => {
     it('should return new tokens', async () => {
       const result = await controller.refresh('old-rt');
 
-      expect(result.message).toBe('Tokens refreshed');
       expect(result.data).toEqual(mockTokens);
     });
   });

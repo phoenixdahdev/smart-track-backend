@@ -28,7 +28,7 @@ function stripPhi(
 }
 
 export type AgencyAuditParams = {
-  org_id: string;
+  org_id: string | null;
   user_id: string;
   user_role: string;
   action: string;
@@ -63,6 +63,8 @@ export class AuditLogService {
   ) {}
 
   async logAgencyAction(params: AgencyAuditParams): Promise<void> {
+    if (!params.org_id) return;
+
     try {
       await this.auditLogDal.create({
         createPayload: {

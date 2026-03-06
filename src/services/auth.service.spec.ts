@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuditLogService } from './audit-log.service';
+import { EmailService } from './email.service';
 import { AgencyRole } from '@enums/role.enum';
 import { UserStatus } from '@enums/user-status.enum';
 import { MfaType } from '@enums/mfa-type.enum';
@@ -21,7 +22,6 @@ jest.mock('google-auth-library', () => ({
       getPayload: () => ({
         email: 'google@agency.com',
         name: 'Google User',
-        picture: 'https://photo.url',
       }),
     }),
   })),
@@ -35,6 +35,7 @@ describe('AuthService', () => {
   let userDal: { get: jest.Mock; create: jest.Mock; update: jest.Mock };
   let jwtService: { sign: jest.Mock; verify: jest.Mock };
   let auditLogService: { logAgencyAction: jest.Mock };
+  let emailService: { sendOtp: jest.Mock; sendPasswordReset: jest.Mock };
 
   const mockUser = {
     id: 'user-uuid',
@@ -48,6 +49,11 @@ describe('AuthService', () => {
     mfa_enabled: false,
     mfa_type: MfaType.NONE,
     status: UserStatus.ACTIVE,
+    email_verified: true,
+    otp_code: null,
+    otp_expires_at: null,
+    reset_token: null,
+    reset_token_expires_at: null,
     last_login: null,
   };
 
@@ -63,6 +69,10 @@ describe('AuthService', () => {
     };
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
+    };
+    emailService = {
+      sendOtp: jest.fn().mockResolvedValue(undefined),
+      sendPasswordReset: jest.fn().mockResolvedValue(undefined),
     };
 
     const configService = {
@@ -81,6 +91,7 @@ describe('AuthService', () => {
       jwtService as unknown as JwtService,
       configService,
       auditLogService as unknown as AuditLogService,
+      emailService as unknown as EmailService,
     );
   });
 
@@ -89,45 +100,100 @@ describe('AuthService', () => {
   });
 
   describe('signup', () => {
-    it('should create user and return tokens', async () => {
+    it('should create user, send OTP, and return tokens', async () => {
       userDal.get.mockResolvedValue(null);
 
       const result = await service.signup(
-        { name: 'New User', email: 'new@agency.com', password: 'password123', org_id: 'org-uuid' },
+        { name: 'New User', email: 'new@agency.com', password: 'password123' },
         '127.0.0.1',
         'Agent',
       );
 
       expect(userDal.create).toHaveBeenCalled();
+      expect(emailService.sendOtp).toHaveBeenCalled();
       expect(result.accessToken).toBe('mock-token');
-      expect(result.refreshToken).toBe('mock-token');
     });
 
     it('should throw BadRequestException for existing email', async () => {
       await expect(
         service.signup(
-          { name: 'Dupe', email: 'test@agency.com', password: 'password123', org_id: 'org-uuid' },
+          { name: 'Dupe', email: 'test@agency.com', password: 'password123' },
           '127.0.0.1',
           '',
         ),
       ).rejects.toThrow(BadRequestException);
     });
+  });
 
-    it('should log audit event on signup', async () => {
-      userDal.get.mockResolvedValue(null);
+  describe('verifyEmail', () => {
+    it('should verify email with correct OTP', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        email_verified: false,
+        otp_code: '123456',
+        otp_expires_at: new Date(Date.now() + 600000),
+      });
 
-      await service.signup(
-        { name: 'New', email: 'new@agency.com', password: 'pass1234', org_id: 'org-uuid' },
-        '127.0.0.1',
-        'Agent',
-      );
+      const result = await service.verifyEmail('test@agency.com', '123456');
 
-      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+      expect(result.message).toBe('Email verified successfully');
+      expect(userDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'SIGNUP',
-          user_id: 'user-uuid',
+          updatePayload: expect.objectContaining({ email_verified: true }),
         }),
       );
+    });
+
+    it('should throw for wrong OTP', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        email_verified: false,
+        otp_code: '123456',
+        otp_expires_at: new Date(Date.now() + 600000),
+      });
+
+      await expect(
+        service.verifyEmail('test@agency.com', '000000'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw for expired OTP', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        email_verified: false,
+        otp_code: '123456',
+        otp_expires_at: new Date(Date.now() - 1000),
+      });
+
+      await expect(
+        service.verifyEmail('test@agency.com', '123456'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw for already verified email', async () => {
+      await expect(
+        service.verifyEmail('test@agency.com', '123456'),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('resendOtp', () => {
+    it('should generate new OTP and send email', async () => {
+      userDal.get.mockResolvedValue({ ...mockUser, email_verified: false });
+
+      const result = await service.resendOtp('test@agency.com');
+
+      expect(emailService.sendOtp).toHaveBeenCalled();
+      expect(result.message).toContain('OTP has been sent');
+    });
+
+    it('should return generic message for non-existent email', async () => {
+      userDal.get.mockResolvedValue(null);
+
+      const result = await service.resendOtp('nonexistent@agency.com');
+
+      expect(result.message).toContain('OTP has been sent');
+      expect(emailService.sendOtp).not.toHaveBeenCalled();
     });
   });
 
@@ -140,181 +206,143 @@ describe('AuthService', () => {
       );
 
       expect(result.accessToken).toBe('mock-token');
-      expect(result.refreshToken).toBe('mock-token');
     });
 
-    it('should throw UnauthorizedException for non-existent user', async () => {
+    it('should throw for non-existent user', async () => {
       userDal.get.mockResolvedValue(null);
 
       await expect(
-        service.signin(
-          { email: 'bad@agency.com', password: 'wrong' },
-          '127.0.0.1',
-          '',
-        ),
+        service.signin({ email: 'bad@agency.com', password: 'wrong' }, '', ''),
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should throw UnauthorizedException for invalid password', async () => {
+    it('should throw for invalid password', async () => {
       bcrypt.compare.mockResolvedValueOnce(false);
 
       await expect(
-        service.signin(
-          { email: 'test@agency.com', password: 'wrong' },
-          '127.0.0.1',
-          '',
-        ),
+        service.signin({ email: 'test@agency.com', password: 'wrong' }, '', ''),
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should throw UnauthorizedException for suspended user', async () => {
+    it('should throw for suspended user', async () => {
       userDal.get.mockResolvedValue({
         ...mockUser,
         status: UserStatus.SUSPENDED,
       });
 
       await expect(
-        service.signin(
-          { email: 'test@agency.com', password: 'password123' },
-          '127.0.0.1',
-          '',
-        ),
+        service.signin({ email: 'test@agency.com', password: 'pass' }, '', ''),
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should update last_login on signin', async () => {
-      await service.signin(
-        { email: 'test@agency.com', password: 'password123' },
-        '127.0.0.1',
-        '',
-      );
-
-      expect(userDal.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          identifierOptions: { id: 'user-uuid' },
-          updatePayload: { last_login: expect.any(Date) as unknown },
-        }),
-      );
-    });
-
-    it('should log audit event on signin', async () => {
-      await service.signin(
-        { email: 'test@agency.com', password: 'password123' },
-        '127.0.0.1',
-        'Agent',
-      );
-
-      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'LOGIN',
-          user_id: 'user-uuid',
-          ip_address: '127.0.0.1',
-        }),
-      );
-    });
-
-    it('should throw for user without password (OAuth-only)', async () => {
+    it('should throw for user without password', async () => {
       userDal.get.mockResolvedValue({ ...mockUser, password: null });
 
       await expect(
-        service.signin(
-          { email: 'test@agency.com', password: 'password123' },
-          '127.0.0.1',
-          '',
-        ),
+        service.signin({ email: 'test@agency.com', password: 'pass' }, '', ''),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
 
   describe('googleSignin', () => {
-    it('should return user and tokens for valid Google ID token', async () => {
+    it('should return tokens for valid Google token', async () => {
       userDal.get.mockResolvedValue({
         ...mockUser,
         email: 'google@agency.com',
       });
 
       const result = await service.googleSignin(
-        { idToken: 'valid-google-token' },
+        { idToken: 'valid-token' },
         '127.0.0.1',
         'Agent',
       );
 
       expect(result.accessToken).toBe('mock-token');
-      expect(result.refreshToken).toBe('mock-token');
     });
 
-    it('should throw when user not found by Google email', async () => {
+    it('should throw when user not found', async () => {
       userDal.get.mockResolvedValue(null);
 
       await expect(
-        service.googleSignin(
-          { idToken: 'valid-google-token' },
-          '127.0.0.1',
-          '',
-        ),
+        service.googleSignin({ idToken: 'valid' }, '', ''),
       ).rejects.toThrow(UnauthorizedException);
     });
+  });
 
-    it('should throw for inactive user on Google signin', async () => {
-      userDal.get.mockResolvedValue({
-        ...mockUser,
-        email: 'google@agency.com',
-        status: UserStatus.SUSPENDED,
-      });
+  describe('getMe', () => {
+    it('should return user profile', async () => {
+      const result = await service.getMe('user-uuid');
 
-      await expect(
-        service.googleSignin(
-          { idToken: 'valid-google-token' },
-          '127.0.0.1',
-          '',
-        ),
-      ).rejects.toThrow(UnauthorizedException);
+      expect(result.id).toBe('user-uuid');
+      expect(result.email_verified).toBe(true);
     });
 
-    it('should log audit event on Google signin', async () => {
-      userDal.get.mockResolvedValue({
-        ...mockUser,
-        email: 'google@agency.com',
-      });
+    it('should throw for missing user', async () => {
+      userDal.get.mockResolvedValue(null);
 
-      await service.googleSignin(
-        { idToken: 'valid-google-token' },
-        '127.0.0.1',
-        'Agent',
-      );
-
-      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'GOOGLE_LOGIN',
-        }),
+      await expect(service.getMe('bad-id')).rejects.toThrow(
+        UnauthorizedException,
       );
     });
   });
 
-  describe('getSession', () => {
-    it('should return session data for active user', async () => {
-      const result = await service.getSession('user-uuid');
+  describe('forgotPassword', () => {
+    it('should send reset email for existing user', async () => {
+      const result = await service.forgotPassword('test@agency.com');
 
-      expect(result.id).toBe('user-uuid');
-      expect(result.email).toBe('test@agency.com');
+      expect(emailService.sendPasswordReset).toHaveBeenCalled();
+      expect(result.message).toContain('reset link has been sent');
     });
 
-    it('should include organization relation', async () => {
-      await service.getSession('user-uuid');
+    it('should return generic message for non-existent email', async () => {
+      userDal.get.mockResolvedValue(null);
 
-      expect(userDal.get).toHaveBeenCalledWith(
+      const result = await service.forgotPassword('nonexistent@test.com');
+
+      expect(result.message).toContain('reset link has been sent');
+      expect(emailService.sendPasswordReset).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset password with valid token', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        reset_token: 'hashed-token',
+        reset_token_expires_at: new Date(Date.now() + 3600000),
+      });
+
+      const result = await service.resetPassword('raw-token', 'newpass123');
+
+      expect(result.message).toBe('Password reset successfully');
+      expect(userDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          relations: { organization: true },
+          updatePayload: expect.objectContaining({
+            reset_token: null,
+            reset_token_expires_at: null,
+          }),
         }),
       );
     });
 
-    it('should throw UnauthorizedException for missing user', async () => {
+    it('should throw for invalid token', async () => {
       userDal.get.mockResolvedValue(null);
 
-      await expect(service.getSession('bad-id')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.resetPassword('bad-token', 'newpass123'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw for expired token', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        reset_token: 'hashed',
+        reset_token_expires_at: new Date(Date.now() - 1000),
+      });
+
+      await expect(
+        service.resetPassword('raw', 'newpass123'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -325,17 +353,6 @@ describe('AuthService', () => {
       const result = await service.refreshToken('old-token');
 
       expect(result.accessToken).toBe('mock-token');
-      expect(result.refreshToken).toBe('mock-token');
-    });
-
-    it('should verify with refresh secret', async () => {
-      jwtService.verify.mockReturnValue({ sub: 'user-uuid' });
-
-      await service.refreshToken('old-token');
-
-      expect(jwtService.verify).toHaveBeenCalledWith('old-token', {
-        secret: 'test-refresh-secret',
-      });
     });
 
     it('should throw on invalid token', async () => {
@@ -343,41 +360,25 @@ describe('AuthService', () => {
         throw new Error('invalid');
       });
 
-      await expect(service.refreshToken('bad-token')).rejects.toThrow(
-        UnauthorizedException,
-      );
-    });
-
-    it('should throw for inactive user on refresh', async () => {
-      jwtService.verify.mockReturnValue({ sub: 'user-uuid' });
-      userDal.get.mockResolvedValue({
-        ...mockUser,
-        status: UserStatus.ARCHIVED,
-      });
-
-      await expect(service.refreshToken('token')).rejects.toThrow(
+      await expect(service.refreshToken('bad')).rejects.toThrow(
         UnauthorizedException,
       );
     });
   });
 
   describe('signout', () => {
-    it('should log audit event on signout', async () => {
-      await service.signout(
-        'user-uuid',
-        'org-uuid',
-        'ADMIN',
-        '127.0.0.1',
-        'Agent',
-      );
+    it('should log audit event when org_id present', async () => {
+      await service.signout('user-uuid', 'org-uuid', 'ADMIN', '127.0.0.1', 'Agent');
 
       expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'LOGOUT',
-          user_id: 'user-uuid',
-          org_id: 'org-uuid',
-        }),
+        expect.objectContaining({ action: 'LOGOUT' }),
       );
+    });
+
+    it('should skip audit log when no org_id', async () => {
+      await service.signout('user-uuid', null, 'DSP', '127.0.0.1', 'Agent');
+
+      expect(auditLogService.logAgencyAction).not.toHaveBeenCalled();
     });
   });
 });

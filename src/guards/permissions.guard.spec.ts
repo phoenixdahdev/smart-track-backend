@@ -57,6 +57,7 @@ describe('PermissionsGuard', () => {
       sub_permissions: { 'view:reports': true, 'edit:records': true },
       session_timeout: 30,
       mfa_enabled: false,
+      email_verified: true,
     });
     jest
       .spyOn(reflector, 'getAllAndOverride')
@@ -76,6 +77,7 @@ describe('PermissionsGuard', () => {
       sub_permissions: { 'view:reports': true },
       session_timeout: 30,
       mfa_enabled: false,
+      email_verified: true,
     });
     jest
       .spyOn(reflector, 'getAllAndOverride')

@@ -21,6 +21,7 @@ describe('JwtStrategy', () => {
     mfa_enabled: false,
     mfa_type: MfaType.NONE,
     status: UserStatus.ACTIVE,
+    email_verified: true,
     last_login: null,
   };
 
@@ -63,6 +64,7 @@ describe('JwtStrategy', () => {
       sub_permissions: { 'view:reports': true },
       session_timeout: 30,
       mfa_enabled: false,
+      email_verified: true,
     });
   });
 

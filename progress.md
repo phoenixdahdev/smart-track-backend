@@ -286,6 +286,8 @@
 | 12 - Hardening             | 0/10       | All phases                               |
 | **Total**                  | **31/123** |                                          |
 
-**Entity Layer Complete:** 47 entities, 22 new enums (+3 role additions), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 165 tests green across 19 suites.
+**Entity Layer Complete:** 47 entities, 22 new enums (+3 role additions), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 187 tests green across 22 suites.
 
-**Auth Rewrite (2026-03-06):** Replaced Auth0 JWKS (RS256) with local JWT (HS256) + bcrypt password auth + Google OAuth ID token signin. Added `password` column to users table (nullable for OAuth-only users). Removed `jwks-rsa` dependency, added `bcrypt` + `google-auth-library`. 6 auth routes: signup, signin, signin/google, session, signout, refresh. All mutations audit-logged. @PrivateFields(['password']) strips password from responses.
+**Auth Rewrite (2026-03-06):** Replaced Auth0 JWKS (RS256) with local JWT (HS256) + bcrypt password auth + Google OAuth ID token signin. Added `password` column to users table (nullable for OAuth-only users). Removed `jwks-rsa` dependency, added `bcrypt` + `google-auth-library`. @PrivateFields(['password', 'otp_code', 'reset_token']) strips sensitive fields from responses.
+
+**Auth Enhancements (2026-03-06):** org_id made optional at signup (users create orgs post-signup). UserEntity changed from TenantBaseEntity to BaseEntity with nullable org_id. Added: OrganizationController/Service (create/get/update orgs, assigns AGENCY_OWNER role), EmailService (Resend SDK for OTP + password reset emails), email verification (OTP 6-digit, 10-min expiry), forgot-password/reset-password (SHA256-hashed tokens, 1-hour expiry), GET /auth/me. 11 auth routes total: signup, verify-email, resend-otp, signin, signin/google, me, session, forgot-password, reset-password, signout, refresh. All DTOs have @ApiProperty Swagger decorators. Migration: auth-enhancements (dropped auth0_sub, nullable org_id, email_verified, otp, reset_token fields).

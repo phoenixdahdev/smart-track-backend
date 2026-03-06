@@ -4,13 +4,16 @@ import { AuthService } from '@services/auth.service';
 import { SignupDto } from '@dtos/signup.dto';
 import { SigninDto } from '@dtos/signin.dto';
 import { GoogleSigninDto } from '@dtos/google-signin.dto';
+import { VerifyEmailDto } from '@dtos/verify-email.dto';
+import { ForgotPasswordDto } from '@dtos/forgot-password.dto';
+import { ResetPasswordDto } from '@dtos/reset-password.dto';
 import { Public } from '@decorators/roles.decorator';
 import { CurrentUser } from '@decorators/current-user.decorator';
 import { PrivateFields } from '@decorators/private.decorator';
 import { type AuthenticatedUser } from '@app-types/auth.types';
 
 @Controller('auth')
-@PrivateFields(['password'])
+@PrivateFields(['password', 'otp_code', 'reset_token'])
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -20,9 +23,23 @@ export class AuthController {
     const { ip, userAgent } = this.extractRequestMeta(req);
     const result = await this.authService.signup(dto, ip, userAgent);
     return {
-      message: 'Account created successfully',
+      message: 'Account created successfully. Please verify your email.',
       data: result,
     };
+  }
+
+  @Public()
+  @Post('verify-email')
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    const result = await this.authService.verifyEmail(dto.email, dto.otp);
+    return result;
+  }
+
+  @Public()
+  @Post('resend-otp')
+  async resendOtp(@Body() dto: ForgotPasswordDto) {
+    const result = await this.authService.resendOtp(dto.email);
+    return result;
   }
 
   @Public()
@@ -47,13 +64,39 @@ export class AuthController {
     };
   }
 
+  @Get('me')
+  async me(@CurrentUser('id') userId: string) {
+    const user = await this.authService.getMe(userId);
+    return {
+      message: 'User retrieved',
+      data: user,
+    };
+  }
+
   @Get('session')
   async session(@CurrentUser('id') userId: string) {
-    const user = await this.authService.getSession(userId);
+    const user = await this.authService.getMe(userId);
     return {
       message: 'Session retrieved',
       data: user,
     };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const result = await this.authService.forgotPassword(dto.email);
+    return result;
+  }
+
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    const result = await this.authService.resetPassword(
+      dto.token,
+      dto.newPassword,
+    );
+    return result;
   }
 
   @Post('signout')

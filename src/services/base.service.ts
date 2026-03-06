@@ -9,7 +9,9 @@ import { AppService } from './app.service';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { AuthService } from './auth.service';
 import { AuditLogService } from './audit-log.service';
+import { EmailService } from './email.service';
 import { EncryptionService } from './encryption.service';
+import { OrganizationService } from './organization.service';
 import { SubPermissionsService } from './sub-permissions.service';
 
 // Phase 1 DALs
@@ -87,7 +89,9 @@ export const services: Provider[] = [
   JwtStrategy,
   AuthService,
   AuditLogService,
+  EmailService,
   EncryptionService,
+  OrganizationService,
   SubPermissionsService,
 
   // Guards
