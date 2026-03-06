@@ -39,7 +39,9 @@ describe('Role Enums', () => {
     it('platform and agency roles should not overlap', () => {
       const platformValues = Object.values(PlatformRole);
       const agencyValues = Object.values(AgencyRole);
-      const overlap = platformValues.filter((v) => agencyValues.includes(v as any));
+      const overlap = platformValues.filter((v) =>
+        agencyValues.includes(v as any),
+      );
       expect(overlap).toHaveLength(0);
     });
   });

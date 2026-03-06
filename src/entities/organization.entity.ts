@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { OrgStatus } from '@enums/org-status.enum';
 import { UserEntity } from './user.entity';

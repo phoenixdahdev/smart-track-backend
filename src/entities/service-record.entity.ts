@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { TenantBaseEntity } from './tenant-base.entity';
 import { ServiceRecordStatus } from '@enums/service-record-status.enum';
 import { IndividualEntity } from './individual.entity';
@@ -35,7 +29,11 @@ export class ServiceRecordEntity extends TenantBaseEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   units_delivered: number;
 
-  @Column({ type: 'enum', enum: ServiceRecordStatus, default: ServiceRecordStatus.DRAFT })
+  @Column({
+    type: 'enum',
+    enum: ServiceRecordStatus,
+    default: ServiceRecordStatus.DRAFT,
+  })
   status: ServiceRecordStatus;
 
   @Column({ type: 'timestamp', nullable: true })

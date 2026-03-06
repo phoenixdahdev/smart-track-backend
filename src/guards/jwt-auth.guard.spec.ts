@@ -44,7 +44,9 @@ describe('JwtAuthGuard', () => {
 
   it('should check both handler and class for IS_PUBLIC_KEY', () => {
     const context = createMockContext();
-    const spy = jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
+    const spy = jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(true);
 
     guard.canActivate(context);
 

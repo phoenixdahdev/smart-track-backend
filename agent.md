@@ -1,11 +1,13 @@
 # SmartTrack Health - Agent Configuration
 
 ## Agent Identity
+
 You are building SmartTrack Health, a HIPAA-compliant IDD care documentation and billing platform. You are working on the NestJS backend API.
 
 ## Decision Framework
 
 ### Before Writing Code
+
 1. Read the relevant spec in `docs/` for the feature you're implementing
 2. Check `plan.md` for phase context and dependencies
 3. Check `progress.md` for what's already done
@@ -13,12 +15,14 @@ You are building SmartTrack Health, a HIPAA-compliant IDD care documentation and
 5. Verify the feature's place in the Golden Thread: DSP → Service Record → Supervisor Approval → Billing → Claim → ERA → Payment
 
 ### When Making Architecture Decisions
+
 - Default to the simplest solution that satisfies security requirements
 - If a decision isn't covered in the specs, flag it as an open question rather than assuming
 - Follow the flat architecture pattern (no NestJS feature modules)
 - Follow the existing code patterns in the codebase
 
 ### Security-First Checklist (Run Mentally Before Every Feature)
+
 - [ ] Does this touch PHI? → Add field-level encryption
 - [ ] Does this query tenant data? → Verify RLS is applied
 - [ ] Does this endpoint need role checks? → Add @Roles() + guard
@@ -31,6 +35,7 @@ You are building SmartTrack Health, a HIPAA-compliant IDD care documentation and
 ## Implementation Patterns
 
 ### Adding a New Feature (Step by Step)
+
 1. **Entity** — Create in `src/entities/feature.entity.ts`, extend `TenantBaseEntity` (adds `org_id`, `id`, `created_at`, `updated_at`)
 2. **DAL** — Create in `src/dals/feature.dal.ts`, extend `AbstractModelAction<FeatureEntity>`
 3. **DTOs** — Create in `src/dtos/create-feature.dto.ts`, `update-feature.dto.ts`
@@ -40,6 +45,7 @@ You are building SmartTrack Health, a HIPAA-compliant IDD care documentation and
 7. **Tests** — Write `.spec.ts` files alongside each file
 
 ### Entity Pattern (TypeORM)
+
 ```typescript
 import { Entity, Column } from 'typeorm';
 import { TenantBaseEntity } from '@entities/tenant-base.entity';
@@ -54,6 +60,7 @@ export class FeatureEntity extends TenantBaseEntity {
 ```
 
 ### DAL Pattern
+
 ```typescript
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -63,13 +70,16 @@ import { FeatureEntity } from '@entities/feature.entity';
 
 @Injectable()
 export class FeatureDal extends AbstractModelAction<FeatureEntity> {
-  constructor(@InjectRepository(FeatureEntity) repository: Repository<FeatureEntity>) {
+  constructor(
+    @InjectRepository(FeatureEntity) repository: Repository<FeatureEntity>,
+  ) {
     super(repository, FeatureEntity);
   }
 }
 ```
 
 ### Controller Pattern
+
 ```typescript
 import { Controller, Get } from '@nestjs/common';
 import { Roles } from '@decorators/roles.decorator';
@@ -87,6 +97,7 @@ export class ClaimsController {
 ```
 
 ### Service Registration Pattern
+
 ```typescript
 // In services/base.service.ts — add to the providers array
 export const services: Provider[] = [
@@ -106,9 +117,13 @@ TypeOrmModule.forFeature([..., FeatureEntity]),
 ```
 
 ### State Machine Pattern
+
 ```typescript
 import { validateTransition } from '@utils/state-machine';
-import { SERVICE_RECORD_TRANSITIONS, ServiceRecordStatus } from '@enums/service-record-status.enum';
+import {
+  SERVICE_RECORD_TRANSITIONS,
+  ServiceRecordStatus,
+} from '@enums/service-record-status.enum';
 
 // Use in service:
 if (!validateTransition(SERVICE_RECORD_TRANSITIONS, currentStatus, newStatus)) {
@@ -117,6 +132,7 @@ if (!validateTransition(SERVICE_RECORD_TRANSITIONS, currentStatus, newStatus)) {
 ```
 
 ### Financial Calculation Pattern
+
 ```typescript
 // All money in cents (integers)
 const unitRate = 1500; // $15.00
@@ -128,6 +144,7 @@ const totalCents = unitRate * units; // 6000 = $60.00
 ## Console-Specific Guidelines
 
 ### SuperAdmin (`/superadmin/*`)
+
 - Platform operators only — hardware MFA required
 - Manages tenants, not tenant data
 - Agency onboarding pipeline (7-stage state machine)
@@ -135,27 +152,32 @@ const totalCents = unitRate * units; // 6000 = $60.00
 - Separate from all agency-level logic
 
 ### Admin (`/admin/*`)
+
 - Agency configuration, user management, program/site setup
 - Can view but not create service documentation
 - Manages payer config and rate tables
 
 ### Supervisor (`/supervisor/*`)
+
 - Review queue is the core feature — approve/reject service records
 - Cannot create documentation, only review
 - Monitors staff compliance and ISP progress
 
 ### Staff/DSP (`/staff/*`)
+
 - Creates service records, daily notes, incident reports
 - EVV clock-in/clock-out
 - Cannot approve own documentation
 - MAR module access controlled by sub-permissions
 
 ### Clinician (`/clinical/*`)
+
 - Behavior Treatment Plans (BTP)
 - Clinical data review and analysis
 - Cannot submit claims
 
 ### Billing (`/billing/*`)
+
 - Claims only from APPROVED service records (enforced at DB)
 - 7-phase claims processing pipeline
 - Authorization management (three-bucket model)
@@ -163,6 +185,7 @@ const totalCents = unitRate * units; // 6000 = $60.00
 - All amounts in cents
 
 ### Guardian Portal (`/portal/*`)
+
 - Read-only — no write endpoints
 - Filtered view of individual's data
 - No clinical details, no billing data
@@ -170,6 +193,7 @@ const totalCents = unitRate * units; // 6000 = $60.00
 ## Quality Gates
 
 ### Before Marking a Feature Complete
+
 1. Unit tests pass with >80% coverage for the module
 2. E2e test with realistic data scenarios
 3. RLS tested: create data as Org A, verify Org B cannot see it
@@ -179,6 +203,7 @@ const totalCents = unitRate * units; // 6000 = $60.00
 7. State machine: verify invalid transitions are rejected
 
 ### Before Committing
+
 - `pnpm lint` passes
 - `pnpm test` passes
 - No TODO/FIXME without a linked issue
@@ -186,14 +211,15 @@ const totalCents = unitRate * units; // 6000 = $60.00
 - No `console.log` — use NestJS Logger
 
 ## File Reference
-| File | Purpose |
-|------|---------|
-| `plan.md` | Development phases, architecture, data model |
-| `CLAUDE.md` | Project conventions, commands, critical rules |
-| `progress.md` | Phase/feature completion tracking |
-| `docs/SmartTrack_Developer_Specification (2).pdf` | Canonical tech spec |
-| `docs/SmartTrack_Billing_Console_Dev_Walkthrough.pdf` | Billing implementation guide |
-| `docs/SmartTrack_SuperAdmin_Console_Spec.pdf` | SuperAdmin console spec |
-| `docs/SmartTrack Developer Specification Vol 01.pdf` | Role system + wireframes |
-| `docs/SmartTrack Health Enterprise EVV...pdf` | EVV + scheduling + UI spec |
-| `docs/ref.txt` | Scope clarification (no payment processing) |
+
+| File                                                  | Purpose                                       |
+| ----------------------------------------------------- | --------------------------------------------- |
+| `plan.md`                                             | Development phases, architecture, data model  |
+| `CLAUDE.md`                                           | Project conventions, commands, critical rules |
+| `progress.md`                                         | Phase/feature completion tracking             |
+| `docs/SmartTrack_Developer_Specification (2).pdf`     | Canonical tech spec                           |
+| `docs/SmartTrack_Billing_Console_Dev_Walkthrough.pdf` | Billing implementation guide                  |
+| `docs/SmartTrack_SuperAdmin_Console_Spec.pdf`         | SuperAdmin console spec                       |
+| `docs/SmartTrack Developer Specification Vol 01.pdf`  | Role system + wireframes                      |
+| `docs/SmartTrack Health Enterprise EVV...pdf`         | EVV + scheduling + UI spec                    |
+| `docs/ref.txt`                                        | Scope clarification (no payment processing)   |

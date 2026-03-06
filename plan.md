@@ -14,19 +14,20 @@ SmartTrack Health is an enterprise HIPAA-compliant care documentation and billin
 
 Each console is a fully isolated application context — separate route namespaces, no shared navigation or state.
 
-| Console | Route Namespace | Primary Users |
-|---------|----------------|---------------|
-| SuperAdmin | `/superadmin/*` | SmartTrack platform operators |
-| Admin/Provider | `/admin/*` | Agency owners, administrators |
-| Supervisor | `/supervisor/*` | Program supervisors, managers |
-| Staff/DSP | `/staff/*` | Direct Support Professionals |
-| Clinician | `/clinical/*` | Clinical staff (BTP, assessments) |
-| Billing | `/billing/*` | Billing specialists, finance managers |
-| Guardian Portal | `/portal/*` | Individuals, guardians (read-only) |
+| Console         | Route Namespace | Primary Users                         |
+| --------------- | --------------- | ------------------------------------- |
+| SuperAdmin      | `/superadmin/*` | SmartTrack platform operators         |
+| Admin/Provider  | `/admin/*`      | Agency owners, administrators         |
+| Supervisor      | `/supervisor/*` | Program supervisors, managers         |
+| Staff/DSP       | `/staff/*`      | Direct Support Professionals          |
+| Clinician       | `/clinical/*`   | Clinical staff (BTP, assessments)     |
+| Billing         | `/billing/*`    | Billing specialists, finance managers |
+| Guardian Portal | `/portal/*`     | Individuals, guardians (read-only)    |
 
 ### 2.2 Role System (Canonical - from Vol 01)
 
 **Platform-Level Roles** (SuperAdmin Console only):
+
 - Platform Owner
 - Platform Admin
 - Onboarding Specialist
@@ -35,6 +36,7 @@ Each console is a fully isolated application context — separate route namespac
 - Compliance Auditor
 
 **Agency-Level Roles** (Agency consoles):
+
 - Admin/Provider → `/admin/*`
 - Supervisor/Manager → `/supervisor/*`
 - DSP (Direct Support Professional) → `/staff/*`
@@ -54,25 +56,26 @@ Each console is a fully isolated application context — separate route namespac
 
 ### 2.4 Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Backend API | NestJS 11 (TypeScript) |
-| Database | PostgreSQL (with RLS) |
-| ORM | TypeORM (AbstractModelAction + DAL pattern) |
-| Auth | JWT with Auth0 |
-| File Storage | AWS S3 (HIPAA BAA) |
-| Encryption | AES-256 (field-level for PHI) |
-| EDI Processing | x12-parser / node-x12 |
-| Package Manager | pnpm |
-| Testing | Jest + Supertest |
-| Linting | ESLint (flat config) + Prettier |
-| Frontend | React + TypeScript (separate repo/phase) |
+| Layer           | Technology                                  |
+| --------------- | ------------------------------------------- |
+| Backend API     | NestJS 11 (TypeScript)                      |
+| Database        | PostgreSQL (with RLS)                       |
+| ORM             | TypeORM (AbstractModelAction + DAL pattern) |
+| Auth            | Local JWT (HS256) + bcrypt + Google OAuth   |
+| File Storage    | AWS S3 (HIPAA BAA)                          |
+| Encryption      | AES-256 (field-level for PHI)               |
+| EDI Processing  | x12-parser / node-x12                       |
+| Package Manager | pnpm                                        |
+| Testing         | Jest + Supertest                            |
+| Linting         | ESLint (flat config) + Prettier             |
+| Frontend        | React + TypeScript (separate repo/phase)    |
 
 ---
 
 ## 3. Data Model - Core Entities
 
 ### 3.1 Platform-Level Tables (SuperAdmin)
+
 - `smarttrack_operators` — Platform staff accounts
 - `signup_applications` — Agency signup pipeline
 - `application_documents` — Uploaded verification docs
@@ -89,6 +92,7 @@ Each console is a fully isolated application context — separate route namespac
 - `plan_definitions` — Subscription tier definitions
 
 ### 3.2 Agency-Level Tables (Per-Tenant, RLS-Protected)
+
 - `users` — Agency staff with role + sub_permissions JSON
 - `programs` — Service programs within agency
 - `sites` — Physical locations
@@ -118,6 +122,7 @@ Each console is a fully isolated application context — separate route namespac
 ## 4. Key Workflows
 
 ### 4.1 The Golden Thread (Core Data Flow)
+
 ```
 DSP creates service record → submits for review →
 Supervisor reviews → approves/rejects →
@@ -129,12 +134,14 @@ Receive ERA (835) → reconcile payments → post to AR
 ```
 
 ### 4.2 Service Record State Machine
+
 ```
 DRAFT → PENDING_REVIEW → APPROVED (immutable)
                        → REJECTED (with reason, can resubmit)
 ```
 
 ### 4.3 Claims Lifecycle
+
 ```
 DRAFT → SUBMITTED → ACCEPTED_277 → PENDING → PAID
                   → REJECTED_277                → DENIED
@@ -145,6 +152,7 @@ DRAFT → SUBMITTED → ACCEPTED_277 → PENDING → PAID
 ```
 
 ### 4.4 Agency Onboarding Pipeline
+
 ```
 PENDING_REVIEW → UNDER_REVIEW → DOCS_REQUESTED → APPROVED → PROVISIONING → ONBOARDING → ACTIVE
                                → DOCS_RECEIVED ↗
@@ -152,12 +160,14 @@ PENDING_REVIEW → UNDER_REVIEW → DOCS_REQUESTED → APPROVED → PROVISIONING
 ```
 
 ### 4.5 Authorization Management (Three-Bucket Model)
+
 ```
 units_authorized = total units approved by payer
 units_used = units already billed
 units_pending = units in draft/submitted claims
 units_remaining = units_authorized - units_used - units_pending
 ```
+
 Threshold alerts at configurable percentages (e.g., 75%, 90%, 100%).
 
 ---
@@ -165,36 +175,41 @@ Threshold alerts at configurable percentages (e.g., 75%, 90%, 100%).
 ## 5. Security Requirements
 
 ### 5.1 RBAC at 3 Layers
+
 1. **UI** — Route guards prevent rendering unauthorized consoles
 2. **API** — JWT middleware + role/permission checks on every endpoint
 3. **Database** — PostgreSQL RLS policies filter by `org_id` (and optionally `user_id`)
 
 ### 5.2 HIPAA Compliance
+
 - Field-level AES-256 encryption for all PHI columns
 - No PHI in URLs, query parameters, logs, or error responses
 - Append-only audit logs (who accessed what, when, from where)
 - Session timeouts per role (see below)
-- MFA enforcement (FIDO2/YubiKey for SuperAdmin; TOTP for agency roles)
+- MFA enforcement (mfa_enabled/mfa_type stored on user; enforcement deferred to frontend/middleware)
 - Automatic session termination on role change
 
 ### 5.3 Session Security by Role
 
-| Role | Session Timeout | MFA Required |
-|------|----------------|-------------|
-| Platform Owner | 15 min | Hardware (FIDO2) |
-| Platform Admin | 15 min | Hardware (FIDO2) |
-| Admin/Provider | 30 min | Yes (TOTP) |
-| Supervisor | 30 min | Yes (TOTP) |
-| Billing Specialist | 20 min | Yes (TOTP) |
-| DSP | 60 min | Optional |
-| Clinician | 30 min | Yes (TOTP) |
-| Guardian | 60 min | Optional |
+| Role               | Session Timeout | MFA Required     |
+| ------------------ | --------------- | ---------------- |
+| Platform Owner     | 15 min          | Hardware (FIDO2) |
+| Platform Admin     | 15 min          | Hardware (FIDO2) |
+| Admin/Provider     | 30 min          | Yes (TOTP)       |
+| Supervisor         | 30 min          | Yes (TOTP)       |
+| Billing Specialist | 20 min          | Yes (TOTP)       |
+| DSP                | 60 min          | Optional         |
+| Clinician          | 30 min          | Yes (TOTP)       |
+| Guardian           | 60 min          | Optional         |
 
 ### 5.4 Break-Glass Access Protocol
+
 For support engineers needing emergency tenant access:
+
 1. Request with justification → 2. Approval by Platform Admin → 3. Time-limited read-only access granted → 4. All actions logged → 5. Agency notified → 6. Session auto-expires
 
 ### 5.5 API Security
+
 - Return 404 (not 403) for out-of-scope resources to prevent enumeration
 - Rate limiting on auth endpoints
 - Request signing for EDI submissions
@@ -205,6 +220,7 @@ For support engineers needing emergency tenant access:
 ## 6. Implementation Phases
 
 ### Phase 0: Project Foundation (Weeks 1-2)
+
 - [x] Initialize NestJS project
 - [ ] Configure strict TypeScript (`strict: true`)
 - [ ] Set up PostgreSQL connection (TypeORM)
@@ -216,20 +232,22 @@ For support engineers needing emergency tenant access:
 - [ ] CI/CD pipeline (lint, test, build)
 - [ ] Project documentation (CLAUDE.md, README)
 
-### Phase 1: Authentication & Multi-Tenancy (Weeks 3-5)
-- [ ] Auth module (JWT + refresh tokens)
-- [ ] Auth0 integration
-- [ ] MFA support (TOTP + FIDO2)
-- [ ] Organizations table + tenant registry
-- [ ] Row-Level Security (RLS) policies
-- [ ] Tenant context middleware (extract org_id from JWT, set RLS)
-- [ ] Role definitions + RBAC guard decorators
-- [ ] Sub-permissions model (JSON on user record)
-- [ ] Session management (timeouts per role)
-- [ ] Audit log module (append-only)
-- [ ] Field-level encryption service (AES-256)
+### Phase 1: Authentication & Multi-Tenancy (Weeks 3-5) ✅
+
+- [x] Auth module (local JWT HS256 + bcrypt passwords + refresh tokens)
+- [x] Google OAuth ID token signin (google-auth-library OAuth2Client.verifyIdToken)
+- [x] MFA support (mfa_enabled/mfa_type on UserEntity, enforcement deferred)
+- [x] Organizations table + tenant registry
+- [x] Row-Level Security (RLS) policies
+- [x] Tenant context middleware (extract org_id from JWT, set RLS)
+- [x] Role definitions + RBAC guard decorators
+- [x] Sub-permissions model (JSON on user record)
+- [x] Session management (timeouts per role)
+- [x] Audit log module (append-only)
+- [x] Field-level encryption service (AES-256)
 
 ### Phase 2: Core Entity Layer (Weeks 6-8)
+
 - [ ] Users module (CRUD, role assignment, sub-permissions)
 - [ ] Organizations module (agency profile, config)
 - [ ] Programs module
@@ -241,6 +259,7 @@ For support engineers needing emergency tenant access:
 - [ ] Seed data / fixtures for development
 
 ### Phase 3: Service Documentation (Weeks 9-12)
+
 - [ ] Service records module (state machine: DRAFT → PENDING_REVIEW → APPROVED/REJECTED)
 - [ ] Daily notes module
 - [ ] ISP goals module
@@ -253,6 +272,7 @@ For support engineers needing emergency tenant access:
 - [ ] Correction request workflow (append-only amendments)
 
 ### Phase 4: EVV (Electronic Visit Verification) (Weeks 13-14)
+
 - [ ] EVV clock-in/clock-out endpoints
 - [ ] GPS capture + validation
 - [ ] Shift association
@@ -262,6 +282,7 @@ For support engineers needing emergency tenant access:
 - [ ] EVV data linked to service records
 
 ### Phase 5: Scheduling (Weeks 15-16)
+
 - [ ] Schedule creation (admin/supervisor)
 - [ ] Shift assignment to staff
 - [ ] Staff schedule view (my shifts)
@@ -270,6 +291,7 @@ For support engineers needing emergency tenant access:
 - [ ] Schedule-to-EVV linkage
 
 ### Phase 6: Billing & Claims Engine (Weeks 17-22)
+
 - [ ] Billing queue (pull approved, unbilled service records)
 - [ ] Service authorization management (three-bucket model)
 - [ ] Authorization threshold alerts
@@ -289,6 +311,7 @@ For support engineers needing emergency tenant access:
 - [ ] Common denial code handling (CO-4, CO-11, CO-16, CO-18, CO-50, CO-97, CO-170)
 
 ### Phase 7: Payment Reconciliation (Weeks 23-25)
+
 - [ ] 835 ERA file ingestion
 - [ ] ERA parsing (segment extraction)
 - [ ] 4-priority matching algorithm (claim_id → CLP reference → service date + member → manual)
@@ -299,6 +322,7 @@ For support engineers needing emergency tenant access:
 - [ ] Financial dashboard data endpoints
 
 ### Phase 8: SuperAdmin Console API (Weeks 26-29)
+
 - [ ] SmartTrack operator management
 - [ ] Agency signup pipeline (7-stage state machine)
 - [ ] Application review queue with SLA indicators
@@ -315,6 +339,7 @@ For support engineers needing emergency tenant access:
 - [ ] Platform audit log
 
 ### Phase 9: Notification Engine (Weeks 30-31)
+
 - [ ] Notification service (email, in-app, SMS)
 - [ ] Authorization threshold alerts
 - [ ] Claim status change notifications
@@ -324,6 +349,7 @@ For support engineers needing emergency tenant access:
 - [ ] Break-glass access notifications to agencies
 
 ### Phase 10: Guardian Portal API (Week 32)
+
 - [ ] Read-only ISP summaries endpoint
 - [ ] Progress reports endpoint
 - [ ] Incident summaries endpoint (redacted as appropriate)
@@ -331,6 +357,7 @@ For support engineers needing emergency tenant access:
 - [ ] Guardian authentication (limited scope JWT)
 
 ### Phase 11: Reporting & Analytics (Weeks 33-35)
+
 - [ ] Billing reconciliation reports
 - [ ] AR aging reports
 - [ ] Claims lifecycle analytics
@@ -342,6 +369,7 @@ For support engineers needing emergency tenant access:
 - [ ] Export functionality (CSV, PDF)
 
 ### Phase 12: Hardening & Compliance (Weeks 36-38)
+
 - [ ] Security audit (OWASP top 10)
 - [ ] HIPAA compliance review
 - [ ] Penetration testing preparation
@@ -357,12 +385,12 @@ For support engineers needing emergency tenant access:
 
 ## 7. Subscription Tiers
 
-| Tier | Price | Target |
-|------|-------|--------|
-| Starter | $299/mo | Small agencies, basic documentation + billing |
-| Growth | $699/mo | Mid-size, full EVV + scheduling + claims |
-| Professional | $1,499/mo | Large agencies, all modules + analytics |
-| Enterprise | Custom | Multi-state, custom integrations, SLA |
+| Tier         | Price     | Target                                        |
+| ------------ | --------- | --------------------------------------------- |
+| Starter      | $299/mo   | Small agencies, basic documentation + billing |
+| Growth       | $699/mo   | Mid-size, full EVV + scheduling + claims      |
+| Professional | $1,499/mo | Large agencies, all modules + analytics       |
+| Enterprise   | Custom    | Multi-state, custom integrations, SLA         |
 
 Module availability per tier drives feature flag configuration.
 
@@ -373,7 +401,7 @@ Module availability per tier drives feature flag configuration.
 > These items need resolution before or during implementation. Flagged here to avoid assumptions.
 
 1. ~~**ORM Choice**~~: **TypeORM** (decided)
-2. ~~**Auth Provider**~~: **Auth0** (decided)
+2. ~~**Auth Provider**~~: **Local JWT (HS256) + bcrypt + Google OAuth** (decided — replaced Auth0)
 3. **Database Schema Strategy**: Separate schema per tenant (full isolation) vs shared schema with RLS? SuperAdmin spec suggests separate schema; this has operational complexity.
 4. **Deployment Target**: AWS (ECS/EKS)? Which region? Impacts HIPAA BAA setup.
 5. **Frontend Repository**: Same monorepo or separate repo? The Next.js snippets suggest Next.js for frontend.
@@ -388,6 +416,7 @@ Module availability per tier drives feature flag configuration.
 ## 9. Definition of Done (Per Feature)
 
 From Developer Spec — every feature must meet ALL criteria:
+
 1. RLS-tested with multiple tenant contexts
 2. Role-permission matrix enforced
 3. Audit log entries verified

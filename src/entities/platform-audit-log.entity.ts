@@ -22,10 +22,10 @@ export class PlatformAuditLogEntity extends BaseEntity {
   target_id: string | null;
 
   @Column({ type: 'jsonb', nullable: true })
-  before_val: Record<string, any> | null;
+  before_val: Record<string, unknown> | null;
 
   @Column({ type: 'jsonb', nullable: true })
-  after_val: Record<string, any> | null;
+  after_val: Record<string, unknown> | null;
 
   @Column({ type: 'varchar', length: 45 })
   ip_address: string;

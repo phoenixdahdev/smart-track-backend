@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { TenantBaseEntity } from './tenant-base.entity';
 import { OrganizationEntity } from './organization.entity';
 import { SiteEntity } from './site.entity';

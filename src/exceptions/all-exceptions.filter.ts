@@ -67,8 +67,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (typeof response === 'object' && response !== null) {
       const res = response as Record<string, unknown>;
       return {
-        message:
-          (res.message as string | string[]) ?? 'Internal server error',
+        message: (res.message as string | string[]) ?? 'Internal server error',
         error: (res.error as string) ?? undefined,
       };
     }

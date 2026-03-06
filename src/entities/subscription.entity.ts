@@ -14,7 +14,11 @@ export class SubscriptionEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   plan_tier: string;
 
-  @Column({ type: 'enum', enum: SubscriptionStatus, default: SubscriptionStatus.TRIALING })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.TRIALING,
+  })
   status: SubscriptionStatus;
 
   @Column({ type: 'enum', enum: BillingCycle, default: BillingCycle.MONTHLY })

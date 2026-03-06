@@ -102,7 +102,14 @@ describe('ResponseInterceptor', () => {
       const handler = createCallHandler({
         data: [],
         message: 'Listed',
-        meta: { total: 50, limit: 10, page: 1, total_pages: 5, has_next: true, has_previous: false },
+        meta: {
+          total: 50,
+          limit: 10,
+          page: 1,
+          total_pages: 5,
+          has_next: true,
+          has_previous: false,
+        },
       });
 
       interceptor.intercept(context, handler).subscribe((result: any) => {

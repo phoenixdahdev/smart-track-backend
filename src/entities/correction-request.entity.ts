@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { TenantBaseEntity } from './tenant-base.entity';
 import { CorrectionStatus } from '@enums/correction-status.enum';
 import { ServiceRecordEntity } from './service-record.entity';
@@ -20,7 +15,11 @@ export class CorrectionRequestEntity extends TenantBaseEntity {
   @Column('text')
   requested_changes: string;
 
-  @Column({ type: 'enum', enum: CorrectionStatus, default: CorrectionStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: CorrectionStatus,
+    default: CorrectionStatus.PENDING,
+  })
   status: CorrectionStatus;
 
   @Column({ type: 'uuid', nullable: true })

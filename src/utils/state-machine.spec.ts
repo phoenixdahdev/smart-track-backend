@@ -95,7 +95,11 @@ describe('validateTransition', () => {
   describe('claim transitions', () => {
     it('should allow DRAFT -> SUBMITTED', () => {
       expect(
-        validateTransition(CLAIM_TRANSITIONS, ClaimStatus.DRAFT, ClaimStatus.SUBMITTED),
+        validateTransition(
+          CLAIM_TRANSITIONS,
+          ClaimStatus.DRAFT,
+          ClaimStatus.SUBMITTED,
+        ),
       ).toBe(true);
     });
 
@@ -111,28 +115,48 @@ describe('validateTransition', () => {
 
     it('should allow PENDING -> PAID', () => {
       expect(
-        validateTransition(CLAIM_TRANSITIONS, ClaimStatus.PENDING, ClaimStatus.PAID),
+        validateTransition(
+          CLAIM_TRANSITIONS,
+          ClaimStatus.PENDING,
+          ClaimStatus.PAID,
+        ),
       ).toBe(true);
     });
 
     it('should allow DENIED -> APPEALED', () => {
       expect(
-        validateTransition(CLAIM_TRANSITIONS, ClaimStatus.DENIED, ClaimStatus.APPEALED),
+        validateTransition(
+          CLAIM_TRANSITIONS,
+          ClaimStatus.DENIED,
+          ClaimStatus.APPEALED,
+        ),
       ).toBe(true);
     });
 
     it('should NOT allow DRAFT -> PAID (skip states)', () => {
       expect(
-        validateTransition(CLAIM_TRANSITIONS, ClaimStatus.DRAFT, ClaimStatus.PAID),
+        validateTransition(
+          CLAIM_TRANSITIONS,
+          ClaimStatus.DRAFT,
+          ClaimStatus.PAID,
+        ),
       ).toBe(false);
     });
 
     it('should NOT allow VOID -> any state (terminal)', () => {
       expect(
-        validateTransition(CLAIM_TRANSITIONS, ClaimStatus.VOID, ClaimStatus.DRAFT),
+        validateTransition(
+          CLAIM_TRANSITIONS,
+          ClaimStatus.VOID,
+          ClaimStatus.DRAFT,
+        ),
       ).toBe(false);
       expect(
-        validateTransition(CLAIM_TRANSITIONS, ClaimStatus.VOID, ClaimStatus.PAID),
+        validateTransition(
+          CLAIM_TRANSITIONS,
+          ClaimStatus.VOID,
+          ClaimStatus.PAID,
+        ),
       ).toBe(false);
     });
 

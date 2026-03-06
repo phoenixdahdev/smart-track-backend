@@ -14,7 +14,11 @@ export class OnboardingTaskEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   task_name: string;
 
-  @Column({ type: 'enum', enum: OnboardingTaskStatus, default: OnboardingTaskStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: OnboardingTaskStatus,
+    default: OnboardingTaskStatus.PENDING,
+  })
   status: OnboardingTaskStatus;
 
   @Column({ type: 'uuid', nullable: true })

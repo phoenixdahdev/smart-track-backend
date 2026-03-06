@@ -27,9 +27,7 @@ describe('RolesGuard', () => {
 
   it('should allow access to public routes', () => {
     const context = createMockContext();
-    jest
-      .spyOn(reflector, 'getAllAndOverride')
-      .mockReturnValueOnce(true); // isPublic
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce(true); // isPublic
 
     expect(guard.canActivate(context)).toBe(true);
   });
@@ -99,7 +97,10 @@ describe('RolesGuard', () => {
     jest
       .spyOn(reflector, 'getAllAndOverride')
       .mockReturnValueOnce(false) // isPublic
-      .mockReturnValueOnce([PlatformRole.PLATFORM_OWNER, PlatformRole.PLATFORM_ADMIN]);
+      .mockReturnValueOnce([
+        PlatformRole.PLATFORM_OWNER,
+        PlatformRole.PLATFORM_ADMIN,
+      ]);
 
     expect(guard.canActivate(context)).toBe(true);
   });

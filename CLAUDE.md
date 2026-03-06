@@ -1,19 +1,22 @@
 # SmartTrack Health - CLAUDE.md
 
 ## Project Overview
+
 SmartTrack Health is an enterprise HIPAA-compliant care documentation and billing platform for IDD service providers. NestJS backend API with PostgreSQL, multi-tenant RLS, 7 isolated consoles.
 
 ## Tech Stack
+
 - **Runtime**: Node.js + TypeScript
 - **Framework**: NestJS 11
 - **Database**: PostgreSQL with Row-Level Security
 - **ORM**: TypeORM (AbstractModelAction + DAL pattern)
-- **Auth**: JWT with Auth0
+- **Auth**: Local JWT (HS256) + bcrypt passwords + Google OAuth ID token
 - **Package Manager**: pnpm
 - **Testing**: Jest (unit) + Supertest (e2e)
 - **Linting**: ESLint (flat config) + Prettier
 
 ## Commands
+
 - `pnpm start:dev` — Start dev server with watch
 - `pnpm build` — Production build
 - `pnpm test` — Run unit tests
@@ -26,6 +29,7 @@ SmartTrack Health is an enterprise HIPAA-compliant care documentation and billin
 - `pnpm migration:revert` — Revert last migration
 
 ## Project Structure (Flat Architecture)
+
 ```
 src/
   controllers/          # All route controllers + base.controller.ts registry
@@ -49,6 +53,7 @@ src/
 ```
 
 ## Architecture Pattern
+
 - **Single AppModule** — no NestJS feature modules. All controllers/services registered via `base.controller.ts` and `base.service.ts` registries
 - **DAL Pattern** — each entity gets a DAL class extending `AbstractModelAction<T>` for type-safe CRUD
 - **Path Aliases** — `@controllers/*`, `@services/*`, `@dals/*`, `@entities/*`, `@enums/*`, `@utils/*`, `@decorators/*`, `@guards/*`, `@interceptors/*`, `@exceptions/*`, `@dtos/*`, `@database/*`, `@app-types/*`
@@ -57,6 +62,7 @@ src/
 ## Code Conventions
 
 ### Naming
+
 - Files: `kebab-case` (e.g., `service-record.entity.ts`, `billing-queue.service.ts`)
 - Classes: `PascalCase` (e.g., `ServiceRecordService`, `ClaimEntity`)
 - Variables/functions: `camelCase`
@@ -65,10 +71,12 @@ src/
 - Enum values: `UPPER_SNAKE_CASE`
 
 ### Formatting (enforced by Prettier)
+
 - Single quotes
 - Trailing commas (all)
 
 ### Adding a New Feature
+
 1. Create entity in `entities/`
 2. Create DAL in `dals/` extending `AbstractModelAction<T>`
 3. Create service in `services/`
@@ -81,7 +89,9 @@ src/
 ## Critical Rules — NEVER VIOLATE
 
 ### 1. Money in Cents
+
 All financial values are stored and calculated as integers (cents). Never use floating point for money. Display formatting happens only at the presentation layer.
+
 ```typescript
 // CORRECT
 const amount = 15099; // $150.99
@@ -90,39 +100,51 @@ const amount = 150.99;
 ```
 
 ### 2. No PHI Leakage
+
 PHI must NEVER appear in:
+
 - URL paths or query parameters
 - Log output (use structured logging with PHI fields excluded)
 - Error messages returned to clients
 - Stack traces
-Use resource IDs (UUIDs) in URLs, never names/SSNs/DOBs.
+  Use resource IDs (UUIDs) in URLs, never names/SSNs/DOBs.
 
 ### 3. RLS Enforcement
+
 Every table containing tenant data MUST have `org_id` column with RLS policy. Never bypass RLS. The tenant context middleware sets `app.current_org_id` on every request.
 
 ### 4. Console Isolation
+
 API endpoints are namespaced per console. A billing controller serves `/api/v1/billing/*` only. Never create cross-console endpoints.
 
 ### 5. 404 Not 403
+
 When a user requests a resource outside their scope (wrong tenant, wrong role), return 404 — never 403. This prevents resource enumeration attacks.
 
 ### 6. Immutable Approved Records
+
 Once a service record reaches APPROVED status, it cannot be modified. Corrections are append-only amendments that reference the original.
 
 ### 7. Claims from Approved Only
+
 Claims can ONLY be generated from service records with status = APPROVED. This must be enforced at the database layer (CHECK constraint or trigger), not just application code.
 
 ### 8. Append-Only Audit Logs
+
 Audit log tables have no UPDATE or DELETE permissions. Every PHI access, mutation, login, and role change is logged with: who, what, when, from_where, org_id.
 
 ### 9. Field-Level Encryption
+
 PHI columns (SSN, DOB, diagnosis, etc.) use AES-256 encryption. Encryption/decryption happens in the application layer via the encryption service. Encrypted values are stored as bytea or text.
 
 ### 10. State Machine Integrity
+
 Service records and claims follow strict state machines. Validate transitions — never allow skipping states (e.g., DRAFT cannot go directly to APPROVED).
 
 ## Testing Requirements
+
 Every feature must have spec files. Definition of Done:
+
 1. Unit tests for service, controller, guard, interceptor logic
 2. RLS-tested with multiple tenant contexts
 3. Role-permission matrix enforced and tested
@@ -132,6 +154,7 @@ Every feature must have spec files. Definition of Done:
 7. E2e test passing with realistic data
 
 ## Error Response Format
+
 ```json
 {
   "status_code": 404,
@@ -142,13 +165,16 @@ Every feature must have spec files. Definition of Done:
   "success": false
 }
 ```
+
 Never include entity details, PHI, or internal state in error responses.
 
 ## Git Commits
+
 - No Co-Authored-By tags. Just a clear, descriptive commit message.
-- Keep messages concise — focus on *what* and *why*, not *how*.
+- Keep messages concise — focus on _what_ and _why_, not _how_.
 
 ## Key Documents
+
 - `plan.md` — Full development plan with phases
 - `progress.md` — Progress tracking
 - `agent.md` — Agent workflow configuration

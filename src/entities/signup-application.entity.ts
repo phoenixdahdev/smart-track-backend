@@ -26,7 +26,11 @@ export class SignupApplicationEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 20, nullable: true })
   contact_phone: string | null;
 
-  @Column({ type: 'enum', enum: ApplicationStatus, default: ApplicationStatus.SUBMITTED })
+  @Column({
+    type: 'enum',
+    enum: ApplicationStatus,
+    default: ApplicationStatus.SUBMITTED,
+  })
   status: ApplicationStatus;
 
   @Column({ type: 'varchar', length: 50, nullable: true })

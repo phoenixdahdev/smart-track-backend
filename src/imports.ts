@@ -1,6 +1,8 @@
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { type ModuleMetadata } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '@database/database.module';
 
 // Phase 1
@@ -71,6 +73,14 @@ import { NotificationPreferenceEntity } from '@entities/notification-preference.
 export const imports: ModuleMetadata['imports'] = [
   ConfigModule.forRoot({ isGlobal: true }),
   DatabaseModule,
+  PassportModule.register({ defaultStrategy: 'jwt' }),
+  JwtModule.registerAsync({
+    inject: [ConfigService],
+    useFactory: (config: ConfigService) => ({
+      secret: config.get<string>('JWT_SECRET', 'change-me'),
+      signOptions: { expiresIn: '15m' },
+    }),
+  }),
   TypeOrmModule.forFeature([
     // Phase 1
     OrganizationEntity,

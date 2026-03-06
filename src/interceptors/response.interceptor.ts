@@ -89,8 +89,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
     const errorMessage =
       exception instanceof Error ? exception.message : 'Unknown error';
-    const errorStack =
-      exception instanceof Error ? exception.stack : undefined;
+    const errorStack = exception instanceof Error ? exception.stack : undefined;
 
     this.logger.error(
       `Error processing ${req.method} ${req.url}: ${errorMessage}`,

@@ -1,8 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-} from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { TenantBaseEntity } from './tenant-base.entity';
 
 @Entity('audit_logs')

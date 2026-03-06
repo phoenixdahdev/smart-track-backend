@@ -24,7 +24,11 @@ export class RemittanceEntity extends TenantBaseEntity {
   @Column({ type: 'varchar', length: 50, nullable: true })
   interchange_control_num: string | null;
 
-  @Column({ type: 'enum', enum: RemittanceStatus, default: RemittanceStatus.RECEIVED })
+  @Column({
+    type: 'enum',
+    enum: RemittanceStatus,
+    default: RemittanceStatus.RECEIVED,
+  })
   status: RemittanceStatus;
 
   @Column({ type: 'varchar', length: 500, nullable: true })

@@ -1,9 +1,16 @@
 import { Logger, type Provider } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from '@interceptors/response.interceptor';
+import { TenantContextInterceptor } from '@interceptors/tenant-context.interceptor';
 import { JwtAuthGuard } from '@guards/jwt-auth.guard';
 import { RolesGuard } from '@guards/roles.guard';
+import { PermissionsGuard } from '@guards/permissions.guard';
 import { AppService } from './app.service';
+import { JwtStrategy } from './auth/jwt.strategy';
+import { AuthService } from './auth.service';
+import { AuditLogService } from './audit-log.service';
+import { EncryptionService } from './encryption.service';
+import { SubPermissionsService } from './sub-permissions.service';
 
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
@@ -76,6 +83,13 @@ export const services: Provider[] = [
   // Core
   AppService,
 
+  // Auth
+  JwtStrategy,
+  AuthService,
+  AuditLogService,
+  EncryptionService,
+  SubPermissionsService,
+
   // Guards
   {
     provide: APP_GUARD,
@@ -85,8 +99,16 @@ export const services: Provider[] = [
     provide: APP_GUARD,
     useClass: RolesGuard,
   },
+  {
+    provide: APP_GUARD,
+    useClass: PermissionsGuard,
+  },
 
   // Interceptors
+  {
+    provide: APP_INTERCEPTOR,
+    useClass: TenantContextInterceptor,
+  },
   {
     provide: APP_INTERCEPTOR,
     useClass: ResponseInterceptor,

@@ -24,6 +24,9 @@ export class UserEntity extends TenantBaseEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  password: string | null;
+
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
@@ -33,7 +36,11 @@ export class UserEntity extends TenantBaseEntity {
   @Column({ type: 'jsonb', default: '{}' })
   sub_permissions: Record<string, unknown>;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING_INVITE })
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.PENDING_INVITE,
+  })
   status: UserStatus;
 
   @Column({ type: 'boolean', default: false })

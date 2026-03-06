@@ -22,14 +22,8 @@ describe('camelToSnake', () => {
   });
 
   it('should handle arrays', () => {
-    const result = camelToSnake([
-      { firstName: 'John' },
-      { firstName: 'Jane' },
-    ]);
-    expect(result).toEqual([
-      { first_name: 'John' },
-      { first_name: 'Jane' },
-    ]);
+    const result = camelToSnake([{ firstName: 'John' }, { firstName: 'Jane' }]);
+    expect(result).toEqual([{ first_name: 'John' }, { first_name: 'Jane' }]);
   });
 
   it('should handle arrays inside objects', () => {
@@ -58,7 +52,12 @@ describe('camelToSnake', () => {
   it('should strip private fields when provided', () => {
     const privateFields = new Set(['password', 'ssn']);
     const result = camelToSnake(
-      { name: 'John', password: 'secret', ssn: '123-45-6789', email: 'john@test.com' },
+      {
+        name: 'John',
+        password: 'secret',
+        ssn: '123-45-6789',
+        email: 'john@test.com',
+      },
       privateFields,
     );
     expect(result).toEqual({ name: 'John', email: 'john@test.com' });

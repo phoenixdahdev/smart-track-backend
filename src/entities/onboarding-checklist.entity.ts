@@ -12,7 +12,11 @@ export class OnboardingChecklistEntity extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   specialist_id: string | null;
 
-  @Column({ type: 'enum', enum: OnboardingStatus, default: OnboardingStatus.NOT_STARTED })
+  @Column({
+    type: 'enum',
+    enum: OnboardingStatus,
+    default: OnboardingStatus.NOT_STARTED,
+  })
   status: OnboardingStatus;
 
   @Column({ type: 'timestamp', nullable: true })

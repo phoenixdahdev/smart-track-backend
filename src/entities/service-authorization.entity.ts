@@ -45,7 +45,11 @@ export class ServiceAuthorizationEntity extends TenantBaseEntity {
   @Column({ type: 'varchar', length: 10, nullable: true })
   rendering_provider_npi: string | null;
 
-  @Column({ type: 'enum', enum: AuthorizationStatus, default: AuthorizationStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: AuthorizationStatus,
+    default: AuthorizationStatus.ACTIVE,
+  })
   status: AuthorizationStatus;
 
   @Column({ type: 'text', nullable: true })

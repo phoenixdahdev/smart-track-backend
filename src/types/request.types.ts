@@ -1,9 +1,5 @@
-import { type UserRole } from '@enums/role.enum';
+import { type AuthenticatedUser } from './auth.types';
 
 export type RequestWithUser = {
-  user?: {
-    id: string;
-    role: UserRole;
-    org_id: string | null;
-  };
+  user?: AuthenticatedUser;
 };

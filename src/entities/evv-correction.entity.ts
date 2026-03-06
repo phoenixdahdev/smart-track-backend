@@ -22,7 +22,11 @@ export class EvvCorrectionEntity extends TenantBaseEntity {
   @Column('text')
   reason: string;
 
-  @Column({ type: 'enum', enum: CorrectionStatus, default: CorrectionStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: CorrectionStatus,
+    default: CorrectionStatus.PENDING,
+  })
   status: CorrectionStatus;
 
   @Column({ type: 'uuid', nullable: true })
