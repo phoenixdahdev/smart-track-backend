@@ -2,6 +2,8 @@ import { UserController } from './user.controller';
 import { UserService } from '@services/user.service';
 import { AgencyRole } from '@enums/role.enum';
 import { UserStatus } from '@enums/user-status.enum';
+import { type AuthenticatedUser } from '@app-types/auth.types';
+import { type Request } from 'express';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -101,9 +103,9 @@ describe('UserController', () => {
       const result = await controller.assignRole(
         'user-uuid',
         'org-uuid',
-        AgencyRole.SUPERVISOR,
-        mockCurrentUser as never,
-        mockReq as never,
+        { role: AgencyRole.SUPERVISOR },
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Role assigned');
     });
@@ -114,7 +116,9 @@ describe('UserController', () => {
       const result = await controller.updateSubPermissions(
         'user-uuid',
         'org-uuid',
-        { 'view:reports': true },
+        { sub_permissions: { 'view:reports': true } },
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Permissions updated');
     });
@@ -122,7 +126,12 @@ describe('UserController', () => {
 
   describe('DELETE /admin/users/:id', () => {
     it('should deactivate user', async () => {
-      const result = await controller.deactivate('user-uuid', 'org-uuid');
+      const result = await controller.deactivate(
+        'user-uuid',
+        'org-uuid',
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
+      );
       expect(result.message).toBe('User deactivated');
     });
   });

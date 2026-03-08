@@ -1,5 +1,8 @@
 import { ProgramController } from './program.controller';
 import { ProgramService } from '@services/program.service';
+import { AgencyRole } from '@enums/role.enum';
+import { type AuthenticatedUser } from '@app-types/auth.types';
+import { type Request } from 'express';
 
 describe('ProgramController', () => {
   let controller: ProgramController;
@@ -16,6 +19,24 @@ describe('ProgramController', () => {
     name: 'Residential Support',
     type: 'RESIDENTIAL',
     active: true,
+  };
+
+  const mockCurrentUser = {
+    id: 'admin-uuid',
+    org_id: 'org-uuid',
+    role: AgencyRole.ADMIN,
+    email: 'admin@agency.com',
+    name: 'Admin',
+    sub_permissions: {},
+    session_timeout: 30,
+    mfa_enabled: false,
+    email_verified: true,
+  };
+
+  const mockReq = {
+    ip: '127.0.0.1',
+    socket: { remoteAddress: '127.0.0.1' },
+    headers: { 'user-agent': 'jest' },
   };
 
   beforeEach(() => {
@@ -50,7 +71,8 @@ describe('ProgramController', () => {
     it('should create program', async () => {
       const result = await controller.create(
         { name: 'Residential Support' },
-        'org-uuid',
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Program created');
       expect(result.data.id).toBe('prog-uuid');
@@ -67,9 +89,12 @@ describe('ProgramController', () => {
 
   describe('PATCH /admin/programs/:id', () => {
     it('should update program', async () => {
-      const result = await controller.update('prog-uuid', 'org-uuid', {
-        name: 'Community Living',
-      });
+      const result = await controller.update(
+        'prog-uuid',
+        mockCurrentUser as unknown as AuthenticatedUser,
+        { name: 'Community Living' },
+        mockReq as unknown as Request,
+      );
       expect(result.message).toBe('Program updated');
     });
   });

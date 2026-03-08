@@ -16,10 +16,18 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('/health (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/health')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        const body = res.body as { message: string; data: { status: string } };
+        expect(body.message).toBe('SmartTrack Health API is running');
+        expect(body.data.status).toBe('ok');
+      });
   });
 });

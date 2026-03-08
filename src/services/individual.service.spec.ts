@@ -81,7 +81,7 @@ describe('IndividualService', () => {
         ssn: '123-45-6789',
       };
 
-      await service.create(dto, 'org-uuid', 'admin-uuid', '127.0.0.1', 'jest');
+      await service.create(dto, 'org-uuid', 'admin-uuid', 'ADMIN', '127.0.0.1', 'jest');
 
       expect(mockEncrypt).toHaveBeenCalledWith('123-45-6789');
       expect(mockEncrypt).toHaveBeenCalledWith('1990-05-15');
@@ -101,6 +101,7 @@ describe('IndividualService', () => {
         { first_name: 'A', last_name: 'B', date_of_birth: '2000-01-01' },
         'org-uuid',
         'admin-uuid',
+        'ADMIN',
         '127.0.0.1',
         'jest',
       );
@@ -170,6 +171,7 @@ describe('IndividualService', () => {
         'org-uuid',
         { ssn: '999-88-7777' },
         'admin-uuid',
+        'ADMIN',
         '127.0.0.1',
         'jest',
       );
@@ -193,6 +195,7 @@ describe('IndividualService', () => {
           'org-uuid',
           { first_name: 'X' },
           'admin-uuid',
+          'ADMIN',
           '127.0.0.1',
           'jest',
         ),

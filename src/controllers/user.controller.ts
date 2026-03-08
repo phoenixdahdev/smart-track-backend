@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -17,6 +18,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from '@services/user.service';
 import { CreateUserDto } from '@dtos/create-user.dto';
 import { UpdateUserDto } from '@dtos/update-user.dto';
+import { AssignRoleDto } from '@dtos/assign-role.dto';
+import { UpdateSubPermissionsDto } from '@dtos/update-sub-permissions.dto';
 import { Roles } from '@decorators/roles.decorator';
 import { CurrentUser } from '@decorators/current-user.decorator';
 import { AgencyRole } from '@enums/role.enum';
@@ -76,7 +79,14 @@ export class UserController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser('org_id') orgId: string,
     @Body() dto: UpdateUserDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
   ) {
+    if (
+      dto.role === AgencyRole.AGENCY_OWNER &&
+      currentUser.role !== AgencyRole.AGENCY_OWNER
+    ) {
+      throw new ForbiddenException('Only the agency owner can assign this role');
+    }
     const user = await this.userService.update(id, orgId, dto);
     return {
       message: 'User updated',
@@ -89,16 +99,25 @@ export class UserController {
   async assignRole(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser('org_id') orgId: string,
-    @Body('role') role: AgencyRole,
+    @Body() dto: AssignRoleDto,
     @CurrentUser() currentUser: AuthenticatedUser,
     @Req() req: Request,
   ) {
+    if (id === currentUser.id) {
+      throw new ForbiddenException('Cannot change your own role');
+    }
+    if (
+      dto.role === AgencyRole.AGENCY_OWNER &&
+      currentUser.role !== AgencyRole.AGENCY_OWNER
+    ) {
+      throw new ForbiddenException('Only the agency owner can assign this role');
+    }
     const ip = (req.ip ?? req.socket?.remoteAddress) || '';
     const userAgent = req.headers['user-agent'] ?? '';
     const user = await this.userService.assignRole(
       id,
       orgId,
-      role,
+      dto.role,
       currentUser.id,
       ip,
       userAgent,
@@ -114,12 +133,23 @@ export class UserController {
   async updateSubPermissions(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser('org_id') orgId: string,
-    @Body('sub_permissions') sub_permissions: Record<string, boolean>,
+    @Body() dto: UpdateSubPermissionsDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Req() req: Request,
   ) {
+    if (id === currentUser.id) {
+      throw new ForbiddenException('Cannot modify your own permissions');
+    }
+    const ip = (req.ip ?? req.socket?.remoteAddress) || '';
+    const userAgent = req.headers['user-agent'] ?? '';
     const user = await this.userService.updateSubPermissions(
       id,
       orgId,
-      sub_permissions,
+      dto.sub_permissions,
+      currentUser.id,
+      currentUser.role,
+      ip,
+      userAgent,
     );
     return {
       message: 'Permissions updated',
@@ -133,8 +163,19 @@ export class UserController {
   async deactivate(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser('org_id') orgId: string,
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Req() req: Request,
   ) {
-    await this.userService.deactivate(id, orgId);
+    const ip = (req.ip ?? req.socket?.remoteAddress) || '';
+    const userAgent = req.headers['user-agent'] ?? '';
+    await this.userService.deactivate(
+      id,
+      orgId,
+      currentUser.id,
+      currentUser.role,
+      ip,
+      userAgent,
+    );
     return {
       message: 'User deactivated',
     };

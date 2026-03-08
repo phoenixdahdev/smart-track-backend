@@ -159,32 +159,66 @@ describe('UserService', () => {
   });
 
   describe('updateSubPermissions', () => {
-    it('should update sub_permissions', async () => {
+    it('should update sub_permissions and log audit', async () => {
       userDal.get.mockResolvedValue(mockUser);
 
-      await service.updateSubPermissions('user-uuid', 'org-uuid', {
-        'view:reports': true,
-      });
+      await service.updateSubPermissions(
+        'user-uuid',
+        'org-uuid',
+        { 'view:reports': true },
+        'admin-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
+      );
 
       expect(userDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           updatePayload: { sub_permissions: { 'view:reports': true } },
         }),
       );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'PERMISSIONS_UPDATED' }),
+      );
     });
   });
 
   describe('deactivate', () => {
-    it('should archive user', async () => {
+    it('should archive user and log audit', async () => {
       userDal.get.mockResolvedValue(mockUser);
 
-      await service.deactivate('user-uuid', 'org-uuid');
+      await service.deactivate(
+        'user-uuid',
+        'org-uuid',
+        'admin-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
+      );
 
       expect(userDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           updatePayload: { status: UserStatus.ARCHIVED },
         }),
       );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'USER_DEACTIVATED' }),
+      );
+    });
+
+    it('should throw ForbiddenException when ADMIN tries to deactivate AGENCY_OWNER', async () => {
+      userDal.get.mockResolvedValue({ ...mockUser, role: AgencyRole.AGENCY_OWNER });
+
+      await expect(
+        service.deactivate(
+          'owner-uuid',
+          'org-uuid',
+          'admin-uuid',
+          'ADMIN',
+          '127.0.0.1',
+          'jest',
+        ),
+      ).rejects.toThrow();
     });
   });
 });

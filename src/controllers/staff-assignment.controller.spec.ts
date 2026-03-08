@@ -1,5 +1,8 @@
 import { StaffAssignmentController } from './staff-assignment.controller';
 import { StaffAssignmentService } from '@services/staff-assignment.service';
+import { AgencyRole } from '@enums/role.enum';
+import { type AuthenticatedUser } from '@app-types/auth.types';
+import { type Request } from 'express';
 
 describe('StaffAssignmentController', () => {
   let controller: StaffAssignmentController;
@@ -21,6 +24,24 @@ describe('StaffAssignmentController', () => {
     effective_date: '2026-01-01',
     end_date: null,
     active: true,
+  };
+
+  const mockCurrentUser = {
+    id: 'admin-uuid',
+    org_id: 'org-uuid',
+    role: AgencyRole.ADMIN,
+    email: 'admin@agency.com',
+    name: 'Admin',
+    sub_permissions: {},
+    session_timeout: 30,
+    mfa_enabled: false,
+    email_verified: true,
+  };
+
+  const mockReq = {
+    ip: '127.0.0.1',
+    socket: { remoteAddress: '127.0.0.1' },
+    headers: { 'user-agent': 'jest' },
   };
 
   beforeEach(() => {
@@ -82,6 +103,8 @@ describe('StaffAssignmentController', () => {
           effective_date: '2026-01-01',
         },
         'org-uuid',
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Staff assignment created');
       expect(result.data.id).toBe('assign-uuid');
@@ -97,9 +120,13 @@ describe('StaffAssignmentController', () => {
 
   describe('PATCH /admin/staff-assignments/:id', () => {
     it('should update assignment', async () => {
-      const result = await controller.update('assign-uuid', 'org-uuid', {
-        end_date: '2026-06-30',
-      });
+      const result = await controller.update(
+        'assign-uuid',
+        'org-uuid',
+        { end_date: '2026-06-30' },
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
+      );
       expect(result.message).toBe('Staff assignment updated');
     });
   });
@@ -109,7 +136,9 @@ describe('StaffAssignmentController', () => {
       const result = await controller.endAssignment(
         'assign-uuid',
         'org-uuid',
-        '2026-12-31',
+        { end_date: '2026-12-31' },
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Staff assignment ended');
       expect(result.data.active).toBe(false);

@@ -29,23 +29,10 @@ import { OrgStatus } from '@enums/org-status.enum';
 import { AgencyRole } from '@enums/role.enum';
 import { UserStatus } from '@enums/user-status.enum';
 import { MfaType } from '@enums/mfa-type.enum';
-import { createCipheriv, randomBytes } from 'crypto';
+import { aes256GcmEncrypt } from '@utils/aes-gcm.util';
 
-// ---------------------------------------------------------------------------
-// Inline encryption helper (mirrors EncryptionService without DI)
-// ---------------------------------------------------------------------------
 function encryptField(plaintext: string, hexKey: string): string {
-  const key = Buffer.from(hexKey, 'hex');
-  const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', key, iv, {
-    authTagLength: 16,
-  });
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, 'utf8'),
-    cipher.final(),
-  ]);
-  const authTag = cipher.getAuthTag();
-  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
+  return aes256GcmEncrypt(plaintext, Buffer.from(hexKey, 'hex'));
 }
 
 // ---------------------------------------------------------------------------

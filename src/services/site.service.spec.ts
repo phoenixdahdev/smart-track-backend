@@ -9,6 +9,7 @@ describe('SiteService', () => {
     create: jest.Mock;
     update: jest.Mock;
   };
+  let auditLogService: { logAgencyAction: jest.Mock };
 
   const mockSite = {
     id: 'site-uuid',
@@ -32,8 +33,11 @@ describe('SiteService', () => {
       create: jest.fn().mockResolvedValue(mockSite),
       update: jest.fn().mockResolvedValue(mockSite),
     };
+    auditLogService = {
+      logAgencyAction: jest.fn().mockResolvedValue(undefined),
+    };
 
-    service = new SiteService(siteDal as never);
+    service = new SiteService(siteDal as never, auditLogService as never);
   });
 
   it('should be defined', () => {
@@ -62,7 +66,7 @@ describe('SiteService', () => {
   });
 
   describe('create', () => {
-    it('should create site with org_id', async () => {
+    it('should create site with org_id and log audit', async () => {
       const result = await service.create(
         {
           program_id: 'prog-uuid',
@@ -73,6 +77,10 @@ describe('SiteService', () => {
           zip: '78701',
         },
         'org-uuid',
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
       );
 
       expect(siteDal.create).toHaveBeenCalledWith(
@@ -83,6 +91,9 @@ describe('SiteService', () => {
             name: 'Sunrise House',
           }) as unknown,
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'SITE_CREATED' }),
       );
       expect(result.id).toBe('site-uuid');
     });
@@ -106,15 +117,26 @@ describe('SiteService', () => {
   });
 
   describe('update', () => {
-    it('should update site', async () => {
+    it('should update site and log audit', async () => {
       siteDal.get.mockResolvedValue(mockSite);
 
-      await service.update('site-uuid', 'org-uuid', { name: 'New Name' });
+      await service.update(
+        'site-uuid',
+        'org-uuid',
+        { name: 'New Name' },
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
+      );
 
       expect(siteDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           updatePayload: { name: 'New Name' },
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'SITE_UPDATED' }),
       );
     });
 
@@ -122,7 +144,7 @@ describe('SiteService', () => {
       siteDal.get.mockResolvedValue(null);
 
       await expect(
-        service.update('bad-id', 'org-uuid', { name: 'X' }),
+        service.update('bad-id', 'org-uuid', { name: 'X' }, 'user-uuid', 'ADMIN', '127.0.0.1', 'jest'),
       ).rejects.toThrow(NotFoundException);
     });
   });

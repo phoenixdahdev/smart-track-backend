@@ -1,5 +1,8 @@
 import { SiteController } from './site.controller';
 import { SiteService } from '@services/site.service';
+import { AgencyRole } from '@enums/role.enum';
+import { type AuthenticatedUser } from '@app-types/auth.types';
+import { type Request } from 'express';
 
 describe('SiteController', () => {
   let controller: SiteController;
@@ -21,6 +24,24 @@ describe('SiteController', () => {
     state: 'TX',
     zip: '78701',
     active: true,
+  };
+
+  const mockCurrentUser = {
+    id: 'admin-uuid',
+    org_id: 'org-uuid',
+    role: AgencyRole.ADMIN,
+    email: 'admin@agency.com',
+    name: 'Admin',
+    sub_permissions: {},
+    session_timeout: 30,
+    mfa_enabled: false,
+    email_verified: true,
+  };
+
+  const mockReq = {
+    ip: '127.0.0.1',
+    socket: { remoteAddress: '127.0.0.1' },
+    headers: { 'user-agent': 'jest' },
   };
 
   beforeEach(() => {
@@ -76,7 +97,8 @@ describe('SiteController', () => {
           state: 'TX',
           zip: '78701',
         },
-        'org-uuid',
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Site created');
       expect(result.data.id).toBe('site-uuid');
@@ -93,9 +115,12 @@ describe('SiteController', () => {
 
   describe('PATCH /admin/sites/:id', () => {
     it('should update site', async () => {
-      const result = await controller.update('site-uuid', 'org-uuid', {
-        name: 'East Campus',
-      });
+      const result = await controller.update(
+        'site-uuid',
+        mockCurrentUser as unknown as AuthenticatedUser,
+        { name: 'East Campus' },
+        mockReq as unknown as Request,
+      );
       expect(result.message).toBe('Site updated');
     });
   });

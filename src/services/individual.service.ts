@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { IndividualDal } from '@dals/individual.dal';
 import { EncryptionService } from './encryption.service';
 import { AuditLogService } from './audit-log.service';
@@ -9,6 +9,8 @@ import { type PaginationValidator } from '@utils/pagination-utils';
 
 @Injectable()
 export class IndividualService {
+  private readonly logger = new Logger(IndividualService.name);
+
   constructor(
     private readonly individualDal: IndividualDal,
     private readonly encryptionService: EncryptionService,
@@ -70,44 +72,38 @@ export class IndividualService {
     return result;
   }
 
-  private decryptFields(individual: IndividualEntity): IndividualEntity {
-    const decrypted = { ...individual };
-
+  private decryptField(
+    value: string | null | undefined,
+    fieldName: string,
+  ): string | null {
+    if (!value) return null;
     try {
-      if (decrypted.ssn) {
-        decrypted.ssn = this.encryptionService.decrypt(decrypted.ssn);
-      }
-      if (decrypted.date_of_birth) {
-        decrypted.date_of_birth = this.encryptionService.decrypt(
-          decrypted.date_of_birth,
-        );
-      }
-      if (decrypted.medicaid_id) {
-        decrypted.medicaid_id = this.encryptionService.decrypt(
-          decrypted.medicaid_id,
-        );
-      }
-      if (decrypted.diagnosis_codes) {
-        decrypted.diagnosis_codes = this.encryptionService.decrypt(
-          decrypted.diagnosis_codes,
-        );
-      }
-      if (decrypted.address) {
-        decrypted.address = this.encryptionService.decrypt(decrypted.address);
-      }
-      if (decrypted.phone) {
-        decrypted.phone = this.encryptionService.decrypt(decrypted.phone);
-      }
-      if (decrypted.emergency_contact) {
-        decrypted.emergency_contact = this.encryptionService.decrypt(
-          decrypted.emergency_contact,
-        );
-      }
+      return this.encryptionService.decrypt(value);
     } catch {
-      // Decryption errors must not leak PHI details
+      this.logger.warn(
+        `Failed to decrypt field "${fieldName}" for individual record — returning null`,
+      );
+      return null;
     }
+  }
 
-    return decrypted;
+  private decryptFields(individual: IndividualEntity): IndividualEntity {
+    return {
+      ...individual,
+      ssn: this.decryptField(individual.ssn, 'ssn'),
+      date_of_birth: this.decryptField(individual.date_of_birth, 'date_of_birth'),
+      medicaid_id: this.decryptField(individual.medicaid_id, 'medicaid_id'),
+      diagnosis_codes: this.decryptField(
+        individual.diagnosis_codes,
+        'diagnosis_codes',
+      ),
+      address: this.decryptField(individual.address, 'address'),
+      phone: this.decryptField(individual.phone, 'phone'),
+      emergency_contact: this.decryptField(
+        individual.emergency_contact,
+        'emergency_contact',
+      ),
+    };
   }
 
   async list(orgId: string, pagination?: PaginationValidator) {
@@ -131,6 +127,7 @@ export class IndividualService {
     dto: CreateIndividualDto,
     orgId: string,
     requestingUserId: string,
+    userRole: string,
     ip: string,
     userAgent: string,
   ) {
@@ -157,7 +154,7 @@ export class IndividualService {
     await this.auditLogService.logAgencyAction({
       org_id: orgId,
       user_id: requestingUserId,
-      user_role: 'ADMIN',
+      user_role: userRole,
       action: 'INDIVIDUAL_CREATED',
       action_type: 'CREATE',
       table_name: 'individuals',
@@ -205,6 +202,7 @@ export class IndividualService {
     orgId: string,
     dto: UpdateIndividualDto,
     requestingUserId: string,
+    userRole: string,
     ip: string,
     userAgent: string,
   ) {
@@ -245,7 +243,7 @@ export class IndividualService {
     await this.auditLogService.logAgencyAction({
       org_id: orgId,
       user_id: requestingUserId,
-      user_role: 'ADMIN',
+      user_role: userRole,
       action: 'INDIVIDUAL_UPDATED',
       action_type: 'UPDATE',
       table_name: 'individuals',

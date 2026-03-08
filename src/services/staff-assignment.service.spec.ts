@@ -9,6 +9,7 @@ describe('StaffAssignmentService', () => {
     create: jest.Mock;
     update: jest.Mock;
   };
+  let auditLogService: { logAgencyAction: jest.Mock };
 
   const mockAssignment = {
     id: 'assign-uuid',
@@ -31,8 +32,14 @@ describe('StaffAssignmentService', () => {
       create: jest.fn().mockResolvedValue(mockAssignment),
       update: jest.fn().mockResolvedValue(mockAssignment),
     };
+    auditLogService = {
+      logAgencyAction: jest.fn().mockResolvedValue(undefined),
+    };
 
-    service = new StaffAssignmentService(staffAssignmentDal as never);
+    service = new StaffAssignmentService(
+      staffAssignmentDal as never,
+      auditLogService as never,
+    );
   });
 
   it('should be defined', () => {
@@ -62,7 +69,7 @@ describe('StaffAssignmentService', () => {
   });
 
   describe('create', () => {
-    it('should create assignment with org_id and active=true', async () => {
+    it('should create assignment with org_id, active=true, and log audit', async () => {
       const result = await service.create(
         {
           staff_id: 'staff-uuid',
@@ -71,6 +78,10 @@ describe('StaffAssignmentService', () => {
           effective_date: '2026-01-01',
         },
         'org-uuid',
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
       );
 
       expect(staffAssignmentDal.create).toHaveBeenCalledWith(
@@ -81,6 +92,9 @@ describe('StaffAssignmentService', () => {
             active: true,
           }) as unknown,
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'STAFF_ASSIGNMENT_CREATED' }),
       );
       expect(result.id).toBe('assign-uuid');
     });
@@ -104,17 +118,26 @@ describe('StaffAssignmentService', () => {
   });
 
   describe('update', () => {
-    it('should update assignment', async () => {
+    it('should update assignment and log audit', async () => {
       staffAssignmentDal.get.mockResolvedValue(mockAssignment);
 
-      await service.update('assign-uuid', 'org-uuid', {
-        end_date: '2026-06-30',
-      });
+      await service.update(
+        'assign-uuid',
+        'org-uuid',
+        { end_date: '2026-06-30' },
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
+      );
 
       expect(staffAssignmentDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           updatePayload: { end_date: '2026-06-30' },
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'STAFF_ASSIGNMENT_UPDATED' }),
       );
     });
 
@@ -122,21 +145,32 @@ describe('StaffAssignmentService', () => {
       staffAssignmentDal.get.mockResolvedValue(null);
 
       await expect(
-        service.update('bad-id', 'org-uuid', { active: false }),
+        service.update('bad-id', 'org-uuid', { active: false }, 'user-uuid', 'ADMIN', '127.0.0.1', 'jest'),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('endAssignment', () => {
-    it('should set end_date and active=false', async () => {
+    it('should set end_date, active=false, and log audit', async () => {
       staffAssignmentDal.get.mockResolvedValue(mockAssignment);
 
-      await service.endAssignment('assign-uuid', 'org-uuid', '2026-12-31');
+      await service.endAssignment(
+        'assign-uuid',
+        'org-uuid',
+        '2026-12-31',
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
+      );
 
       expect(staffAssignmentDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           updatePayload: { end_date: '2026-12-31', active: false },
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'STAFF_ASSIGNMENT_ENDED' }),
       );
     });
   });

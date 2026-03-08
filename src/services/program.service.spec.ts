@@ -9,6 +9,7 @@ describe('ProgramService', () => {
     create: jest.Mock;
     update: jest.Mock;
   };
+  let auditLogService: { logAgencyAction: jest.Mock };
 
   const mockProgram = {
     id: 'prog-uuid',
@@ -29,8 +30,11 @@ describe('ProgramService', () => {
       create: jest.fn().mockResolvedValue(mockProgram),
       update: jest.fn().mockResolvedValue(mockProgram),
     };
+    auditLogService = {
+      logAgencyAction: jest.fn().mockResolvedValue(undefined),
+    };
 
-    service = new ProgramService(programDal as never);
+    service = new ProgramService(programDal as never, auditLogService as never);
   });
 
   it('should be defined', () => {
@@ -48,10 +52,14 @@ describe('ProgramService', () => {
   });
 
   describe('create', () => {
-    it('should create program with org_id', async () => {
+    it('should create program with org_id and log audit', async () => {
       const result = await service.create(
         { name: 'Residential Support', type: 'RESIDENTIAL' },
         'org-uuid',
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
       );
 
       expect(programDal.create).toHaveBeenCalledWith(
@@ -61,6 +69,9 @@ describe('ProgramService', () => {
             name: 'Residential Support',
           }) as unknown,
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'PROGRAM_CREATED' }),
       );
       expect(result.id).toBe('prog-uuid');
     });
@@ -84,17 +95,26 @@ describe('ProgramService', () => {
   });
 
   describe('update', () => {
-    it('should update program', async () => {
+    it('should update program and log audit', async () => {
       programDal.get.mockResolvedValue(mockProgram);
 
-      await service.update('prog-uuid', 'org-uuid', {
-        name: 'Community Living',
-      });
+      await service.update(
+        'prog-uuid',
+        'org-uuid',
+        { name: 'Community Living' },
+        'user-uuid',
+        'ADMIN',
+        '127.0.0.1',
+        'jest',
+      );
 
       expect(programDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
           updatePayload: { name: 'Community Living' },
         }),
+      );
+      expect(auditLogService.logAgencyAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'PROGRAM_UPDATED' }),
       );
     });
 
@@ -102,7 +122,7 @@ describe('ProgramService', () => {
       programDal.get.mockResolvedValue(null);
 
       await expect(
-        service.update('bad-id', 'org-uuid', { name: 'X' }),
+        service.update('bad-id', 'org-uuid', { name: 'X' }, 'user-uuid', 'ADMIN', '127.0.0.1', 'jest'),
       ).rejects.toThrow(NotFoundException);
     });
   });

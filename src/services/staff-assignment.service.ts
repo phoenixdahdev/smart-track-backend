@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StaffAssignmentDal } from '@dals/staff-assignment.dal';
+import { AuditLogService } from './audit-log.service';
 import { type CreateStaffAssignmentDto } from '@dtos/create-staff-assignment.dto';
 import { type UpdateStaffAssignmentDto } from '@dtos/update-staff-assignment.dto';
 import { type PaginationValidator } from '@utils/pagination-utils';
 
 @Injectable()
 export class StaffAssignmentService {
-  constructor(private readonly staffAssignmentDal: StaffAssignmentDal) {}
+  constructor(
+    private readonly staffAssignmentDal: StaffAssignmentDal,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async listByIndividual(
     individualId: string,
@@ -40,8 +44,15 @@ export class StaffAssignmentService {
     });
   }
 
-  async create(dto: CreateStaffAssignmentDto, orgId: string) {
-    return this.staffAssignmentDal.create({
+  async create(
+    dto: CreateStaffAssignmentDto,
+    orgId: string,
+    requestingUserId: string,
+    userRole: string,
+    ip: string,
+    userAgent: string,
+  ) {
+    const assignment = await this.staffAssignmentDal.create({
       createPayload: {
         org_id: orgId,
         staff_id: dto.staff_id,
@@ -53,6 +64,20 @@ export class StaffAssignmentService {
       } as never,
       transactionOptions: { useTransaction: false },
     });
+
+    await this.auditLogService.logAgencyAction({
+      org_id: orgId,
+      user_id: requestingUserId,
+      user_role: userRole,
+      action: 'STAFF_ASSIGNMENT_CREATED',
+      action_type: 'CREATE',
+      table_name: 'staff_assignments',
+      record_id: assignment.id,
+      ip_address: ip,
+      user_agent: userAgent,
+    });
+
+    return assignment;
   }
 
   async findById(id: string, orgId: string) {
@@ -67,7 +92,15 @@ export class StaffAssignmentService {
     return assignment;
   }
 
-  async update(id: string, orgId: string, dto: UpdateStaffAssignmentDto) {
+  async update(
+    id: string,
+    orgId: string,
+    dto: UpdateStaffAssignmentDto,
+    requestingUserId: string,
+    userRole: string,
+    ip: string,
+    userAgent: string,
+  ) {
     const assignment = await this.staffAssignmentDal.get({
       identifierOptions: { id, org_id: orgId } as never,
     });
@@ -76,14 +109,36 @@ export class StaffAssignmentService {
       throw new NotFoundException();
     }
 
-    return this.staffAssignmentDal.update({
+    const updated = await this.staffAssignmentDal.update({
       identifierOptions: { id } as never,
       updatePayload: dto as never,
       transactionOptions: { useTransaction: false },
     });
+
+    await this.auditLogService.logAgencyAction({
+      org_id: orgId,
+      user_id: requestingUserId,
+      user_role: userRole,
+      action: 'STAFF_ASSIGNMENT_UPDATED',
+      action_type: 'UPDATE',
+      table_name: 'staff_assignments',
+      record_id: id,
+      ip_address: ip,
+      user_agent: userAgent,
+    });
+
+    return updated;
   }
 
-  async endAssignment(id: string, orgId: string, endDate: string) {
+  async endAssignment(
+    id: string,
+    orgId: string,
+    endDate: string,
+    requestingUserId: string,
+    userRole: string,
+    ip: string,
+    userAgent: string,
+  ) {
     const assignment = await this.staffAssignmentDal.get({
       identifierOptions: { id, org_id: orgId } as never,
     });
@@ -92,10 +147,24 @@ export class StaffAssignmentService {
       throw new NotFoundException();
     }
 
-    return this.staffAssignmentDal.update({
+    const updated = await this.staffAssignmentDal.update({
       identifierOptions: { id } as never,
       updatePayload: { end_date: endDate, active: false } as never,
       transactionOptions: { useTransaction: false },
     });
+
+    await this.auditLogService.logAgencyAction({
+      org_id: orgId,
+      user_id: requestingUserId,
+      user_role: userRole,
+      action: 'STAFF_ASSIGNMENT_ENDED',
+      action_type: 'UPDATE',
+      table_name: 'staff_assignments',
+      record_id: id,
+      ip_address: ip,
+      user_agent: userAgent,
+    });
+
+    return updated;
   }
 }

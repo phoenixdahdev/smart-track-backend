@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -54,13 +55,18 @@ export class IndividualController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Req() req: Request,
   ) {
+    const orgId = currentUser.org_id;
+    if (!orgId) {
+      throw new BadRequestException('User is not associated with an organization');
+    }
     const ip = (req.ip ?? req.socket?.remoteAddress) || '';
     const userAgent = req.headers['user-agent'] ?? '';
 
     const individual = await this.individualService.create(
       dto,
-      currentUser.org_id!,
+      orgId,
       currentUser.id,
+      currentUser.role,
       ip,
       userAgent,
     );
@@ -77,12 +83,16 @@ export class IndividualController {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Req() req: Request,
   ) {
+    const orgId = currentUser.org_id;
+    if (!orgId) {
+      throw new BadRequestException('User is not associated with an organization');
+    }
     const ip = (req.ip ?? req.socket?.remoteAddress) || '';
     const userAgent = req.headers['user-agent'] ?? '';
 
     const individual = await this.individualService.findById(
       id,
-      currentUser.org_id!,
+      orgId,
       currentUser.id,
       currentUser.role,
       ip,
@@ -103,14 +113,19 @@ export class IndividualController {
     @Body() dto: UpdateIndividualDto,
     @Req() req: Request,
   ) {
+    const orgId = currentUser.org_id;
+    if (!orgId) {
+      throw new BadRequestException('User is not associated with an organization');
+    }
     const ip = (req.ip ?? req.socket?.remoteAddress) || '';
     const userAgent = req.headers['user-agent'] ?? '';
 
     const individual = await this.individualService.update(
       id,
-      currentUser.org_id!,
+      orgId,
       dto,
       currentUser.id,
+      currentUser.role,
       ip,
       userAgent,
     );

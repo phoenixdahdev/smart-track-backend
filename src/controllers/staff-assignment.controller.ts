@@ -7,15 +7,19 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
+import { type Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StaffAssignmentService } from '@services/staff-assignment.service';
 import { CreateStaffAssignmentDto } from '@dtos/create-staff-assignment.dto';
 import { UpdateStaffAssignmentDto } from '@dtos/update-staff-assignment.dto';
+import { EndAssignmentDto } from '@dtos/end-assignment.dto';
 import { Roles } from '@decorators/roles.decorator';
 import { CurrentUser } from '@decorators/current-user.decorator';
 import { AgencyRole } from '@enums/role.enum';
 import { PaginationValidator } from '@utils/pagination-utils';
+import { type AuthenticatedUser } from '@app-types/auth.types';
 
 @ApiTags('Admin — Staff Assignments')
 @ApiBearerAuth()
@@ -70,8 +74,19 @@ export class StaffAssignmentController {
   async create(
     @Body() dto: CreateStaffAssignmentDto,
     @CurrentUser('org_id') orgId: string,
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Req() req: Request,
   ) {
-    const assignment = await this.staffAssignmentService.create(dto, orgId);
+    const ip = (req.ip ?? req.socket?.remoteAddress) || '';
+    const userAgent = req.headers['user-agent'] ?? '';
+    const assignment = await this.staffAssignmentService.create(
+      dto,
+      orgId,
+      currentUser.id,
+      currentUser.role,
+      ip,
+      userAgent,
+    );
     return {
       message: 'Staff assignment created',
       data: assignment,
@@ -98,11 +113,19 @@ export class StaffAssignmentController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser('org_id') orgId: string,
     @Body() dto: UpdateStaffAssignmentDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Req() req: Request,
   ) {
+    const ip = (req.ip ?? req.socket?.remoteAddress) || '';
+    const userAgent = req.headers['user-agent'] ?? '';
     const assignment = await this.staffAssignmentService.update(
       id,
       orgId,
       dto,
+      currentUser.id,
+      currentUser.role,
+      ip,
+      userAgent,
     );
     return {
       message: 'Staff assignment updated',
@@ -116,12 +139,20 @@ export class StaffAssignmentController {
   async endAssignment(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser('org_id') orgId: string,
-    @Body('end_date') endDate: string,
+    @Body() dto: EndAssignmentDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Req() req: Request,
   ) {
+    const ip = (req.ip ?? req.socket?.remoteAddress) || '';
+    const userAgent = req.headers['user-agent'] ?? '';
     const assignment = await this.staffAssignmentService.endAssignment(
       id,
       orgId,
-      endDate,
+      dto.end_date,
+      currentUser.id,
+      currentUser.role,
+      ip,
+      userAgent,
     );
     return {
       message: 'Staff assignment ended',

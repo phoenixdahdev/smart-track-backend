@@ -1,6 +1,8 @@
 import { IndividualController } from './individual.controller';
 import { IndividualService } from '@services/individual.service';
 import { AgencyRole } from '@enums/role.enum';
+import { type AuthenticatedUser } from '@app-types/auth.types';
+import { type Request } from 'express';
 
 describe('IndividualController', () => {
   let controller: IndividualController;
@@ -74,8 +76,8 @@ describe('IndividualController', () => {
           last_name: 'Doe',
           date_of_birth: '1990-05-15',
         },
-        mockCurrentUser as never,
-        mockReq as never,
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Individual created');
       expect(result.data.id).toBe('ind-uuid');
@@ -86,8 +88,8 @@ describe('IndividualController', () => {
     it('should get individual by id', async () => {
       const result = await controller.findById(
         'ind-uuid',
-        mockCurrentUser as never,
-        mockReq as never,
+        mockCurrentUser as unknown as AuthenticatedUser,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Individual retrieved');
       expect(result.data.first_name).toBe('John');
@@ -98,9 +100,9 @@ describe('IndividualController', () => {
     it('should update individual', async () => {
       const result = await controller.update(
         'ind-uuid',
-        mockCurrentUser as never,
+        mockCurrentUser as unknown as AuthenticatedUser,
         { first_name: 'Johnny' },
-        mockReq as never,
+        mockReq as unknown as Request,
       );
       expect(result.message).toBe('Individual updated');
     });

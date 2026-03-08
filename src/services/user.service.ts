@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,7 +9,7 @@ import { AuditLogService } from './audit-log.service';
 import { type CreateUserDto } from '@dtos/create-user.dto';
 import { type UpdateUserDto } from '@dtos/update-user.dto';
 import { UserStatus } from '@enums/user-status.enum';
-import { type AgencyRole } from '@enums/role.enum';
+import { AgencyRole, type AgencyRole as AgencyRoleType } from '@enums/role.enum';
 import { type PaginationValidator } from '@utils/pagination-utils';
 
 @Injectable()
@@ -90,7 +91,7 @@ export class UserService {
   async assignRole(
     id: string,
     orgId: string,
-    role: AgencyRole,
+    role: AgencyRoleType,
     requestingUserId: string,
     ip: string,
     userAgent: string,
@@ -132,6 +133,10 @@ export class UserService {
     id: string,
     orgId: string,
     sub_permissions: Record<string, boolean>,
+    requestingUserId: string,
+    requestingUserRole: string,
+    ip: string,
+    userAgent: string,
   ) {
     const user = await this.userDal.get({
       identifierOptions: { id, org_id: orgId } as never,
@@ -141,14 +146,39 @@ export class UserService {
       throw new NotFoundException();
     }
 
-    return this.userDal.update({
+    const previousPerms = user.sub_permissions;
+
+    const updated = await this.userDal.update({
       identifierOptions: { id } as never,
       updatePayload: { sub_permissions } as never,
       transactionOptions: { useTransaction: false },
     });
+
+    await this.auditLogService.logAgencyAction({
+      org_id: orgId,
+      user_id: requestingUserId,
+      user_role: requestingUserRole,
+      action: 'PERMISSIONS_UPDATED',
+      action_type: 'UPDATE',
+      table_name: 'users',
+      record_id: id,
+      before_val: { sub_permissions: previousPerms },
+      after_val: { sub_permissions },
+      ip_address: ip,
+      user_agent: userAgent,
+    });
+
+    return updated;
   }
 
-  async deactivate(id: string, orgId: string) {
+  async deactivate(
+    id: string,
+    orgId: string,
+    requestingUserId: string,
+    requestingUserRole: string,
+    ip: string,
+    userAgent: string,
+  ) {
     const user = await this.userDal.get({
       identifierOptions: { id, org_id: orgId } as never,
     });
@@ -157,10 +187,33 @@ export class UserService {
       throw new NotFoundException();
     }
 
-    return this.userDal.update({
+    if (
+      user.role === AgencyRole.AGENCY_OWNER &&
+      (requestingUserRole as AgencyRoleType) !== AgencyRole.AGENCY_OWNER
+    ) {
+      throw new ForbiddenException(
+        'Only the agency owner can deactivate another agency owner',
+      );
+    }
+
+    const updated = await this.userDal.update({
       identifierOptions: { id } as never,
       updatePayload: { status: UserStatus.ARCHIVED } as never,
       transactionOptions: { useTransaction: false },
     });
+
+    await this.auditLogService.logAgencyAction({
+      org_id: orgId,
+      user_id: requestingUserId,
+      user_role: requestingUserRole,
+      action: 'USER_DEACTIVATED',
+      action_type: 'UPDATE',
+      table_name: 'users',
+      record_id: id,
+      ip_address: ip,
+      user_agent: userAgent,
+    });
+
+    return updated;
   }
 }
