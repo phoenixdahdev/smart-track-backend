@@ -59,7 +59,7 @@ describe('ProgramService', () => {
           createPayload: expect.objectContaining({
             org_id: 'org-uuid',
             name: 'Residential Support',
-          }),
+          }) as unknown,
         }),
       );
       expect(result.id).toBe('prog-uuid');

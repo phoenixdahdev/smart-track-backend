@@ -48,7 +48,7 @@ describe('JwtAuthGuard', () => {
       .spyOn(reflector, 'getAllAndOverride')
       .mockReturnValue(true);
 
-    guard.canActivate(context);
+    void guard.canActivate(context);
 
     expect(spy).toHaveBeenCalledWith('isPublic', [
       context.getHandler(),

@@ -64,7 +64,7 @@ describe('UserService', () => {
             status: UserStatus.PENDING_INVITE,
             email_verified: false,
             password: null,
-          }),
+          }) as unknown,
         }),
       );
       expect(result.id).toBe('user-uuid');

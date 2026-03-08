@@ -81,7 +81,7 @@ describe('SiteService', () => {
             org_id: 'org-uuid',
             program_id: 'prog-uuid',
             name: 'Sunrise House',
-          }),
+          }) as unknown,
         }),
       );
       expect(result.id).toBe('site-uuid');

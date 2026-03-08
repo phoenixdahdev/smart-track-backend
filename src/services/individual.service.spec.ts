@@ -91,7 +91,7 @@ describe('IndividualService', () => {
             org_id: 'org-uuid',
             ssn: 'ENC(123-45-6789)',
             date_of_birth: 'ENC(1990-05-15)',
-          }),
+          }) as unknown,
         }),
       );
     });
@@ -179,7 +179,7 @@ describe('IndividualService', () => {
         expect.objectContaining({
           updatePayload: expect.objectContaining({
             ssn: 'ENC(999-88-7777)',
-          }),
+          }) as unknown,
         }),
       );
     });

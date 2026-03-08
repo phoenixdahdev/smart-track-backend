@@ -79,7 +79,7 @@ describe('StaffAssignmentService', () => {
             org_id: 'org-uuid',
             staff_id: 'staff-uuid',
             active: true,
-          }),
+          }) as unknown,
         }),
       );
       expect(result.id).toBe('assign-uuid');

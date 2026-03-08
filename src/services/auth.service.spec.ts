@@ -136,7 +136,7 @@ describe('AuthService', () => {
       expect(result.message).toBe('Email verified successfully');
       expect(userDal.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          updatePayload: expect.objectContaining({ email_verified: true }),
+          updatePayload: expect.objectContaining({ email_verified: true }) as unknown,
         }),
       );
     });
@@ -317,7 +317,7 @@ describe('AuthService', () => {
           updatePayload: expect.objectContaining({
             reset_token: null,
             reset_token_expires_at: null,
-          }),
+          }) as unknown,
         }),
       );
     });

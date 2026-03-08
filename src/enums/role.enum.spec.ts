@@ -40,7 +40,7 @@ describe('Role Enums', () => {
       const platformValues = Object.values(PlatformRole);
       const agencyValues = Object.values(AgencyRole);
       const overlap = platformValues.filter((v) =>
-        agencyValues.includes(v as any),
+        (agencyValues as string[]).includes(v),
       );
       expect(overlap).toHaveLength(0);
     });
