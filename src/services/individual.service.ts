@@ -15,7 +15,7 @@ export class IndividualService {
     private readonly individualDal: IndividualDal,
     private readonly encryptionService: EncryptionService,
     private readonly auditLogService: AuditLogService,
-  ) {}
+  ) { }
 
   private encryptPhiFields(
     phiFields: Partial<
@@ -91,7 +91,7 @@ export class IndividualService {
     return {
       ...individual,
       ssn: this.decryptField(individual.ssn, 'ssn'),
-      date_of_birth: this.decryptField(individual.date_of_birth, 'date_of_birth'),
+      date_of_birth: this.decryptField(individual.date_of_birth, 'date_of_birth') ?? "",
       medicaid_id: this.decryptField(individual.medicaid_id, 'medicaid_id'),
       diagnosis_codes: this.decryptField(
         individual.diagnosis_codes,
