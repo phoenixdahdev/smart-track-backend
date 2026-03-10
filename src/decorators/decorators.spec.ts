@@ -1,7 +1,6 @@
 import { IS_PUBLIC_KEY, ROLES_KEY } from './roles.decorator';
 import { IS_PRIVATE_KEY } from './private.decorator';
 import { SKIP_RESPONSE_INTERCEPTOR } from './skip-response-interceptor.decorator';
-import { SetMetadata } from '@nestjs/common';
 
 // We test decorator metadata by applying them and reading via Reflect
 describe('Decorators', () => {

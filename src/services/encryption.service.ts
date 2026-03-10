@@ -1,10 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-
-const ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 12;
-const AUTH_TAG_LENGTH = 16;
+import { createDecipheriv } from 'crypto';
+import {
+  AES_GCM_ALGORITHM,
+  AES_GCM_AUTH_TAG_LENGTH,
+  aes256GcmEncrypt,
+} from '@utils/aes-gcm.util';
 
 @Injectable()
 export class EncryptionService implements OnModuleInit {
@@ -26,18 +27,7 @@ export class EncryptionService implements OnModuleInit {
   }
 
   encrypt(plaintext: string): string {
-    const iv = randomBytes(IV_LENGTH);
-    const cipher = createCipheriv(ALGORITHM, this.key, iv, {
-      authTagLength: AUTH_TAG_LENGTH,
-    });
-
-    const encrypted = Buffer.concat([
-      cipher.update(plaintext, 'utf8'),
-      cipher.final(),
-    ]);
-    const authTag = cipher.getAuthTag();
-
-    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
+    return aes256GcmEncrypt(plaintext, this.key);
   }
 
   decrypt(ciphertext: string): string {
@@ -51,8 +41,8 @@ export class EncryptionService implements OnModuleInit {
     const authTag = Buffer.from(authTagHex, 'hex');
     const encrypted = Buffer.from(encryptedHex, 'hex');
 
-    const decipher = createDecipheriv(ALGORITHM, this.key, iv, {
-      authTagLength: AUTH_TAG_LENGTH,
+    const decipher = createDecipheriv(AES_GCM_ALGORITHM, this.key, iv, {
+      authTagLength: AES_GCM_AUTH_TAG_LENGTH,
     });
     decipher.setAuthTag(authTag);
 

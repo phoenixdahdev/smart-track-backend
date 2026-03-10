@@ -5,5 +5,20 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@database/(.*)$": "<rootDir>/../src/database/$1",
+    "^@utils/(.*)$": "<rootDir>/../src/utils/$1",
+    "^@decorators/(.*)$": "<rootDir>/../src/decorators/$1",
+    "^@interceptors/(.*)$": "<rootDir>/../src/interceptors/$1",
+    "^@exceptions/(.*)$": "<rootDir>/../src/exceptions/$1",
+    "^@guards/(.*)$": "<rootDir>/../src/guards/$1",
+    "^@services/(.*)$": "<rootDir>/../src/services/$1",
+    "^@controllers/(.*)$": "<rootDir>/../src/controllers/$1",
+    "^@dals/(.*)$": "<rootDir>/../src/dals/$1",
+    "^@dtos/(.*)$": "<rootDir>/../src/dtos/$1",
+    "^@entities/(.*)$": "<rootDir>/../src/entities/$1",
+    "^@enums/(.*)$": "<rootDir>/../src/enums/$1",
+    "^@app-types/(.*)$": "<rootDir>/../src/types/$1"
   }
 }

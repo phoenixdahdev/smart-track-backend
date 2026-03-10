@@ -69,19 +69,19 @@
 
 ## Phase 2: Core Entity Layer
 
-**Status: Not Started (entities ready)**
+**Status: Complete (9/9)**
 
-| Task                          | Status | Notes                                                  |
-| ----------------------------- | ------ | ------------------------------------------------------ |
-| Users module                  | [ ]    | Entity + DAL created                                   |
-| Organizations module          | [ ]    | Entity + DAL created                                   |
-| Programs module               | [ ]    | Entity + DAL created                                   |
-| Sites module                  | [ ]    | Entity + DAL created                                   |
-| Individuals module            | [ ]    | Entity + DAL created (PHI fields ready for encryption) |
-| Staff assignments module      | [ ]    | Entity + DAL created                                   |
-| Console-scoped API routing    | [ ]    | /api/v1/{console}/...                                  |
-| Permission matrix enforcement | [ ]    |                                                        |
-| Seed data / dev fixtures      | [ ]    |                                                        |
+| Task                          | Status | Notes                                                                                        |
+| ----------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| Users module                  | [x]    | UserService + UserController, full CRUD, role assignment, sub-permissions, deactivate        |
+| Organizations module          | [x]    | OrganizationService + OrganizationController — create/get/update (Phase 1 carry-over)        |
+| Programs module               | [x]    | ProgramService + ProgramController, org-scoped CRUD                                          |
+| Sites module                  | [x]    | SiteService + SiteController, program-scoped + org list                                      |
+| Individuals module            | [x]    | IndividualService + IndividualController, PHI fields encrypted (SSN, DOB, medicaid_id, etc.) |
+| Staff assignments module      | [x]    | StaffAssignmentService + StaffAssignmentController, by-individual / by-staff listing         |
+| Console-scoped API routing    | [x]    | `/api/v1/admin/{resource}` — @Roles enforced at controller level                             |
+| Permission matrix enforcement | [x]    | @Roles(AGENCY_OWNER, ADMIN) on admin routes; SUPERVISOR/CLINICIAN read access on individuals |
+| Seed data / dev fixtures      | [x]    | src/database/seeds/dev.seed.ts — org, users (owner/supervisor/DSP), program, site, individual |
 
 ---
 
@@ -273,7 +273,7 @@
 | -------------------------- | ---------- | ---------------------------------------- |
 | 0 - Foundation             | 20/21      | CI/CD pipeline remaining                 |
 | 1 - Auth & Multi-Tenancy   | 11/11      | Complete — local JWT + Google OAuth      |
-| 2 - Core Entities          | 0/9        | Entities ready, services/controllers TBD |
+| 2 - Core Entities          | 9/9        | Complete — services, controllers, routing, PHI encryption, seed data |
 | 3 - Service Documentation  | 0/10       | Entities ready, services/controllers TBD |
 | 4 - EVV                    | 0/7        | Entities ready                           |
 | 5 - Scheduling             | 0/6        | Entities ready                           |

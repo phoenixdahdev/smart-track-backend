@@ -1,6 +1,16 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
+type FilterResponse = {
+  status_code?: number;
+  statusCode?: number;
+  message: string | string[];
+  error?: string;
+  success: boolean;
+  timestamp?: string;
+  path?: string;
+};
+
 describe('AllExceptionsFilter', () => {
   let filter: AllExceptionsFilter;
   let mockResponse: { status: jest.Mock; json: jest.Mock };
@@ -78,7 +88,7 @@ describe('AllExceptionsFilter', () => {
       filter.catch(exception, mockHost);
 
       expect(mockResponse.status).toHaveBeenCalledWith(400);
-      const jsonCall = mockResponse.json.mock.calls[0][0];
+      const jsonCall = (mockResponse.json.mock.calls as Array<[FilterResponse]>)[0][0];
       expect(jsonCall.message).toEqual([
         'email must be an email',
         'name should not be empty',
@@ -108,7 +118,7 @@ describe('AllExceptionsFilter', () => {
 
       filter.catch(exception, mockHost);
 
-      const jsonResponse = mockResponse.json.mock.calls[0][0];
+      const jsonResponse = (mockResponse.json.mock.calls as Array<[FilterResponse]>)[0][0];
       const responseString = JSON.stringify(jsonResponse);
       expect(responseString).not.toContain('database');
       expect(responseString).not.toContain('password');
@@ -135,7 +145,7 @@ describe('AllExceptionsFilter', () => {
 
       filter.catch(exception, mockHost);
 
-      const jsonResponse = mockResponse.json.mock.calls[0][0];
+      const jsonResponse = (mockResponse.json.mock.calls as Array<[FilterResponse]>)[0][0];
       expect(jsonResponse.timestamp).toBeDefined();
     });
 
@@ -144,7 +154,7 @@ describe('AllExceptionsFilter', () => {
 
       filter.catch(exception, mockHost);
 
-      const jsonResponse = mockResponse.json.mock.calls[0][0];
+      const jsonResponse = (mockResponse.json.mock.calls as Array<[FilterResponse]>)[0][0];
       expect(jsonResponse.path).toBe('/api/v1/test');
     });
 
@@ -156,7 +166,7 @@ describe('AllExceptionsFilter', () => {
 
       filter.catch(exception, mockHost);
 
-      const jsonResponse = mockResponse.json.mock.calls[0][0];
+      const jsonResponse = (mockResponse.json.mock.calls as Array<[FilterResponse]>)[0][0];
       expect(jsonResponse.status_code).toBeDefined();
       expect(jsonResponse.statusCode).toBeUndefined();
     });

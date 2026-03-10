@@ -5,18 +5,40 @@ import { Injectable, Logger } from '@nestjs/common';
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly resend: Resend;
+  private _resend: Resend | null = null;
   private readonly fromEmail: string;
+  private readonly apiKey: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.resend = new Resend(configService.get<string>('RESEND_API_KEY', ''));
+    this.apiKey = configService.get<string>('RESEND_API_KEY', '');
     this.fromEmail = configService.get<string>(
       'FROM_EMAIL',
       'noreply@smarttrack.health',
     );
+
+    if (!this.apiKey) {
+      this.logger.warn(
+        'RESEND_API_KEY is not set — email sending will be disabled',
+      );
+    }
+  }
+
+  private get resend(): Resend | null {
+    if (!this.apiKey) return null;
+
+    if (!this._resend) {
+      this._resend = new Resend(this.apiKey);
+    }
+
+    return this._resend;
   }
 
   async sendOtp(to: string, name: string, otp: string): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn('Email skipped — Resend client is not configured');
+      return;
+    }
+
     try {
       await this.resend.emails.send({
         from: this.fromEmail,
@@ -41,6 +63,11 @@ export class EmailService {
     name: string,
     resetToken: string,
   ): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn('Email skipped — Resend client is not configured');
+      return;
+    }
+
     const frontendUrl = this.configService.get<string>(
       'FRONTEND_URL',
       'http://localhost:3001',

@@ -13,6 +13,11 @@ import { EmailService } from './email.service';
 import { EncryptionService } from './encryption.service';
 import { OrganizationService } from './organization.service';
 import { SubPermissionsService } from './sub-permissions.service';
+import { UserService } from './user.service';
+import { ProgramService } from './program.service';
+import { SiteService } from './site.service';
+import { IndividualService } from './individual.service';
+import { StaffAssignmentService } from './staff-assignment.service';
 
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
@@ -93,6 +98,13 @@ export const services: Provider[] = [
   EncryptionService,
   OrganizationService,
   SubPermissionsService,
+
+  // Phase 2 Services
+  UserService,
+  ProgramService,
+  SiteService,
+  IndividualService,
+  StaffAssignmentService,
 
   // Guards
   {

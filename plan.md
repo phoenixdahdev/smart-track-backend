@@ -248,15 +248,15 @@ For support engineers needing emergency tenant access:
 
 ### Phase 2: Core Entity Layer (Weeks 6-8)
 
-- [ ] Users module (CRUD, role assignment, sub-permissions)
-- [ ] Organizations module (agency profile, config)
-- [ ] Programs module
-- [ ] Sites module
-- [ ] Individuals module (PHI — encrypted fields)
-- [ ] Staff assignments module
-- [ ] Console-scoped API routing (`/api/v1/{console}/...`)
-- [ ] Permission matrix enforcement (action-by-role checks)
-- [ ] Seed data / fixtures for development
+- [x] Users module (CRUD, role assignment, sub-permissions)
+- [x] Organizations module (agency profile, config)
+- [x] Programs module
+- [x] Sites module
+- [x] Individuals module (PHI — encrypted fields)
+- [x] Staff assignments module
+- [x] Console-scoped API routing (`/api/v1/{console}/...`)
+- [x] Permission matrix enforcement (action-by-role checks)
+- [x] Seed data / fixtures for development
 
 ### Phase 3: Service Documentation (Weeks 9-12)
 

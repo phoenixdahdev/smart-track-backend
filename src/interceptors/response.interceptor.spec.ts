@@ -9,6 +9,21 @@ import { Reflector } from '@nestjs/core';
 import { of, throwError } from 'rxjs';
 import { ResponseInterceptor } from './response.interceptor';
 
+type InterceptorResponse = {
+  message?: string;
+  data?: Record<string, unknown>;
+  success?: boolean;
+  timestamp?: string;
+  meta?: Record<string, unknown>;
+};
+
+type ErrorResponse = {
+  message: string;
+  success?: boolean;
+  path?: string;
+  timestamp?: string;
+};
+
 describe('ResponseInterceptor', () => {
   let interceptor: ResponseInterceptor;
   let reflector: Reflector;
@@ -58,11 +73,12 @@ describe('ResponseInterceptor', () => {
         data: { id: '123' },
       });
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.message).toBe('Test message');
-        expect(result.data).toEqual({ id: '123' });
-        expect(result.success).toBe(true);
-        expect(result.timestamp).toBeDefined();
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.message).toBe('Test message');
+        expect(res.data).toEqual({ id: '123' });
+        expect(res.success).toBe(true);
+        expect(res.timestamp).toBeDefined();
         done();
       });
     });
@@ -74,8 +90,9 @@ describe('ResponseInterceptor', () => {
 
       const handler = createCallHandler({ data: { id: '123' } });
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.message).toBe('Success');
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.message).toBe('Success');
         done();
       });
     });
@@ -87,9 +104,10 @@ describe('ResponseInterceptor', () => {
 
       const handler = createCallHandler('plain string');
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.message).toBe('Success');
-        expect(result.success).toBe(true);
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.message).toBe('Success');
+        expect(res.success).toBe(true);
         done();
       });
     });
@@ -112,9 +130,10 @@ describe('ResponseInterceptor', () => {
         },
       });
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.meta).toBeDefined();
-        expect(result.meta.total).toBe(50);
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.meta).toBeDefined();
+        expect(res.meta?.['total']).toBe(50);
         done();
       });
     });
@@ -128,10 +147,11 @@ describe('ResponseInterceptor', () => {
         data: { firstName: 'John', lastName: 'Doe' },
       });
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.data.first_name).toBe('John');
-        expect(result.data.last_name).toBe('Doe');
-        expect(result.data.firstName).toBeUndefined();
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.data?.['first_name']).toBe('John');
+        expect(res.data?.['last_name']).toBe('Doe');
+        expect(res.data?.['firstName']).toBeUndefined();
         done();
       });
     });
@@ -153,14 +173,15 @@ describe('ResponseInterceptor', () => {
         },
       });
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.data.id).toBe('123');
-        expect(result.data.name).toBe('John');
-        expect(result.data.password).toBeUndefined();
-        expect(result.data.ssn).toBeUndefined();
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.data?.['id']).toBe('123');
+        expect(res.data?.['name']).toBe('John');
+        expect(res.data?.['password']).toBeUndefined();
+        expect(res.data?.['ssn']).toBeUndefined();
         // dateOfBirth is stripped before camelToSnake conversion
-        expect(result.data.date_of_birth).toBeUndefined();
-        expect(result.data.dateOfBirth).toBeUndefined();
+        expect(res.data?.['date_of_birth']).toBeUndefined();
+        expect(res.data?.['dateOfBirth']).toBeUndefined();
         done();
       });
     });
@@ -177,9 +198,10 @@ describe('ResponseInterceptor', () => {
         data: { id: '123', diagnosis: 'sensitive-info' },
       });
 
-      interceptor.intercept(context, handler).subscribe((result: any) => {
-        expect(result.data.id).toBe('123');
-        expect(result.data.diagnosis).toBeUndefined();
+      interceptor.intercept(context, handler).subscribe((result) => {
+        const res = result as InterceptorResponse;
+        expect(res.data?.['id']).toBe('123');
+        expect(res.data?.['diagnosis']).toBeUndefined();
         done();
       });
     });
@@ -213,10 +235,11 @@ describe('ResponseInterceptor', () => {
       );
 
       interceptor.intercept(context, handler).subscribe({
-        error: (err) => {
+        error: (err: unknown) => {
           expect(err).toBeInstanceOf(HttpException);
-          expect(err.getStatus()).toBe(404);
-          const response = err.getResponse();
+          const httpErr = err as HttpException;
+          expect(httpErr.getStatus()).toBe(404);
+          const response = httpErr.getResponse() as ErrorResponse;
           expect(response.message).toBe('Not found');
           expect(response.success).toBe(false);
           done();
@@ -233,9 +256,10 @@ describe('ResponseInterceptor', () => {
       );
 
       interceptor.intercept(context, handler).subscribe({
-        error: (err) => {
+        error: (err: unknown) => {
           expect(err).toBeInstanceOf(InternalServerErrorException);
-          const response = err.getResponse();
+          const httpErr = err as InternalServerErrorException;
+          const response = httpErr.getResponse() as ErrorResponse;
           expect(response.message).toBe('Internal server error');
           // Must never contain the original error details
           expect(JSON.stringify(response)).not.toContain('PHI');
@@ -254,8 +278,9 @@ describe('ResponseInterceptor', () => {
       );
 
       interceptor.intercept(context, handler).subscribe({
-        error: (err) => {
-          const response = err.getResponse();
+        error: (err: unknown) => {
+          const httpErr = err as HttpException;
+          const response = httpErr.getResponse() as ErrorResponse;
           expect(response.path).toBe('/api/v1/test');
           expect(response.timestamp).toBeDefined();
           done();

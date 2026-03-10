@@ -48,7 +48,7 @@ describe('AuditLogService', () => {
           org_id: 'org-1',
           user_id: 'user-1',
           action: 'CREATE',
-        }),
+        }) as unknown,
         transactionOptions: { useTransaction: false },
       });
     });
@@ -115,7 +115,7 @@ describe('AuditLogService', () => {
         createPayload: expect.objectContaining({
           operator_id: 'op-1',
           action: 'BREAK_GLASS',
-        }),
+        }) as unknown,
         transactionOptions: { useTransaction: false },
       });
     });

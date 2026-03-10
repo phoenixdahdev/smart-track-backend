@@ -10,6 +10,49 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smarttrack
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Database
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: smarttrack
+
+      # App
+      NODE_ENV: test
+      PORT: 3000
+
+      # Auth
+      JWT_SECRET: ci-test-jwt-secret-change-in-production
+
+      # Encryption (AES-256 requires 32-byte key — 64 hex chars)
+      ENCRYPTION_KEY: 0000000000000000000000000000000000000000000000000000000000000000
+
+      # Email (dummy key satisfies Resend SDK validation; emails are skipped in test)
+      RESEND_API_KEY: re_test_placeholder
+      FROM_EMAIL: noreply@smarttrack.health
+
+      # OAuth (optional — no real token exchanged in unit/e2e tests)
+      GOOGLE_CLIENT_ID: test-google-client-id.apps.googleusercontent.com
+
+      # Frontend
+      FRONTEND_URL: http://localhost:3001
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,6 +67,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm lint
+
       - run: pnpm build
 
       - run: pnpm test
+
+      - name: Run database migrations
+        run: pnpm migration:run
+
+      - run: pnpm test:e2e

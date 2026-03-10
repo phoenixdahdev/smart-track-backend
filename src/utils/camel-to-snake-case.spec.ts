@@ -61,8 +61,8 @@ describe('camelToSnake', () => {
       privateFields,
     );
     expect(result).toEqual({ name: 'John', email: 'john@test.com' });
-    expect((result as any).password).toBeUndefined();
-    expect((result as any).ssn).toBeUndefined();
+    expect((result as Record<string, unknown>)['password']).toBeUndefined();
+    expect((result as Record<string, unknown>)['ssn']).toBeUndefined();
   });
 
   it('should strip private fields in nested objects', () => {
