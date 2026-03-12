@@ -19,6 +19,16 @@ import { SiteService } from './site.service';
 import { IndividualService } from './individual.service';
 import { StaffAssignmentService } from './staff-assignment.service';
 
+// Phase 3 Services
+import { ServiceRecordService } from './service-record.service';
+import { DailyNoteService } from './daily-note.service';
+import { IspGoalService } from './isp-goal.service';
+import { IspDataPointService } from './isp-data-point.service';
+import { IncidentService } from './incident.service';
+import { BehaviorPlanService } from './behavior-plan.service';
+import { MarEntryService } from './mar-entry.service';
+import { CorrectionRequestService } from './correction-request.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -105,6 +115,16 @@ export const services: Provider[] = [
   SiteService,
   IndividualService,
   StaffAssignmentService,
+
+  // Phase 3 Services
+  ServiceRecordService,
+  DailyNoteService,
+  IspGoalService,
+  IspDataPointService,
+  IncidentService,
+  BehaviorPlanService,
+  MarEntryService,
+  CorrectionRequestService,
 
   // Guards
   {

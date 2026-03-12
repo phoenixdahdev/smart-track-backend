@@ -23,3 +23,4 @@ export * from './billing-cycle.enum';
 export * from './notification-type.enum';
 export * from './place-of-service.enum';
 export * from './agreement-type.enum';
+export * from './mar-result.enum';

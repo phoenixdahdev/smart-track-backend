@@ -87,20 +87,20 @@
 
 ## Phase 3: Service Documentation
 
-**Status: Not Started (entities ready)**
+**Status: Complete (10/10)**
 
-| Task                        | Status | Notes                                     |
-| --------------------------- | ------ | ----------------------------------------- |
-| Service records module      | [ ]    | Entity + DAL created, state machine ready |
-| Daily notes module          | [ ]    | Entity + DAL created                      |
-| ISP goals module            | [ ]    | Entity + DAL created                      |
-| ISP data points module      | [ ]    | Entity + DAL created                      |
-| Incident reporting module   | [ ]    | Entity + DAL created                      |
-| BTP module (Clinician)      | [ ]    | Entity + DAL created (behavior_plans)     |
-| MAR module                  | [ ]    | Entity + DAL created                      |
-| Supervisor review queue     | [ ]    | Core approval workflow                    |
-| Immutability enforcement    | [ ]    | Approved records locked                   |
-| Correction request workflow | [ ]    | Entity + DAL created                      |
+| Task                        | Status | Notes                                                                                     |
+| --------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| Service records module      | [x]    | ServiceRecordService + 3 controllers (staff/supervisor/admin), state machine, staff ownership |
+| Daily notes module          | [x]    | DailyNoteService + StaffDailyNoteController, nested under service records, PHI encrypted  |
+| ISP goals module            | [x]    | IspGoalService + ClinicalIspGoalController, PHI encrypted (description)                   |
+| ISP data points module      | [x]    | IspDataPointService + StaffIspDataPointController, goal validation                        |
+| Incident reporting module   | [x]    | IncidentService + 3 controllers (staff/supervisor/admin), INCIDENT_TRANSITIONS state machine |
+| BTP module (Clinician)      | [x]    | BehaviorPlanService + ClinicalBehaviorPlanController, versioning, PHI encrypted           |
+| MAR module                  | [x]    | MarEntryService + StaffMarEntryController, MarResult enum, PHI encrypted (drug_name/dose/route) |
+| Supervisor review queue     | [x]    | GET /supervisor/service-records/review-queue + approve/reject actions                     |
+| Immutability enforcement    | [x]    | BadRequestException on update/modify of APPROVED records, validateTransition() enforced   |
+| Correction request workflow | [x]    | CorrectionRequestService + 2 controllers (staff/supervisor), CORRECTION_TRANSITIONS       |
 
 ---
 
@@ -274,7 +274,7 @@
 | 0 - Foundation             | 20/21      | CI/CD pipeline remaining                 |
 | 1 - Auth & Multi-Tenancy   | 11/11      | Complete — local JWT + Google OAuth      |
 | 2 - Core Entities          | 9/9        | Complete — services, controllers, routing, PHI encryption, seed data |
-| 3 - Service Documentation  | 0/10       | Entities ready, services/controllers TBD |
+| 3 - Service Documentation  | 10/10      | Complete — 3 consoles (staff/supervisor/clinical), 13 controllers, 8 services |
 | 4 - EVV                    | 0/7        | Entities ready                           |
 | 5 - Scheduling             | 0/6        | Entities ready                           |
 | 6 - Billing & Claims       | 0/16       | Entities ready                           |
@@ -284,9 +284,11 @@
 | 10 - Guardian Portal       | 0/5        | Phase 3 completion                       |
 | 11 - Reporting             | 0/9        | Phases 6-8                               |
 | 12 - Hardening             | 0/10       | All phases                               |
-| **Total**                  | **31/123** |                                          |
+| **Total**                  | **41/123** |                                          |
 
-**Entity Layer Complete:** 47 entities, 22 new enums (+3 role additions), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 187 tests green across 22 suites.
+**Entity Layer Complete:** 47 entities, 23 enums (+MarResult), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 380 tests green across 53 suites.
+
+**Phase 3 (2026-03-10):** Service Documentation complete. 8 services, 13 controllers across 3 new consoles (/staff/*, /supervisor/*, /clinical/*). 15 DTOs, 116 new tests. State machine enforcement (service records + incidents + corrections), immutability on APPROVED records, PHI encryption on 8 fields across 5 entities, audit logging on all mutations/reads. MarResult enum + INCIDENT_TRANSITIONS + CORRECTION_TRANSITIONS added.
 
 **Auth Rewrite (2026-03-06):** Replaced Auth0 JWKS (RS256) with local JWT (HS256) + bcrypt password auth + Google OAuth ID token signin. Added `password` column to users table (nullable for OAuth-only users). Removed `jwks-rsa` dependency, added `bcrypt` + `google-auth-library`. @PrivateFields(['password', 'otp_code', 'reset_token']) strips sensitive fields from responses.
 
