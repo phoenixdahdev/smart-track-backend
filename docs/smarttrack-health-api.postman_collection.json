@@ -1,0 +1,2478 @@
+{
+	"info": {
+		"_postman_id": "smarttrack-health-api-v1",
+		"name": "SmartTrack Health API",
+		"description": "SmartTrack Health — HIPAA-compliant IDD care documentation & billing platform API.\n\n## Authentication\nAll endpoints (except those marked Public) require a Bearer token in the Authorization header.\n\n## Response Format\n```json\n{\n  \"message\": \"string\",\n  \"data\": {},\n  \"meta\": { \"pagination\": {} },\n  \"success\": true\n}\n```\n\n## Roles\n- **AGENCY_OWNER** — Agency owner (full access)\n- **ADMIN** — Agency administrator\n- **SUPERVISOR** — Supervises DSP staff\n- **DSP** — Direct Support Professional (staff)\n- **CLINICIAN** — Clinical staff\n- **BILLING_SPECIALIST** — Billing console access\n- **FINANCE_MANAGER** — Finance console access\n- **GUARDIAN** — Guardian portal access\n\n## Enums\n\n**ServiceRecordStatus:** DRAFT, PENDING_REVIEW, APPROVED, REJECTED\n\n**IncidentStatus:** DRAFT, SUBMITTED, UNDER_REVIEW, CLOSED\n\n**CorrectionStatus:** PENDING, APPROVED, REJECTED\n\n**MarResult:** GIVEN, REFUSED, HELD, NOT_AVAILABLE\n\n**PunchType:** CLOCK_IN, CLOCK_OUT\n\n## State Machines\n\n**Service Records:** DRAFT → PENDING_REVIEW → APPROVED | REJECTED → DRAFT (resubmit)\n\n**Incidents:** DRAFT → SUBMITTED → UNDER_REVIEW → CLOSED\n\n**Corrections:** PENDING → APPROVED | REJECTED",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orgId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "individualId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "programId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "siteId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "serviceRecordId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "goalId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "incidentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "behaviorPlanId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "correctionRequestId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "evvPunchId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "evvCorrectionId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						},
+						"description": "Public health check endpoint. No authentication required."
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				}
+			],
+			"description": "System health endpoints."
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Sign Up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.accessToken) {",
+									"    pm.collectionVariables.set('accessToken', res.data.accessToken);",
+									"}",
+									"if (res.data && res.data.refreshToken) {",
+									"    pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"securePassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/signup",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "signup"]
+						},
+						"description": "**Public** — Create a new user account.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| name | string | Yes | Full name |\n| email | string | Yes | Valid email |\n| password | string | Yes | Min 8 characters |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "verify-email"]
+						},
+						"description": "**Public** — Verify email address with OTP code.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email | string | Yes | Email to verify |\n| otp | string | Yes | 6-digit OTP code |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/resend-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "resend-otp"]
+						},
+						"description": "**Public** — Resend OTP verification code.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email | string | Yes | Email to resend OTP to |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Sign In",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.accessToken) {",
+									"    pm.collectionVariables.set('accessToken', res.data.accessToken);",
+									"}",
+									"if (res.data && res.data.refreshToken) {",
+									"    pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"securePassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/signin",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "signin"]
+						},
+						"description": "**Public** — Sign in with email and password. Returns access and refresh tokens.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email | string | Yes | Registered email |\n| password | string | Yes | Account password |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Sign In with Google",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.accessToken) {",
+									"    pm.collectionVariables.set('accessToken', res.data.accessToken);",
+									"}",
+									"if (res.data && res.data.refreshToken) {",
+									"    pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idToken\": \"<google-oauth2-id-token>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/signin/google",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "signin", "google"]
+						},
+						"description": "**Public** — Sign in with Google OAuth2 ID token. User must already exist in the system.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| idToken | string | Yes | Google OAuth2 ID token |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "forgot-password"]
+						},
+						"description": "**Public** — Request a password reset email.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email | string | Yes | Registered email |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"<reset-token>\",\n  \"newPassword\": \"newSecurePassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "reset-password"]
+						},
+						"description": "**Public** — Reset password using a reset token.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| token | string | Yes | Password reset token |\n| newPassword | string | Yes | Min 8 characters |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.accessToken) {",
+									"    pm.collectionVariables.set('accessToken', res.data.accessToken);",
+									"}",
+									"if (res.data && res.data.refreshToken) {",
+									"    pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh"]
+						},
+						"description": "**Public** — Exchange a refresh token for new access and refresh tokens.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| refreshToken | string | Yes | Valid refresh token |"
+					},
+					"response": [],
+					"auth": {
+						"type": "noauth"
+					}
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "**Authenticated** — Get current authenticated user's profile."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/session",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "session"]
+						},
+						"description": "**Authenticated** — Get current session info."
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Out",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/signout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "signout"]
+						},
+						"description": "**Authenticated** — Sign out and invalidate session."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints. Sign up, sign in, token management, and session handling."
+		},
+		{
+			"name": "Admin > Organizations",
+			"item": [
+				{
+					"name": "Create Organization",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('orgId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"legal_name\": \"Sunrise Care Agency\",\n  \"dba\": \"Sunrise Care\",\n  \"npi\": \"1234567890\",\n  \"ein\": \"12-3456789\",\n  \"address_line1\": \"123 Main St\",\n  \"city\": \"Springfield\",\n  \"state\": \"IL\",\n  \"zip\": \"62704\",\n  \"phone\": \"217-555-0100\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/organizations",
+							"host": ["{{baseUrl}}"],
+							"path": ["organizations"]
+						},
+						"description": "**Authenticated** — Create a new organization.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| legal_name | string | Yes | Legal entity name |\n| dba | string | No | Doing business as |\n| npi | string | Yes | 10-digit NPI number |\n| ein | string | Yes | Employer ID number |\n| address_line1 | string | No | Street address |\n| address_line2 | string | No | Suite/unit |\n| city | string | No | City |\n| state | string | No | 2-letter state code |\n| zip | string | No | ZIP code |\n| phone | string | No | Phone number |"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Organization",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/organizations/{{orgId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["organizations", "{{orgId}}"]
+						},
+						"description": "**Authenticated** — Get organization by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Organization",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"217-555-0200\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/organizations/{{orgId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["organizations", "{{orgId}}"]
+						},
+						"description": "**Authenticated** — Update organization. All fields optional."
+					},
+					"response": []
+				}
+			],
+			"description": "Organization management endpoints."
+		},
+		{
+			"name": "Admin > Users",
+			"item": [
+				{
+					"name": "List Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" },
+								{ "key": "orderBy", "value": "created_at", "disabled": true }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all users in the organization with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Create User (Invite)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('userId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"role\": \"DSP\",\n  \"phone\": \"555-0101\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nInvite a user to the organization.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| name | string | Yes | Full name |\n| email | string | Yes | Valid email |\n| role | AgencyRole | Yes | ADMIN, SUPERVISOR, DSP, CLINICIAN, BILLING_SPECIALIST, FINANCE_MANAGER, GUARDIAN, AGENCY_OWNER, SCHEDULER, HR_MANAGER |\n| phone | string | No | Phone number |\n| supervisor_id | UUID | No | Assigned supervisor |\n| sub_permissions | object | No | Fine-grained permissions |"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{userId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet user by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"555-0202\",\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{userId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate user profile, role, or status.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| name | string | No | Full name |\n| phone | string | No | Phone number |\n| role | AgencyRole | No | New role |\n| status | string | No | ACTIVE, INACTIVE, INVITED |\n| supervisor_id | UUID | No | Assigned supervisor |\n| sub_permissions | object | No | Permissions map |\n| certifications | string[] | No | Certification list |\n| license_info | string | No | License information |"
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"SUPERVISOR\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{userId}}/role",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{userId}}", "role"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nAssign a role to a user.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| role | AgencyRole | Yes | New role to assign |"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Sub-Permissions",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sub_permissions\": {\n    \"can_view_billing\": true,\n    \"can_export_reports\": false\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{userId}}/permissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{userId}}", "permissions"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate user's fine-grained sub-permissions.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| sub_permissions | object | Yes | Key-value boolean map |"
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{userId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nDeactivate (archive) a user. Does not permanently delete."
+					},
+					"response": []
+				}
+			],
+			"description": "User management endpoints. Requires AGENCY_OWNER or ADMIN role."
+		},
+		{
+			"name": "Admin > Programs",
+			"item": [
+				{
+					"name": "List Programs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/programs?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "programs"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all programs in the organization."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Program",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('programId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Day Habilitation Program\",\n  \"type\": \"DAY_HABILITATION\",\n  \"description\": \"Daytime skill-building and community engagement\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/programs",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "programs"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a new program.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| name | string | Yes | Program name |\n| type | string | No | e.g., RESIDENTIAL, DAY_HABILITATION |\n| description | string | No | Description |\n| active | boolean | No | Default: true |"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Program",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/programs/{{programId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "programs", "{{programId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet program by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Program",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated program description\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/programs/{{programId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "programs", "{{programId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate a program. All fields optional."
+					},
+					"response": []
+				}
+			],
+			"description": "Program management endpoints. Requires AGENCY_OWNER or ADMIN role."
+		},
+		{
+			"name": "Admin > Sites",
+			"item": [
+				{
+					"name": "List Sites",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/sites?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "sites"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all sites in the organization."
+					},
+					"response": []
+				},
+				{
+					"name": "List Sites by Program",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/sites/by-program/{{programId}}?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "sites", "by-program", "{{programId}}"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList sites filtered by program."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Site",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('siteId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"program_id\": \"{{programId}}\",\n  \"name\": \"Main Campus\",\n  \"address_line1\": \"456 Oak Ave\",\n  \"city\": \"Springfield\",\n  \"state\": \"IL\",\n  \"zip\": \"62704\",\n  \"latitude\": 39.7817,\n  \"longitude\": -89.6501\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/sites",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "sites"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a new site.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| program_id | UUID | Yes | Parent program |\n| name | string | Yes | Site name |\n| address_line1 | string | Yes | Street address |\n| address_line2 | string | No | Suite/unit |\n| city | string | Yes | City |\n| state | string | Yes | 2-letter state code |\n| zip | string | Yes | ZIP code |\n| latitude | number | No | -90 to 90 |\n| longitude | number | No | -180 to 180 |\n| active | boolean | No | Default: true |"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Site",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/sites/{{siteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "sites", "{{siteId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet site by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Site",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Main Campus - Building A\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/sites/{{siteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "sites", "{{siteId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate a site. All fields optional."
+					},
+					"response": []
+				}
+			],
+			"description": "Site management endpoints. Requires AGENCY_OWNER or ADMIN role."
+		},
+		{
+			"name": "Admin > Individuals",
+			"item": [
+				{
+					"name": "List Individuals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/individuals?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "individuals"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN, SUPERVISOR, CLINICIAN\n\nList all individuals in the organization."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Individual",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('individualId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Michael\",\n  \"last_name\": \"Johnson\",\n  \"date_of_birth\": \"1990-05-15\",\n  \"medicaid_id\": \"MED123456\",\n  \"diagnosis_codes\": \"F70,F84.0\",\n  \"address\": \"789 Elm St, Springfield, IL 62704\",\n  \"phone\": \"555-0303\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/individuals",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "individuals"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a new individual (service recipient). PHI fields are encrypted at rest.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| first_name | string | Yes | First name (encrypted) |\n| last_name | string | Yes | Last name (encrypted) |\n| date_of_birth | string | Yes | YYYY-MM-DD (encrypted) |\n| ssn | string | No | SSN (encrypted) |\n| medicaid_id | string | No | Medicaid ID (encrypted) |\n| diagnosis_codes | string | No | Comma-separated ICD-10 (encrypted) |\n| address | string | No | Full address (encrypted) |\n| phone | string | No | Phone (encrypted) |\n| emergency_contact | string | No | Emergency contact (encrypted) |\n| guardian_id | UUID | No | Guardian user ID |\n| active | boolean | No | Default: true |"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/individuals/{{individualId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "individuals", "{{individualId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN, SUPERVISOR, CLINICIAN\n\nGet individual by ID. PHI fields are decrypted in the response."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Individual",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"555-0404\",\n  \"address\": \"100 New St, Springfield, IL 62704\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/individuals/{{individualId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "individuals", "{{individualId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate individual details. All fields optional."
+					},
+					"response": []
+				}
+			],
+			"description": "Individual (service recipient) management. PHI fields are AES-256 encrypted at rest."
+		},
+		{
+			"name": "Admin > Staff Assignments",
+			"item": [
+				{
+					"name": "List by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/staff-assignments/by-individual/{{individualId}}?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "staff-assignments", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN, SUPERVISOR\n\nList staff assignments for an individual."
+					},
+					"response": []
+				},
+				{
+					"name": "List by Staff",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/staff-assignments/by-staff/{{userId}}?skip=0&take=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "staff-assignments", "by-staff", "{{userId}}"],
+							"query": [
+								{ "key": "skip", "value": "0" },
+								{ "key": "take", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN, SUPERVISOR\n\nList assignments for a specific staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Assignment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"staff_id\": \"{{userId}}\",\n  \"individual_id\": \"{{individualId}}\",\n  \"program_id\": \"{{programId}}\",\n  \"effective_date\": \"2026-03-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/staff-assignments",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "staff-assignments"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a staff-to-individual assignment.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| staff_id | UUID | Yes | Staff user ID |\n| individual_id | UUID | Yes | Individual ID |\n| program_id | UUID | Yes | Program context |\n| effective_date | string | Yes | YYYY-MM-DD |\n| end_date | string | No | YYYY-MM-DD (null = ongoing) |"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Assignment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/staff-assignments/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "staff-assignments", "{{userId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN, SUPERVISOR\n\nGet assignment by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Assignment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"end_date\": \"2026-06-30\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/staff-assignments/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "staff-assignments", "{{userId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate a staff assignment.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| end_date | string | No | YYYY-MM-DD |\n| active | boolean | No | Toggle active state |"
+					},
+					"response": []
+				},
+				{
+					"name": "End Assignment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"end_date\": \"2026-03-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/staff-assignments/{{userId}}/end",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "staff-assignments", "{{userId}}", "end"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nEnd a staff assignment.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| end_date | string | Yes | YYYY-MM-DD end date |"
+					},
+					"response": []
+				}
+			],
+			"description": "Staff-to-individual assignment management."
+		},
+		{
+			"name": "Admin > Service Records",
+			"item": [
+				{
+					"name": "List All Service Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/service-records?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "service-records"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "status", "value": "APPROVED", "disabled": true }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all service records in the organization. Read-only admin view."
+					},
+					"response": []
+				},
+				{
+					"name": "List by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/service-records/by-individual/{{individualId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "service-records", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList service records for a specific individual."
+					},
+					"response": []
+				},
+				{
+					"name": "List by Staff",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/service-records/by-staff/{{userId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "service-records", "by-staff", "{{userId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList service records by a specific staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/service-records/{{serviceRecordId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "service-records", "{{serviceRecordId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet a service record by ID. Read-only."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin read-only view of all service records."
+		},
+		{
+			"name": "Admin > Incidents",
+			"item": [
+				{
+					"name": "List All Incidents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/incidents?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "incidents"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all incidents in the organization. Read-only."
+					},
+					"response": []
+				},
+				{
+					"name": "List by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/incidents/by-individual/{{individualId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "incidents", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList incidents for a specific individual."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Incident",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/incidents/{{incidentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "incidents", "{{incidentId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet an incident by ID. Read-only."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin read-only view of all incidents."
+		},
+		{
+			"name": "Staff > Service Records",
+			"item": [
+				{
+					"name": "Create Service Record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('serviceRecordId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"program_id\": \"{{programId}}\",\n  \"service_date\": \"2026-03-12\",\n  \"units_delivered\": 4\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records"]
+						},
+						"description": "**Roles:** DSP\n\nCreate a new service record. Staff must be assigned to the individual.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual receiving service |\n| program_id | UUID | No | Program context |\n| service_date | string | Yes | YYYY-MM-DD |\n| service_code_id | UUID | No | Service code reference |\n| units_delivered | number | Yes | Positive number |"
+					},
+					"response": []
+				},
+				{
+					"name": "List My Service Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "status", "value": "DRAFT", "disabled": true }
+							]
+						},
+						"description": "**Roles:** DSP\n\nList the current staff member's service records. Optional status filter.\n\n**Status values:** DRAFT, PENDING_REVIEW, APPROVED, REJECTED"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet a service record by ID. Only returns records owned by the current staff."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Service Record",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"units_delivered\": 6,\n  \"service_date\": \"2026-03-12\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}"]
+						},
+						"description": "**Roles:** DSP\n\nUpdate a service record. Only allowed when status is DRAFT or REJECTED. APPROVED records are immutable.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| program_id | UUID | No | Program context |\n| service_date | string | No | YYYY-MM-DD |\n| service_code_id | UUID | No | Service code reference |\n| units_delivered | number | No | Positive number |"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit for Review",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}/submit",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}", "submit"]
+						},
+						"description": "**Roles:** DSP\n\nSubmit a DRAFT service record for supervisor review. Transitions status: DRAFT → PENDING_REVIEW."
+					},
+					"response": []
+				}
+			],
+			"description": "DSP staff service record endpoints. Staff can only see their own records."
+		},
+		{
+			"name": "Staff > Daily Notes",
+			"item": [
+				{
+					"name": "Create Daily Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Individual participated in morning activities. Showed improved social skills.\",\n  \"observations\": \"Good appetite at lunch. Positive mood throughout the day.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}/daily-notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}", "daily-notes"]
+						},
+						"description": "**Roles:** DSP\n\nCreate a daily note for a service record. Cannot add notes to APPROVED service records. Content is PHI-encrypted.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| content | string | Yes | Note content (encrypted at rest) |\n| observations | string | No | Observations (encrypted at rest) |"
+					},
+					"response": []
+				},
+				{
+					"name": "List Daily Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}/daily-notes",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}", "daily-notes"]
+						},
+						"description": "**Roles:** DSP\n\nList all daily notes for a service record."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Daily Note",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}/daily-notes/{{dailyNoteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}", "daily-notes", "{{dailyNoteId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet a single daily note by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Daily Note",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated note content with additional observations.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/service-records/{{serviceRecordId}}/daily-notes/{{dailyNoteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "service-records", "{{serviceRecordId}}", "daily-notes", "{{dailyNoteId}}"]
+						},
+						"description": "**Roles:** DSP\n\nUpdate a daily note. Cannot update notes on APPROVED service records.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| content | string | No | Updated content (encrypted) |\n| observations | string | No | Updated observations (encrypted) |"
+					},
+					"response": []
+				}
+			],
+			"description": "Daily notes nested under service records. PHI-encrypted content."
+		},
+		{
+			"name": "Staff > Incidents",
+			"item": [
+				{
+					"name": "Report Incident",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('incidentId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"type\": \"BEHAVIORAL\",\n  \"description\": \"Individual became agitated during afternoon transition.\",\n  \"immediate_action\": \"Staff used de-escalation techniques. Individual calmed within 10 minutes.\",\n  \"occurred_at\": \"2026-03-12T14:30:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/incidents",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "incidents"]
+						},
+						"description": "**Roles:** DSP\n\nReport a new incident. Created in DRAFT status. PHI fields encrypted.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual involved |\n| type | string | Yes | Incident type category |\n| description | string | Yes | What happened (encrypted) |\n| immediate_action | string | No | Action taken (encrypted) |\n| occurred_at | string | Yes | ISO 8601 timestamp |"
+					},
+					"response": []
+				},
+				{
+					"name": "List Incidents by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/incidents/by-individual/{{individualId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "incidents", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** DSP\n\nList incidents for an individual reported by the current staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Incident",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/incidents/{{incidentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "incidents", "{{incidentId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet an incident by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Incident",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated description with additional details.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/incidents/{{incidentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "incidents", "{{incidentId}}"]
+						},
+						"description": "**Roles:** DSP\n\nUpdate a DRAFT incident.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| type | string | No | Incident type |\n| description | string | No | Updated description (encrypted) |\n| immediate_action | string | No | Updated action (encrypted) |"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Incident",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/incidents/{{incidentId}}/submit",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "incidents", "{{incidentId}}", "submit"]
+						},
+						"description": "**Roles:** DSP\n\nSubmit a DRAFT incident for supervisor review. Transitions: DRAFT → SUBMITTED."
+					},
+					"response": []
+				}
+			],
+			"description": "DSP staff incident reporting. State machine: DRAFT → SUBMITTED → UNDER_REVIEW → CLOSED."
+		},
+		{
+			"name": "Staff > ISP Data Points",
+			"item": [
+				{
+					"name": "Record Data Point",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"goal_id\": \"{{goalId}}\",\n  \"service_record_id\": \"{{serviceRecordId}}\",\n  \"value\": \"3 out of 5 attempts successful\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/isp-data-points",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "isp-data-points"]
+						},
+						"description": "**Roles:** DSP\n\nRecord an ISP data point measurement.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| goal_id | UUID | Yes | ISP goal being tracked |\n| service_record_id | UUID | No | Link to service record |\n| value | string | Yes | Measured value or observation |"
+					},
+					"response": []
+				},
+				{
+					"name": "List by Goal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/isp-data-points/by-goal/{{goalId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "isp-data-points", "by-goal", "{{goalId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** DSP\n\nList data points by ISP goal."
+					},
+					"response": []
+				},
+				{
+					"name": "List by Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/isp-data-points/by-service-record/{{serviceRecordId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "isp-data-points", "by-service-record", "{{serviceRecordId}}"]
+						},
+						"description": "**Roles:** DSP\n\nList data points linked to a specific service record."
+					},
+					"response": []
+				}
+			],
+			"description": "ISP (Individual Service Plan) data point tracking by staff."
+		},
+		{
+			"name": "Staff > MAR Entries",
+			"item": [
+				{
+					"name": "Record MAR Entry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"drug_name\": \"Lisinopril\",\n  \"dose\": \"10mg\",\n  \"route\": \"oral\",\n  \"scheduled_time\": \"2026-03-12T08:00:00.000Z\",\n  \"administered_time\": \"2026-03-12T08:05:00.000Z\",\n  \"result\": \"GIVEN\",\n  \"notes\": \"Taken with breakfast\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/mar-entries",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "mar-entries"]
+						},
+						"description": "**Roles:** DSP\n\nRecord a Medication Administration Record entry. PHI fields encrypted.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual receiving medication |\n| drug_name | string | Yes | Medication name (encrypted) |\n| dose | string | Yes | Dosage (encrypted) |\n| route | string | No | Route of administration (encrypted) |\n| scheduled_time | string | Yes | ISO 8601 scheduled time |\n| administered_time | string | No | ISO 8601 actual time given |\n| result | MarResult | Yes | GIVEN, REFUSED, HELD, NOT_AVAILABLE |\n| notes | string | No | Additional notes |"
+					},
+					"response": []
+				},
+				{
+					"name": "List by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/mar-entries/by-individual/{{individualId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "mar-entries", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** DSP\n\nList MAR entries for an individual."
+					},
+					"response": []
+				},
+				{
+					"name": "Get MAR Entry",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/mar-entries/{{marEntryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "mar-entries", "{{marEntryId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet a MAR entry by ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Medication Administration Record (MAR) tracking. Drug info is PHI-encrypted."
+		},
+		{
+			"name": "Staff > Correction Requests",
+			"item": [
+				{
+					"name": "Create Correction Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('correctionRequestId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"service_record_id\": \"{{serviceRecordId}}\",\n  \"requested_changes\": \"Units delivered should be 6, not 4. Extended shift was not captured.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/correction-requests",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "correction-requests"]
+						},
+						"description": "**Roles:** DSP\n\nCreate a correction request for an APPROVED service record. APPROVED records are immutable — corrections go through this append-only workflow.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| service_record_id | UUID | Yes | The approved service record |\n| requested_changes | string | Yes | Description of corrections needed |"
+					},
+					"response": []
+				},
+				{
+					"name": "List by Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/correction-requests/by-service-record/{{serviceRecordId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "correction-requests", "by-service-record", "{{serviceRecordId}}"]
+						},
+						"description": "**Roles:** DSP\n\nList correction requests for a specific service record."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Correction Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/correction-requests/{{correctionRequestId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "correction-requests", "{{correctionRequestId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet a correction request by ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Staff-initiated correction requests for APPROVED service records. Append-only workflow."
+		},
+		{
+			"name": "Supervisor > Service Records",
+			"item": [
+				{
+					"name": "Review Queue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/service-records/review-queue?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "service-records", "review-queue"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nGet the service record review queue (PENDING_REVIEW records)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/service-records/{{serviceRecordId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "service-records", "{{serviceRecordId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nGet a service record by ID for review."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Service Record",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Looks good. Approved.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/service-records/{{serviceRecordId}}/approve",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "service-records", "{{serviceRecordId}}", "approve"]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nApprove a PENDING_REVIEW service record. Transitions: PENDING_REVIEW → APPROVED. Record becomes immutable after approval.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| notes | string | No | Approval notes |"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Service Record",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rejection_reason\": \"Units delivered does not match shift duration. Please correct.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/service-records/{{serviceRecordId}}/reject",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "service-records", "{{serviceRecordId}}", "reject"]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nReject a PENDING_REVIEW service record. Transitions: PENDING_REVIEW → REJECTED. Staff can then edit and resubmit.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| rejection_reason | string | Yes | Reason for rejection |"
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor review queue for service records. Approve or reject with reasons."
+		},
+		{
+			"name": "Supervisor > Incidents",
+			"item": [
+				{
+					"name": "Incident Review Queue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/incidents/review-queue?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "incidents", "review-queue"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nGet the incident review queue (SUBMITTED incidents)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Incident",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/incidents/{{incidentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "incidents", "{{incidentId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nGet an incident by ID for review."
+					},
+					"response": []
+				},
+				{
+					"name": "Start Review",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/incidents/{{incidentId}}/start-review",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "incidents", "{{incidentId}}", "start-review"]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nStart reviewing a SUBMITTED incident. Transitions: SUBMITTED → UNDER_REVIEW."
+					},
+					"response": []
+				},
+				{
+					"name": "Close Incident",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"supervisor_comments\": \"Reviewed incident. De-escalation techniques were appropriate. No further action needed.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/incidents/{{incidentId}}/close",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "incidents", "{{incidentId}}", "close"]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nClose an UNDER_REVIEW incident with supervisor comments. Transitions: UNDER_REVIEW → CLOSED.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| supervisor_comments | string | No | Closing comments (encrypted) |"
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor incident review. State machine: SUBMITTED → UNDER_REVIEW → CLOSED."
+		},
+		{
+			"name": "Supervisor > Correction Requests",
+			"item": [
+				{
+					"name": "Pending Corrections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/correction-requests/pending?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "correction-requests", "pending"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nGet pending correction requests awaiting review."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Correction Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/correction-requests/{{correctionRequestId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "correction-requests", "{{correctionRequestId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nGet a correction request by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Correction",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reviewer_notes\": \"Verified with shift records. Correction approved.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/correction-requests/{{correctionRequestId}}/approve",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "correction-requests", "{{correctionRequestId}}", "approve"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nApprove a PENDING correction request. Transitions: PENDING → APPROVED.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| reviewer_notes | string | No | Notes on the approval |"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Correction",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reviewer_notes\": \"Shift records do not support this correction.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/correction-requests/{{correctionRequestId}}/reject",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "correction-requests", "{{correctionRequestId}}", "reject"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nReject a PENDING correction request. Transitions: PENDING → REJECTED.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| reviewer_notes | string | No | Notes on the rejection |"
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor review of correction requests for approved service records."
+		},
+		{
+			"name": "Clinical > ISP Goals",
+			"item": [
+				{
+					"name": "Create ISP Goal",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('goalId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"description\": \"Improve independent meal preparation skills\",\n  \"target\": \"Prepare 3 meals independently per week\",\n  \"effective_start\": \"2026-03-01\",\n  \"effective_end\": \"2026-09-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/isp-goals",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "isp-goals"]
+						},
+						"description": "**Roles:** CLINICIAN\n\nCreate an ISP (Individual Service Plan) goal. Description is PHI-encrypted.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual ID |\n| description | string | Yes | Goal description (encrypted) |\n| target | string | No | Target outcome |\n| effective_start | string | Yes | YYYY-MM-DD start date |\n| effective_end | string | No | YYYY-MM-DD end date |"
+					},
+					"response": []
+				},
+				{
+					"name": "List Goals by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/isp-goals/by-individual/{{individualId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "isp-goals", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** CLINICIAN, SUPERVISOR\n\nList ISP goals for an individual."
+					},
+					"response": []
+				},
+				{
+					"name": "Get ISP Goal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/isp-goals/{{goalId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "isp-goals", "{{goalId}}"]
+						},
+						"description": "**Roles:** CLINICIAN, SUPERVISOR\n\nGet an ISP goal by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update ISP Goal",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target\": \"Prepare 5 meals independently per week\",\n  \"effective_end\": \"2026-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/isp-goals/{{goalId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "isp-goals", "{{goalId}}"]
+						},
+						"description": "**Roles:** CLINICIAN\n\nUpdate an ISP goal.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| description | string | No | Updated description (encrypted) |\n| target | string | No | Updated target |\n| effective_end | string | No | YYYY-MM-DD end date |\n| active | boolean | No | Toggle active state |"
+					},
+					"response": []
+				}
+			],
+			"description": "Clinical ISP goal management. Clinician-only write access, Supervisor read access."
+		},
+		{
+			"name": "Clinical > Behavior Plans",
+			"item": [
+				{
+					"name": "Create Behavior Plan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.id) {",
+									"    pm.collectionVariables.set('behaviorPlanId', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"content\": \"Behavior Intervention Plan: Target behavior is elopement. Antecedent strategies include...\",\n  \"effective_date\": \"2026-03-01\",\n  \"end_date\": \"2026-09-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/behavior-plans",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "behavior-plans"]
+						},
+						"description": "**Roles:** CLINICIAN\n\nCreate a new behavior plan. Content is PHI-encrypted. Starts at version 1.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual ID |\n| content | string | Yes | Plan content (encrypted) |\n| effective_date | string | Yes | YYYY-MM-DD |\n| end_date | string | No | YYYY-MM-DD |"
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Version",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"content\": \"Updated BIP v2: Revised antecedent strategies based on 3-month data review...\",\n  \"effective_date\": \"2026-06-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/behavior-plans/by-individual/{{individualId}}/new-version",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "behavior-plans", "by-individual", "{{individualId}}", "new-version"]
+						},
+						"description": "**Roles:** CLINICIAN\n\nCreate a new version of a behavior plan. Deactivates the current active plan and increments version number.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual ID |\n| content | string | Yes | New plan content (encrypted) |\n| effective_date | string | Yes | YYYY-MM-DD |\n| end_date | string | No | YYYY-MM-DD |"
+					},
+					"response": []
+				},
+				{
+					"name": "List by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/behavior-plans/by-individual/{{individualId}}?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "behavior-plans", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nList all behavior plan versions for an individual."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Behavior Plan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/behavior-plans/{{behaviorPlanId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "behavior-plans", "{{behaviorPlanId}}"]
+						},
+						"description": "**Roles:** CLINICIAN\n\nGet a behavior plan by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Behavior Plan",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated plan content with revised strategies.\",\n  \"end_date\": \"2026-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/behavior-plans/{{behaviorPlanId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["clinical", "behavior-plans", "{{behaviorPlanId}}"]
+						},
+						"description": "**Roles:** CLINICIAN\n\nUpdate a behavior plan.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| content | string | No | Updated content (encrypted) |\n| end_date | string | No | YYYY-MM-DD |\n| active | boolean | No | Toggle active state |"
+					},
+					"response": []
+				}
+			],
+			"description": "Clinical behavior plan (BTP) management with versioning. Content is PHI-encrypted."
+		},
+		{
+			"name": "Staff — EVV Punches",
+			"item": [
+				{
+					"name": "Clock In",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"gps_latitude\": 40.7128,\n  \"gps_longitude\": -74.006,\n  \"device_id\": \"mobile-device-001\",\n  \"notes\": \"Starting morning shift\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-punches/clock-in",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-punches", "clock-in"]
+						},
+						"description": "**Roles:** DSP\n\nClock in for an individual. Timestamp is set server-side. GPS is validated against site coordinates but does not block the punch.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual being served |\n| shift_id | UUID | No | Associated shift |\n| gps_latitude | number | No | -90 to 90 |\n| gps_longitude | number | No | -180 to 180 |\n| device_id | string | No | Device identifier |\n| notes | string | No | Optional notes |"
+					},
+					"response": []
+				},
+				{
+					"name": "Clock Out",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"gps_latitude\": 40.7128,\n  \"gps_longitude\": -74.006\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-punches/clock-out",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-punches", "clock-out"]
+						},
+						"description": "**Roles:** DSP\n\nClock out — finds matching open clock-in for the same staff+individual. Timestamp is set server-side."
+					},
+					"response": []
+				},
+				{
+					"name": "List My Punches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-punches?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-punches"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"}
+							]
+						},
+						"description": "**Roles:** DSP\n\nList my EVV punches with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Punch by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-punches/{{evvPunchId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-punches", "{{evvPunchId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet an EVV punch by ID (staff-scoped)."
+					},
+					"response": []
+				}
+			],
+			"description": "Staff EVV punch clock-in/clock-out. DSPs record service sessions with GPS verification."
+		},
+		{
+			"name": "Staff — EVV Corrections",
+			"item": [
+				{
+					"name": "Create Correction Request",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"individual_id\": \"{{individualId}}\",\n  \"punch_type\": \"CLOCK_IN\",\n  \"requested_time\": \"2026-03-10T08:00:00.000Z\",\n  \"reason\": \"Forgot to clock in at start of shift\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-corrections",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-corrections"]
+						},
+						"description": "**Roles:** DSP\n\nCreate an EVV correction request for a missed or incorrect punch.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| individual_id | UUID | Yes | Individual involved |\n| punch_type | enum | Yes | CLOCK_IN or CLOCK_OUT |\n| requested_time | ISO 8601 | Yes | Corrected timestamp |\n| reason | string | Yes | Why correction is needed |\n| shift_id | UUID | No | Associated shift |"
+					},
+					"response": []
+				},
+				{
+					"name": "List My Corrections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-corrections?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-corrections"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"}
+							]
+						},
+						"description": "**Roles:** DSP\n\nList my EVV correction requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Correction by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/evv-corrections/{{evvCorrectionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "evv-corrections", "{{evvCorrectionId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet an EVV correction request by ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Staff EVV correction requests. DSPs can request corrections for missed/incorrect punches."
+		},
+		{
+			"name": "Supervisor — EVV Punches",
+			"item": [
+				{
+					"name": "List All Punches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-punches?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-punches"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"},
+								{"key": "staff_id", "value": "", "disabled": true},
+								{"key": "individual_id", "value": "", "disabled": true},
+								{"key": "punch_type", "value": "", "disabled": true}
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nList all EVV punches with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Missed Punches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-punches/missed?threshold_hours=12",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-punches", "missed"],
+							"query": [
+								{"key": "threshold_hours", "value": "12"}
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nGet clock-in records without matching clock-out past the threshold."
+					},
+					"response": []
+				},
+				{
+					"name": "List Punches by Staff",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-punches/by-staff/{{userId}}?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-punches", "by-staff", "{{userId}}"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"}
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nList EVV punches for a specific staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Punch by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-punches/{{evvPunchId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-punches", "{{evvPunchId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nGet an EVV punch by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Flag Missed Punch",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"staff_id\": \"{{userId}}\",\n  \"individual_id\": \"{{individualId}}\",\n  \"punch_type\": \"CLOCK_OUT\",\n  \"requested_time\": \"2026-03-10T17:00:00.000Z\",\n  \"reason\": \"Staff forgot to clock out\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-punches/flag-missed",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-punches", "flag-missed"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nFlag a missed punch — auto-creates a correction request on behalf of the staff member."
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor EVV punch management. View all punches, detect missed punches, flag corrections."
+		},
+		{
+			"name": "Supervisor — EVV Corrections",
+			"item": [
+				{
+					"name": "List Pending Corrections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-corrections/pending?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-corrections", "pending"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"}
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nList PENDING EVV correction requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Correction by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-corrections/{{evvCorrectionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-corrections", "{{evvCorrectionId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nGet an EVV correction by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Correction",
+					"request": {
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reviewer_notes\": \"Approved — verified with staff\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-corrections/{{evvCorrectionId}}/approve",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-corrections", "{{evvCorrectionId}}", "approve"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nApprove an EVV correction. Creates a new EvvPunch with the corrected data."
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Correction",
+					"request": {
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reviewer_notes\": \"Insufficient evidence for correction\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/evv-corrections/{{evvCorrectionId}}/reject",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "evv-corrections", "{{evvCorrectionId}}", "reject"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nReject an EVV correction with reviewer notes."
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor EVV correction review workflow. Approve (creates corrected punch) or reject corrections."
+		},
+		{
+			"name": "Admin — EVV Punches",
+			"item": [
+				{
+					"name": "List All Punches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/evv-punches?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "evv-punches"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"},
+								{"key": "staff_id", "value": "", "disabled": true},
+								{"key": "individual_id", "value": "", "disabled": true},
+								{"key": "punch_type", "value": "", "disabled": true}
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all EVV punches with optional filters (staff_id, individual_id, punch_type)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get EVV Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/evv-punches/summary?date_from=2026-03-01&date_to=2026-03-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "evv-punches", "summary"],
+							"query": [
+								{"key": "date_from", "value": "2026-03-01"},
+								{"key": "date_to", "value": "2026-03-31"}
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet aggregate EVV stats: total punches, clock-ins, clock-outs, location confirmation rate."
+					},
+					"response": []
+				},
+				{
+					"name": "List Punches by Staff",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/evv-punches/by-staff/{{userId}}?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "evv-punches", "by-staff", "{{userId}}"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"}
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList EVV punches for a specific staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "List Punches by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/evv-punches/by-individual/{{individualId}}?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "evv-punches", "by-individual", "{{individualId}}"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "20"}
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList EVV punches for a specific individual."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Punch by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/evv-punches/{{evvPunchId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "evv-punches", "{{evvPunchId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet an EVV punch by ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin EVV punch management. Full org-wide visibility with filtering, staff/individual drill-down, and aggregate stats."
+		}
+	]
+}

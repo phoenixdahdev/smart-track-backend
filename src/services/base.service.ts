@@ -29,6 +29,10 @@ import { BehaviorPlanService } from './behavior-plan.service';
 import { MarEntryService } from './mar-entry.service';
 import { CorrectionRequestService } from './correction-request.service';
 
+// Phase 4 Services
+import { EvvPunchService } from './evv-punch.service';
+import { EvvCorrectionService } from './evv-correction.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -125,6 +129,10 @@ export const services: Provider[] = [
   BehaviorPlanService,
   MarEntryService,
   CorrectionRequestService,
+
+  // Phase 4 Services
+  EvvPunchService,
+  EvvCorrectionService,
 
   // Guards
   {

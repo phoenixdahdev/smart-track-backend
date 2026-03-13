@@ -3,12 +3,16 @@ import { TenantBaseEntity } from './tenant-base.entity';
 import { PunchType } from '@enums/punch-type.enum';
 import { CorrectionStatus } from '@enums/correction-status.enum';
 import { UserEntity } from './user.entity';
+import { IndividualEntity } from './individual.entity';
 import { ShiftEntity } from './shift.entity';
 
 @Entity('evv_corrections')
 export class EvvCorrectionEntity extends TenantBaseEntity {
   @Column('uuid')
   staff_id: string;
+
+  @Column({ type: 'uuid', nullable: true })
+  individual_id: string | null;
 
   @Column({ type: 'uuid', nullable: true })
   shift_id: string | null;
@@ -38,6 +42,10 @@ export class EvvCorrectionEntity extends TenantBaseEntity {
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'staff_id' })
   staff: UserEntity;
+
+  @ManyToOne(() => IndividualEntity)
+  @JoinColumn({ name: 'individual_id' })
+  individual: IndividualEntity;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'reviewed_by' })

@@ -29,6 +29,17 @@ import { ClinicalBehaviorPlanController } from './clinical-behavior-plan.control
 import { AdminServiceRecordController } from './admin-service-record.controller';
 import { AdminIncidentController } from './admin-incident.controller';
 
+// Phase 4 — Staff Console (EVV)
+import { StaffEvvPunchController } from './staff-evv-punch.controller';
+import { StaffEvvCorrectionController } from './staff-evv-correction.controller';
+
+// Phase 4 — Supervisor Console (EVV)
+import { SupervisorEvvPunchController } from './supervisor-evv-punch.controller';
+import { SupervisorEvvCorrectionController } from './supervisor-evv-correction.controller';
+
+// Phase 4 — Admin Console (EVV)
+import { AdminEvvPunchController } from './admin-evv-punch.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -56,4 +67,12 @@ export const controllers: ModuleMetadata['controllers'] = [
   // Phase 3 — Admin Console
   AdminServiceRecordController,
   AdminIncidentController,
+  // Phase 4 — Staff Console (EVV)
+  StaffEvvPunchController,
+  StaffEvvCorrectionController,
+  // Phase 4 — Supervisor Console (EVV)
+  SupervisorEvvPunchController,
+  SupervisorEvvCorrectionController,
+  // Phase 4 — Admin Console (EVV)
+  AdminEvvPunchController,
 ];

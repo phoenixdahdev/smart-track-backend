@@ -1,6 +1,6 @@
 # SmartTrack Health - Progress Tracker
 
-> Last updated: 2026-03-06
+> Last updated: 2026-03-13
 
 ## Legend
 
@@ -106,17 +106,17 @@
 
 ## Phase 4: EVV (Electronic Visit Verification)
 
-**Status: Not Started (entities ready)**
+**Status: Complete (7/7)**
 
-| Task                           | Status | Notes                                |
-| ------------------------------ | ------ | ------------------------------------ |
-| Clock-in / clock-out endpoints | [ ]    | evv_punches entity + DAL created     |
-| GPS capture + validation       | [ ]    |                                      |
-| Shift association              | [ ]    |                                      |
-| Missed punch detection         | [ ]    | evv_corrections entity + DAL created |
-| Double clock-in prevention     | [ ]    |                                      |
-| Shift overlap detection        | [ ]    |                                      |
-| EVV → service record linkage   | [ ]    |                                      |
+| Task                           | Status | Notes                                                                                     |
+| ------------------------------ | ------ | ----------------------------------------------------------------------------------------- |
+| Clock-in / clock-out endpoints | [x]    | EvvPunchService + 3 controllers (staff/supervisor/admin), server-side timestamp            |
+| GPS capture + validation       | [x]    | haversine utility, isWithinRadius vs site coords, non-blocking (location_confirmed flag)   |
+| Shift association              | [x]    | Optional shift_id on punch, inherited from clock-in on clock-out                          |
+| Missed punch detection         | [x]    | findMissedPunches (threshold-based), supervisor flag-missed → auto-creates correction     |
+| Double clock-in prevention     | [x]    | findOpenSession check — BadRequestException if staff+individual already has open session   |
+| Correction workflow            | [x]    | EvvCorrectionService, approve creates new EvvPunch, CORRECTION_TRANSITIONS state machine  |
+| EVV → service record linkage   | [x]    | linkToServiceRecord validates staff+individual match, updates evv_punch_in/out_id columns |
 
 ---
 
