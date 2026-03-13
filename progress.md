@@ -122,16 +122,16 @@
 
 ## Phase 5: Scheduling
 
-**Status: Not Started (entities ready)**
+**Status: Complete (6/6)**
 
-| Task                    | Status | Notes                           |
-| ----------------------- | ------ | ------------------------------- |
-| Schedule creation       | [ ]    | shifts entity + DAL created     |
-| Shift assignment        | [ ]    |                                 |
-| Staff schedule view     | [ ]    |                                 |
-| Accept/reject workflow  | [ ]    | ShiftStatus state machine ready |
-| Conflict detection      | [ ]    |                                 |
-| Schedule-to-EVV linkage | [ ]    |                                 |
+| Task                    | Status | Notes                                                                                     |
+| ----------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| Schedule creation       | [x]    | ShiftService.create, DRAFT default, staff assignment + conflict validation                |
+| Shift assignment        | [x]    | SHIFT_TRANSITIONS state machine, publish/cancel/accept/reject methods                     |
+| Staff schedule view     | [x]    | StaffShiftController — list my shifts, get by ID, date/status filters                     |
+| Accept/reject workflow  | [x]    | PUBLISHED → ACCEPTED/REJECTED, staff ownership enforced, responded_at set                 |
+| Conflict detection      | [x]    | Same staff + date + overlapping time, excludes terminal states, standalone query endpoint  |
+| Schedule-to-EVV linkage | [x]    | Phase 4 already stores shift_id on EvvPunch; no additional work needed                    |
 
 ---
 
@@ -275,8 +275,8 @@
 | 1 - Auth & Multi-Tenancy   | 11/11      | Complete — local JWT + Google OAuth      |
 | 2 - Core Entities          | 9/9        | Complete — services, controllers, routing, PHI encryption, seed data |
 | 3 - Service Documentation  | 10/10      | Complete — 3 consoles (staff/supervisor/clinical), 13 controllers, 8 services |
-| 4 - EVV                    | 0/7        | Entities ready                           |
-| 5 - Scheduling             | 0/6        | Entities ready                           |
+| 4 - EVV                    | 7/7        | Complete — 3 consoles, GPS validation, correction workflow |
+| 5 - Scheduling             | 6/6        | Complete — 3 consoles, state machine, conflict detection |
 | 6 - Billing & Claims       | 0/16       | Entities ready                           |
 | 7 - Payment Reconciliation | 0/8        | Entities ready                           |
 | 8 - SuperAdmin Console     | 0/14       | Entities ready                           |
@@ -284,9 +284,11 @@
 | 10 - Guardian Portal       | 0/5        | Phase 3 completion                       |
 | 11 - Reporting             | 0/9        | Phases 6-8                               |
 | 12 - Hardening             | 0/10       | All phases                               |
-| **Total**                  | **41/123** |                                          |
+| **Total**                  | **54/123** |                                          |
 
-**Entity Layer Complete:** 47 entities, 23 enums (+MarResult), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 380 tests green across 53 suites.
+**Entity Layer Complete:** 47 entities, 23 enums (+MarResult), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 522 tests green across 65 suites.
+
+**Phase 5 (2026-03-13):** Scheduling complete. ShiftService + 3 controllers (staff/supervisor/admin), 4 DTOs, SHIFT_TRANSITIONS state machine (8 states, 10 transitions). Conflict detection (same staff + date + overlapping time, excludes terminal states). DRAFT-only editing, publish/cancel/accept/reject workflow with audit logging. 68 new tests (30 service + 38 controller). 20 Postman endpoints added.
 
 **Phase 3 (2026-03-10):** Service Documentation complete. 8 services, 13 controllers across 3 new consoles (/staff/*, /supervisor/*, /clinical/*). 15 DTOs, 116 new tests. State machine enforcement (service records + incidents + corrections), immutability on APPROVED records, PHI encryption on 8 fields across 5 entities, audit logging on all mutations/reads. MarResult enum + INCIDENT_TRANSITIONS + CORRECTION_TRANSITIONS added.
 

@@ -80,6 +80,16 @@
 			"key": "evvCorrectionId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "shiftId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "staffId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"auth": {
@@ -2473,6 +2483,376 @@
 				}
 			],
 			"description": "Admin EVV punch management. Full org-wide visibility with filtering, staff/individual drill-down, and aggregate stats."
+		},
+		{
+			"name": "Staff — Shifts",
+			"item": [
+				{
+					"name": "List My Shifts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/shifts?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "shifts"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "status", "value": "PUBLISHED", "disabled": true },
+								{ "key": "date_from", "value": "2026-03-01", "disabled": true },
+								{ "key": "date_to", "value": "2026-03-31", "disabled": true }
+							]
+						},
+						"description": "**Roles:** DSP\n\nList shifts assigned to the authenticated staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Shift by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/shifts/{{shiftId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "shifts", "{{shiftId}}"]
+						},
+						"description": "**Roles:** DSP\n\nGet a specific shift assigned to the authenticated staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/shifts/{{shiftId}}/accept",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "shifts", "{{shiftId}}", "accept"]
+						},
+						"description": "**Roles:** DSP\n\nAccept a published shift. Transitions status from PUBLISHED → ACCEPTED."
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"reason\": \"Scheduling conflict with another appointment\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/shifts/{{shiftId}}/reject",
+							"host": ["{{baseUrl}}"],
+							"path": ["staff", "shifts", "{{shiftId}}", "reject"]
+						},
+						"description": "**Roles:** DSP\n\nReject a published shift. Transitions status from PUBLISHED → REJECTED. Reason is optional."
+					},
+					"response": []
+				}
+			],
+			"description": "Staff shift management. DSPs can view their assigned shifts and accept/reject published shifts."
+		},
+		{
+			"name": "Supervisor — Shifts",
+			"item": [
+				{
+					"name": "Create Shift",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"staff_id\": \"{{staffId}}\",\n\t\"individual_id\": \"{{individualId}}\",\n\t\"shift_date\": \"2026-03-15\",\n\t\"start_time\": \"08:00\",\n\t\"end_time\": \"16:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nCreate a new DRAFT shift. Validates staff assignment and checks for scheduling conflicts."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Shifts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "staff_id", "value": "{{staffId}}", "disabled": true },
+								{ "key": "status", "value": "DRAFT", "disabled": true },
+								{ "key": "date_from", "value": "2026-03-01", "disabled": true },
+								{ "key": "date_to", "value": "2026-03-31", "disabled": true }
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nList all shifts in the organization with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "Check Conflicts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts/conflicts?staff_id={{staffId}}&shift_date=2026-03-15&start_time=08:00&end_time=16:00",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts", "conflicts"],
+							"query": [
+								{ "key": "staff_id", "value": "{{staffId}}" },
+								{ "key": "shift_date", "value": "2026-03-15" },
+								{ "key": "start_time", "value": "08:00" },
+								{ "key": "end_time", "value": "16:00" }
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nCheck scheduling conflicts for a staff member on a given date/time."
+					},
+					"response": []
+				},
+				{
+					"name": "List Shifts by Staff",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts/by-staff/{{staffId}}?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts", "by-staff", "{{staffId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" }
+							]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nList all shifts for a specific staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shift by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts/{{shiftId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts", "{{shiftId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nGet a shift by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"start_time\": \"09:00\",\n\t\"end_time\": \"17:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts/{{shiftId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts", "{{shiftId}}"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nUpdate a DRAFT shift. Only DRAFT shifts can be modified."
+					},
+					"response": []
+				},
+				{
+					"name": "Publish Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts/{{shiftId}}/publish",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts", "{{shiftId}}", "publish"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nPublish a shift (DRAFT → PUBLISHED). Makes it visible to the assigned DSP."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/shifts/{{shiftId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["supervisor", "shifts", "{{shiftId}}", "cancel"]
+						},
+						"description": "**Roles:** SUPERVISOR, AGENCY_OWNER, ADMIN\n\nCancel a shift. Works from any non-terminal state."
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor shift management. Create, update, publish, and cancel shifts. Check scheduling conflicts."
+		},
+		{
+			"name": "Admin — Shifts",
+			"item": [
+				{
+					"name": "Create Shift",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"staff_id\": \"{{staffId}}\",\n\t\"individual_id\": \"{{individualId}}\",\n\t\"shift_date\": \"2026-03-15\",\n\t\"start_time\": \"08:00\",\n\t\"end_time\": \"16:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a new DRAFT shift."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Shifts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "staff_id", "value": "{{staffId}}", "disabled": true },
+								{ "key": "individual_id", "value": "{{individualId}}", "disabled": true },
+								{ "key": "status", "value": "DRAFT", "disabled": true },
+								{ "key": "date_from", "value": "2026-03-01", "disabled": true },
+								{ "key": "date_to", "value": "2026-03-31", "disabled": true }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all shifts with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "List Shifts by Staff",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts/by-staff/{{staffId}}?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts", "by-staff", "{{staffId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all shifts for a specific staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "List Shifts by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts/by-individual/{{individualId}}?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts", "by-individual", "{{individualId}}"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" }
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all shifts for a specific individual."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shift by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts/{{shiftId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts", "{{shiftId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet a shift by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"start_time\": \"09:00\",\n\t\"end_time\": \"17:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts/{{shiftId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts", "{{shiftId}}"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate a DRAFT shift."
+					},
+					"response": []
+				},
+				{
+					"name": "Publish Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts/{{shiftId}}/publish",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts", "{{shiftId}}", "publish"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nPublish a shift (DRAFT → PUBLISHED)."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Shift",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shifts/{{shiftId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "shifts", "{{shiftId}}", "cancel"]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCancel a shift."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin shift management. Full CRUD with org-wide visibility, staff/individual drill-down."
 		}
 	]
 }

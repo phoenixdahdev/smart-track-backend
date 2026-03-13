@@ -423,6 +423,7 @@ From Developer Spec — every feature must meet ALL criteria:
 4. PHI encrypted at field level where applicable
 5. No PHI in logs/URLs/errors
 6. E2E test passing with realistic data
+7. Postman collection updated (`docs/smarttrack-health-api.postman_collection.json`) with all new endpoints
 
 ---
 

@@ -33,6 +33,9 @@ import { CorrectionRequestService } from './correction-request.service';
 import { EvvPunchService } from './evv-punch.service';
 import { EvvCorrectionService } from './evv-correction.service';
 
+// Phase 5 Services
+import { ShiftService } from './shift.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -133,6 +136,9 @@ export const services: Provider[] = [
   // Phase 4 Services
   EvvPunchService,
   EvvCorrectionService,
+
+  // Phase 5 Services
+  ShiftService,
 
   // Guards
   {

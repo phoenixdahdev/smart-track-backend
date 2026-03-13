@@ -85,6 +85,7 @@ src/
 6. Register in `base.service.ts` and `base.controller.ts`
 7. Register entity in `imports.ts` via `TypeOrmModule.forFeature([])`
 8. Write spec files alongside each file
+9. Update Postman collection in `docs/smarttrack-health-api.postman_collection.json` with every new endpoint
 
 ## Critical Rules — NEVER VIOLATE
 
@@ -179,3 +180,4 @@ Never include entity details, PHI, or internal state in error responses.
 - `progress.md` — Progress tracking
 - `agent.md` — Agent workflow configuration
 - `docs/` — Product specifications and reference materials
+- `docs/smarttrack-health-api.postman_collection.json` — Postman API collection (must be kept in sync with endpoints)

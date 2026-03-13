@@ -40,6 +40,15 @@ import { SupervisorEvvCorrectionController } from './supervisor-evv-correction.c
 // Phase 4 — Admin Console (EVV)
 import { AdminEvvPunchController } from './admin-evv-punch.controller';
 
+// Phase 5 — Staff Console (Scheduling)
+import { StaffShiftController } from './staff-shift.controller';
+
+// Phase 5 — Supervisor Console (Scheduling)
+import { SupervisorShiftController } from './supervisor-shift.controller';
+
+// Phase 5 — Admin Console (Scheduling)
+import { AdminShiftController } from './admin-shift.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -75,4 +84,10 @@ export const controllers: ModuleMetadata['controllers'] = [
   SupervisorEvvCorrectionController,
   // Phase 4 — Admin Console (EVV)
   AdminEvvPunchController,
+  // Phase 5 — Staff Console (Scheduling)
+  StaffShiftController,
+  // Phase 5 — Supervisor Console (Scheduling)
+  SupervisorShiftController,
+  // Phase 5 — Admin Console (Scheduling)
+  AdminShiftController,
 ];
