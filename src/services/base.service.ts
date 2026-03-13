@@ -36,6 +36,25 @@ import { EvvCorrectionService } from './evv-correction.service';
 // Phase 5 Services
 import { ShiftService } from './shift.service';
 
+// Phase 6A Services
+import { PayerConfigService } from './payer-config.service';
+import { ServiceCodeService } from './service-code.service';
+import { RateTableService } from './rate-table.service';
+import { ServiceAuthorizationService } from './service-authorization.service';
+import { IndividualPayerCoverageService } from './individual-payer-coverage.service';
+import { BillingQueueService } from './billing-queue.service';
+
+// Phase 6B Services
+import { ClaimService } from './claim.service';
+import { ClaimLineService } from './claim-line.service';
+import { ClaimMappingService } from './claim-mapping.service';
+import { ClaimValidationService } from './claim-validation.service';
+import { DenialHandlerService } from './denial-handler.service';
+
+// Phase 6C Services
+import { EdiGeneratorService } from './edi-generator.service';
+import { ClaimSubmissionService } from './claim-submission.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -72,6 +91,8 @@ import { ServiceAuthorizationDal } from '@dals/service-authorization.dal';
 import { ClaimDal } from '@dals/claim.dal';
 import { ClaimLineDal } from '@dals/claim-line.dal';
 import { ClaimSubmissionDal } from '@dals/claim-submission.dal';
+import { IndividualPayerCoverageDal } from '@dals/individual-payer-coverage.dal';
+import { ClaimStatusHistoryDal } from '@dals/claim-status-history.dal';
 
 // Phase 7 DALs
 import { RemittanceDal } from '@dals/remittance.dal';
@@ -140,6 +161,25 @@ export const services: Provider[] = [
   // Phase 5 Services
   ShiftService,
 
+  // Phase 6A Services
+  PayerConfigService,
+  ServiceCodeService,
+  RateTableService,
+  ServiceAuthorizationService,
+  IndividualPayerCoverageService,
+  BillingQueueService,
+
+  // Phase 6B Services
+  ClaimService,
+  ClaimLineService,
+  ClaimMappingService,
+  ClaimValidationService,
+  DenialHandlerService,
+
+  // Phase 6C Services
+  EdiGeneratorService,
+  ClaimSubmissionService,
+
   // Guards
   {
     provide: APP_GUARD,
@@ -200,6 +240,8 @@ export const services: Provider[] = [
   ClaimDal,
   ClaimLineDal,
   ClaimSubmissionDal,
+  IndividualPayerCoverageDal,
+  ClaimStatusHistoryDal,
 
   // Phase 7 DALs
   RemittanceDal,

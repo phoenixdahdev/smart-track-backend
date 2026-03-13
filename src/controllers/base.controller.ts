@@ -49,6 +49,28 @@ import { SupervisorShiftController } from './supervisor-shift.controller';
 // Phase 5 — Admin Console (Scheduling)
 import { AdminShiftController } from './admin-shift.controller';
 
+// Phase 6A — Admin Console (Billing Config)
+import { AdminPayerConfigController } from './admin-payer-config.controller';
+import { AdminServiceCodeController } from './admin-service-code.controller';
+import { AdminRateTableController } from './admin-rate-table.controller';
+import { AdminServiceAuthorizationController } from './admin-service-authorization.controller';
+import { AdminIndividualPayerCoverageController } from './admin-individual-payer-coverage.controller';
+
+// Phase 6A — Billing Console
+import { BillingServiceAuthorizationController } from './billing-service-authorization.controller';
+import { BillingIndividualPayerCoverageController } from './billing-individual-payer-coverage.controller';
+import { BillingQueueController } from './billing-queue.controller';
+
+// Phase 6B — Billing Console (Claims)
+import { BillingClaimController } from './billing-claim.controller';
+import { BillingClaimLineController } from './billing-claim-line.controller';
+
+// Phase 6B — Admin Console (Claims)
+import { AdminClaimController } from './admin-claim.controller';
+
+// Phase 6C — Billing Console (Submissions)
+import { BillingClaimSubmissionController } from './billing-claim-submission.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -90,4 +112,21 @@ export const controllers: ModuleMetadata['controllers'] = [
   SupervisorShiftController,
   // Phase 5 — Admin Console (Scheduling)
   AdminShiftController,
+  // Phase 6A — Admin Console (Billing Config)
+  AdminPayerConfigController,
+  AdminServiceCodeController,
+  AdminRateTableController,
+  AdminServiceAuthorizationController,
+  AdminIndividualPayerCoverageController,
+  // Phase 6A — Billing Console
+  BillingServiceAuthorizationController,
+  BillingIndividualPayerCoverageController,
+  BillingQueueController,
+  // Phase 6B — Billing Console (Claims)
+  BillingClaimController,
+  BillingClaimLineController,
+  // Phase 6B — Admin Console (Claims)
+  AdminClaimController,
+  // Phase 6C — Billing Console (Submissions)
+  BillingClaimSubmissionController,
 ];

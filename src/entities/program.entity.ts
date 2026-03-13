@@ -18,6 +18,9 @@ export class ProgramEntity extends TenantBaseEntity {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  billing_type: string | null;
+
   @ManyToOne(() => OrganizationEntity, (org) => org.programs)
   @JoinColumn({ name: 'org_id' })
   organization: OrganizationEntity;

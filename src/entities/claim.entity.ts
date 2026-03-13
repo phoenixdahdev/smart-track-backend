@@ -5,6 +5,8 @@ import { ClaimType } from '@enums/claim-type.enum';
 import { ServiceRecordEntity } from './service-record.entity';
 import { IndividualEntity } from './individual.entity';
 import { PayerConfigEntity } from './payer-config.entity';
+import { ServiceAuthorizationEntity } from './service-authorization.entity';
+import { UserEntity } from './user.entity';
 
 @Entity('claims')
 @Index(['service_record_id'])
@@ -63,6 +65,36 @@ export class ClaimEntity extends TenantBaseEntity {
   @Column({ type: 'uuid', nullable: true })
   original_claim_id: string | null;
 
+  @Column({ type: 'uuid', nullable: true })
+  service_authorization_id: string | null;
+
+  @Column({ type: 'uuid', nullable: true })
+  created_by: string | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  validation_errors: Record<string, any> | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  last_validated_at: Date | null;
+
+  @Column({ type: 'integer', default: 0 })
+  paid_amount_cents: number;
+
+  @Column({ type: 'integer', default: 0 })
+  patient_responsibility_cents: number;
+
+  @Column({ type: 'integer', default: 0 })
+  contractual_adj_cents: number;
+
+  @Column({ type: 'integer', default: 0 })
+  balance_cents: number;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  payer_claim_control_number: string | null;
+
+  @Column({ type: 'jsonb', default: '[]' })
+  denial_reason_codes: string[];
+
   @Column({ type: 'timestamp', nullable: true })
   submitted_at: Date | null;
 
@@ -84,4 +116,12 @@ export class ClaimEntity extends TenantBaseEntity {
   @ManyToOne(() => ClaimEntity)
   @JoinColumn({ name: 'original_claim_id' })
   original_claim: ClaimEntity;
+
+  @ManyToOne(() => ServiceAuthorizationEntity)
+  @JoinColumn({ name: 'service_authorization_id' })
+  service_authorization: ServiceAuthorizationEntity;
+
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'created_by' })
+  creator: UserEntity;
 }

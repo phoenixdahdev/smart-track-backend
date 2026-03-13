@@ -137,26 +137,26 @@
 
 ## Phase 6: Billing & Claims Engine
 
-**Status: Not Started (entities ready)**
+**Status: Complete (16/16)**
 
-| Task                                      | Status | Notes                                     |
-| ----------------------------------------- | ------ | ----------------------------------------- |
-| Billing queue (approved unbilled records) | [ ]    |                                           |
-| Service authorization management          | [ ]    | Entity + DAL created (three-bucket model) |
-| Authorization threshold alerts            | [ ]    |                                           |
-| Payer configuration module                | [ ]    | Entity + DAL created                      |
-| Rate tables module                        | [ ]    | Entity + DAL created                      |
-| Service codes module                      | [ ]    | Entity + DAL created (linked to global)   |
-| Claim generation (service record → claim) | [ ]    | claims entity + DAL created               |
-| Claim type determination (837P vs 837I)   | [ ]    | ClaimType enum ready                      |
-| 7-step mapping logic                      | [ ]    |                                           |
-| Pre-submission validation (13 checks)     | [ ]    |                                           |
-| EDI 837 generation                        | [ ]    | x12-parser / node-x12                     |
-| Clearinghouse integration                 | [ ]    | Provider TBD                              |
-| Claim submission tracking                 | [ ]    | Entity + DAL created                      |
-| 277 status response processing            | [ ]    |                                           |
-| Claim status lifecycle                    | [ ]    | ClaimStatus + transitions ready           |
-| Denial handling workflow                  | [ ]    |                                           |
+| Task                                      | Status | Notes                                                                                     |
+| ----------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| Payer configuration module                | [x]    | PayerConfigService + AdminPayerConfigController, CRUD + deactivate, copies from global    |
+| Service codes module                      | [x]    | ServiceCodeService + AdminServiceCodeController, CRUD + deactivate, copies from global    |
+| Rate tables module                        | [x]    | RateTableService + AdminRateTableController, CRUD + date-range lookup                     |
+| Service authorization management          | [x]    | ServiceAuthorizationService + billing/admin controllers, CRUD + void + unit tracking      |
+| Authorization threshold alerts            | [x]    | checkThresholds (80%, 95%, exceeded, expiring within 30 days)                             |
+| Individual payer coverage                 | [x]    | IndividualPayerCoverageService + admin/billing controllers, priority-ordered coverage      |
+| Billing queue (approved unbilled records) | [x]    | BillingQueueService + BillingQueueController, enriched queue items with coverage/auth info |
+| Claim generation (service record → claim) | [x]    | ClaimMappingService — 7-step mapping (payer, rate, auth, type, build, charge, history)    |
+| Claim type determination (837P vs 837I)   | [x]    | Program.billing_type + PayerConfig.config.claim_type_override                             |
+| Pre-submission validation (13 checks)     | [x]    | ClaimValidationService — 13 checks, validateAndStore persists results                     |
+| Claim status lifecycle                    | [x]    | ClaimService — state machine transitions, DRAFT-only edits, replacement claims            |
+| Claim line management                     | [x]    | ClaimLineService + BillingClaimLineController, DRAFT-only, auto line numbering            |
+| Denial handling workflow                  | [x]    | DenialHandlerService — categorize (7 CARC codes), appeal/write-off/correct-and-resubmit  |
+| EDI 837 generation                        | [x]    | EdiGeneratorService — clearinghouse JSON payload (V1), batch support. Raw X12 deferred V2 |
+| Claim submission tracking                 | [x]    | ClaimSubmissionService + BillingClaimSubmissionController, submit/batch/response tracking  |
+| 277 status response processing            | [x]    | recordResponse maps ACCEPTED→ACCEPTED_277, REJECTED→REJECTED_277, updates claim status    |
 
 ---
 
@@ -277,16 +277,18 @@
 | 3 - Service Documentation  | 10/10      | Complete — 3 consoles (staff/supervisor/clinical), 13 controllers, 8 services |
 | 4 - EVV                    | 7/7        | Complete — 3 consoles, GPS validation, correction workflow |
 | 5 - Scheduling             | 6/6        | Complete — 3 consoles, state machine, conflict detection |
-| 6 - Billing & Claims       | 0/16       | Entities ready                           |
+| 6 - Billing & Claims       | 16/16      | Complete — 10 services, 12 controllers, 21 DTOs, 304 new tests |
 | 7 - Payment Reconciliation | 0/8        | Entities ready                           |
 | 8 - SuperAdmin Console     | 0/14       | Entities ready                           |
 | 9 - Notifications          | 0/7        | Entities ready                           |
 | 10 - Guardian Portal       | 0/5        | Phase 3 completion                       |
 | 11 - Reporting             | 0/9        | Phases 6-8                               |
 | 12 - Hardening             | 0/10       | All phases                               |
-| **Total**                  | **54/123** |                                          |
+| **Total**                  | **70/123** |                                          |
 
-**Entity Layer Complete:** 47 entities, 23 enums (+MarResult), 47 DALs — all registered in imports.ts and base.service.ts. Build passes, 522 tests green across 65 suites.
+**Entity Layer Complete:** 49 entities (+IndividualPayerCoverage, ClaimStatusHistory), 23 enums, 49 DALs — all registered in imports.ts and base.service.ts. Build passes, 826 tests green across 90 suites.
+
+**Phase 6 (2026-03-13):** Billing & Claims Engine complete. Largest phase — 3 sub-phases (6A: Configuration, 6B: Claims Processing, 6C: EDI & Submission). 2 new entities (IndividualPayerCoverage, ClaimStatusHistory), 3 entity modifications (Claim: validation/payment fields, Program: billing_type, Organization: taxonomy_code). 10 services, 12 controllers (admin + billing consoles), 21 DTOs, 1 types file, 25 spec files, 1 migration. 304 new tests. V1 uses clearinghouse JSON payload (raw X12 EDI deferred to V2). Denial handling covers 7 CARC codes with appeal/write-off/correct-and-resubmit workflows.
 
 **Phase 5 (2026-03-13):** Scheduling complete. ShiftService + 3 controllers (staff/supervisor/admin), 4 DTOs, SHIFT_TRANSITIONS state machine (8 states, 10 transitions). Conflict detection (same staff + date + overlapping time, excludes terminal states). DRAFT-only editing, publish/cancel/accept/reject workflow with audit logging. 68 new tests (30 service + 38 controller). 20 Postman endpoints added.
 

@@ -49,6 +49,9 @@ export class OrganizationEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  taxonomy_code: string | null;
+
   @Column({ type: 'date', nullable: true })
   go_live_date: Date | null;
 

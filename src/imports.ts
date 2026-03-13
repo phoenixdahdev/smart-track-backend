@@ -41,6 +41,8 @@ import { ServiceAuthorizationEntity } from '@entities/service-authorization.enti
 import { ClaimEntity } from '@entities/claim.entity';
 import { ClaimLineEntity } from '@entities/claim-line.entity';
 import { ClaimSubmissionEntity } from '@entities/claim-submission.entity';
+import { IndividualPayerCoverageEntity } from '@entities/individual-payer-coverage.entity';
+import { ClaimStatusHistoryEntity } from '@entities/claim-status-history.entity';
 
 // Phase 7
 import { RemittanceEntity } from '@entities/remittance.entity';
@@ -118,6 +120,8 @@ export const imports: ModuleMetadata['imports'] = [
     ClaimEntity,
     ClaimLineEntity,
     ClaimSubmissionEntity,
+    IndividualPayerCoverageEntity,
+    ClaimStatusHistoryEntity,
 
     // Phase 7
     RemittanceEntity,
