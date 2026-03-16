@@ -39,6 +39,10 @@ import { EvvCorrectionService } from './evv-correction.service';
 // Phase 5 Services
 import { ShiftService } from './shift.service';
 
+// ADL Tracking Services
+import { AdlCategoryService } from './adl-category.service';
+import { AdlEntryService } from './adl-entry.service';
+
 // Phase 6A Services
 import { PayerConfigService } from './payer-config.service';
 import { ServiceCodeService } from './service-code.service';
@@ -78,6 +82,10 @@ import { IncidentDal } from '@dals/incident.dal';
 import { BehaviorPlanDal } from '@dals/behavior-plan.dal';
 import { MarEntryDal } from '@dals/mar-entry.dal';
 import { CorrectionRequestDal } from '@dals/correction-request.dal';
+
+// ADL Tracking DALs
+import { AdlCategoryDal } from '@dals/adl-category.dal';
+import { AdlEntryDal } from '@dals/adl-entry.dal';
 
 // Phase 4 DALs
 import { EvvPunchDal } from '@dals/evv-punch.dal';
@@ -166,6 +174,10 @@ export const services: Provider[] = [
   // Phase 5 Services
   ShiftService,
 
+  // ADL Tracking Services
+  AdlCategoryService,
+  AdlEntryService,
+
   // Phase 6A Services
   PayerConfigService,
   ServiceCodeService,
@@ -233,6 +245,10 @@ export const services: Provider[] = [
   BehaviorPlanDal,
   MarEntryDal,
   CorrectionRequestDal,
+
+  // ADL Tracking DALs
+  AdlCategoryDal,
+  AdlEntryDal,
 
   // Phase 4 DALs
   EvvPunchDal,

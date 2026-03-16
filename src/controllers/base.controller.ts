@@ -30,6 +30,18 @@ import { ClinicalBehaviorPlanController } from './clinical-behavior-plan.control
 import { AdminServiceRecordController } from './admin-service-record.controller';
 import { AdminIncidentController } from './admin-incident.controller';
 
+// ADL Tracking — Admin Console
+import { AdminAdlCategoryController } from './admin-adl-category.controller';
+
+// ADL Tracking — Staff Console
+import { StaffAdlEntryController } from './staff-adl-entry.controller';
+
+// ADL Tracking — Supervisor Console
+import { SupervisorAdlEntryController } from './supervisor-adl-entry.controller';
+
+// ADL Tracking — Clinical Console
+import { ClinicalAdlEntryController } from './clinical-adl-entry.controller';
+
 // Phase 4 — Staff Console (EVV)
 import { StaffEvvPunchController } from './staff-evv-punch.controller';
 import { StaffEvvCorrectionController } from './staff-evv-correction.controller';
@@ -100,6 +112,11 @@ export const controllers: ModuleMetadata['controllers'] = [
   // Phase 3 — Admin Console
   AdminServiceRecordController,
   AdminIncidentController,
+  // ADL Tracking
+  AdminAdlCategoryController,
+  StaffAdlEntryController,
+  SupervisorAdlEntryController,
+  ClinicalAdlEntryController,
   // Phase 4 — Staff Console (EVV)
   StaffEvvPunchController,
   StaffEvvCorrectionController,

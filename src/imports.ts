@@ -26,6 +26,10 @@ import { BehaviorPlanEntity } from '@entities/behavior-plan.entity';
 import { MarEntryEntity } from '@entities/mar-entry.entity';
 import { CorrectionRequestEntity } from '@entities/correction-request.entity';
 
+// ADL Tracking
+import { AdlCategoryEntity } from '@entities/adl-category.entity';
+import { AdlEntryEntity } from '@entities/adl-entry.entity';
+
 // Phase 4
 import { EvvPunchEntity } from '@entities/evv-punch.entity';
 import { EvvCorrectionEntity } from '@entities/evv-correction.entity';
@@ -104,6 +108,10 @@ export const imports: ModuleMetadata['imports'] = [
     BehaviorPlanEntity,
     MarEntryEntity,
     CorrectionRequestEntity,
+
+    // ADL Tracking
+    AdlCategoryEntity,
+    AdlEntryEntity,
 
     // Phase 4
     EvvPunchEntity,
