@@ -12,6 +12,7 @@ describe('ShiftService', () => {
   };
   let staffAssignmentDal: { get: jest.Mock };
   let auditLogService: { logAgencyAction: jest.Mock };
+  let notificationTriggerService: { onShiftPublished: jest.Mock; onShiftCancelled: jest.Mock };
 
   const mockShift = {
     id: 'shift-uuid',
@@ -50,11 +51,16 @@ describe('ShiftService', () => {
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
     };
+    notificationTriggerService = {
+      onShiftPublished: jest.fn().mockResolvedValue(undefined),
+      onShiftCancelled: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new ShiftService(
       shiftDal as never,
       staffAssignmentDal as never,
       auditLogService as never,
+      notificationTriggerService as never,
     );
   });
 

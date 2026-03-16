@@ -195,6 +195,11 @@
 			"key": "taskId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "notificationId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"auth": {
@@ -9001,6 +9006,1040 @@
 				}
 			],
 			"description": "SuperAdmin console — platform-level operations. Requires a platform operator JWT.\n\n## Operator Roles\n- **PLATFORM_ADMIN** — Full platform access\n- **ONBOARDING_SPECIALIST** — Application review & onboarding only\n\n## Key Concepts\n- **Applications** follow a state machine: SUBMITTED → UNDER_REVIEW → APPROVED | REJECTED → PROVISIONED\n- **Break Glass** provides audited emergency access to tenant data\n- **Global Service Codes / Payers** are platform-wide references that tenants map locally"
+		},
+		{
+			"name": "Admin > Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications?page=1&limit=20&type=AUTH_EXPIRING&read=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "type",
+									"value": "AUTH_EXPIRING",
+									"disabled": true
+								},
+								{
+									"key": "read",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList notifications for the current user with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/unread-count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet count of unread notifications for the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet notification preferences for the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_enabled\": true,\n  \"sms_enabled\": false,\n  \"in_app_enabled\": true,\n  \"preferences\": {\n    \"AUTH_EXPIRING\": { \"email\": true, \"sms\": false, \"in_app\": true },\n    \"REVIEW_OVERDUE\": { \"email\": true, \"sms\": false, \"in_app\": true }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate notification preferences.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email_enabled | boolean | No | Global email toggle |\n| sms_enabled | boolean | No | Global SMS toggle |\n| in_app_enabled | boolean | No | Global in-app toggle |\n| preferences | object | No | Per-type channel overrides |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"read\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/{{notificationId}}/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"{{notificationId}}",
+								"read"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nMark a specific notification as read or unread.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| read | boolean | Yes | true to mark read, false to mark unread |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"AUTH_EXPIRING\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/mark-all-read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"mark-all-read"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nMark all notifications as read, optionally filtered by type.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| type | string | No | Filter by notification type |"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"type\": \"AUTH_EXPIRING\",\n  \"title\": \"Authorization Expiring Soon\",\n  \"message\": \"Service authorization for individual will expire in 30 days.\",\n  \"entity_type\": \"service_authorization\",\n  \"entity_id\": \"{{serviceAuthorizationId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"create"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a notification for a specific user.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| user_id | UUID | Yes | Target user |\n| type | string | Yes | Notification type |\n| title | string | Yes | Notification title |\n| message | string | Yes | Notification body |\n| entity_type | string | No | Related entity type |\n| entity_id | UUID | No | Related entity ID |"
+					},
+					"response": []
+				},
+				{
+					"name": "Trigger Auth Threshold Check",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"authorization_id\": \"{{serviceAuthorizationId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/trigger/auth-thresholds",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"trigger",
+								"auth-thresholds"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nTrigger authorization threshold check. Scans authorizations nearing expiry or utilization limits and creates notifications.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| authorization_id | UUID | No | Check specific authorization only |"
+					},
+					"response": []
+				},
+				{
+					"name": "Trigger Review Reminders",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"overdue_hours\": 48\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/trigger/review-reminders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"trigger",
+								"review-reminders"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nTrigger review reminder notifications for overdue service records.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| overdue_hours | number | No | Hours threshold for overdue (default: 48) |"
+					},
+					"response": []
+				},
+				{
+					"name": "Cleanup Old Notifications",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/notifications/cleanup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"notifications",
+								"cleanup"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCleanup old read notifications beyond the retention period."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin notification management — list, read, preferences, triggers, and cleanup."
+		},
+		{
+			"name": "Billing > Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications?page=1&limit=20&type=CLAIM_STATUS_CHANGE&read=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "type",
+									"value": "CLAIM_STATUS_CHANGE",
+									"disabled": true
+								},
+								{
+									"key": "read",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nList notifications for the current billing user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications/unread-count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet count of unread notifications."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet notification preferences."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_enabled\": true,\n  \"sms_enabled\": false,\n  \"in_app_enabled\": true,\n  \"preferences\": {\n    \"CLAIM_STATUS_CHANGE\": { \"email\": true, \"sms\": false, \"in_app\": true },\n    \"ERA_RECEIVED\": { \"email\": true, \"sms\": false, \"in_app\": true }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nUpdate notification preferences.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email_enabled | boolean | No | Global email toggle |\n| sms_enabled | boolean | No | Global SMS toggle |\n| in_app_enabled | boolean | No | Global in-app toggle |\n| preferences | object | No | Per-type channel overrides |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"read\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications/{{notificationId}}/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications",
+								"{{notificationId}}",
+								"read"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nMark a specific notification as read or unread.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| read | boolean | Yes | true to mark read, false to mark unread |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"CLAIM_STATUS_CHANGE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications/mark-all-read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications",
+								"mark-all-read"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nMark all notifications as read, optionally filtered by type.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| type | string | No | Filter by notification type |"
+					},
+					"response": []
+				},
+				{
+					"name": "Trigger Auth Threshold Check",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"authorization_id\": \"{{serviceAuthorizationId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/billing/notifications/trigger/auth-thresholds",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"notifications",
+								"trigger",
+								"auth-thresholds"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nTrigger authorization threshold check for billing alerts.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| authorization_id | UUID | No | Check specific authorization only |"
+					},
+					"response": []
+				}
+			],
+			"description": "Billing notification management — list, read, preferences, and authorization threshold triggers."
+		},
+		{
+			"name": "Supervisor > Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications?page=1&limit=20&type=REVIEW_OVERDUE&read=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "type",
+									"value": "REVIEW_OVERDUE",
+									"disabled": true
+								},
+								{
+									"key": "read",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nList notifications for the current supervisor."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications/unread-count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nGet count of unread notifications."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nGet notification preferences."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_enabled\": true,\n  \"sms_enabled\": false,\n  \"in_app_enabled\": true,\n  \"preferences\": {\n    \"REVIEW_OVERDUE\": { \"email\": true, \"sms\": false, \"in_app\": true },\n    \"RECORD_SUBMITTED\": { \"email\": true, \"sms\": false, \"in_app\": true }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nUpdate notification preferences.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email_enabled | boolean | No | Global email toggle |\n| sms_enabled | boolean | No | Global SMS toggle |\n| in_app_enabled | boolean | No | Global in-app toggle |\n| preferences | object | No | Per-type channel overrides |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"read\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications/{{notificationId}}/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications",
+								"{{notificationId}}",
+								"read"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nMark a specific notification as read or unread.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| read | boolean | Yes | true to mark read, false to mark unread |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"REVIEW_OVERDUE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications/mark-all-read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications",
+								"mark-all-read"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nMark all notifications as read, optionally filtered by type.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| type | string | No | Filter by notification type |"
+					},
+					"response": []
+				},
+				{
+					"name": "Trigger Review Reminders",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"overdue_hours\": 48\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/notifications/trigger/review-reminders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"notifications",
+								"trigger",
+								"review-reminders"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nTrigger review reminder notifications for overdue service records.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| overdue_hours | number | No | Hours threshold for overdue (default: 48) |"
+					},
+					"response": []
+				}
+			],
+			"description": "Supervisor notification management — list, read, preferences, and review reminder triggers."
+		},
+		{
+			"name": "Staff > Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/notifications?page=1&limit=20&type=SHIFT_REMINDER&read=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "type",
+									"value": "SHIFT_REMINDER",
+									"disabled": true
+								},
+								{
+									"key": "read",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						},
+						"description": "**Roles:** DSP\n\nList notifications for the current staff member."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/notifications/unread-count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "**Roles:** DSP\n\nGet count of unread notifications."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** DSP\n\nGet notification preferences."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_enabled\": true,\n  \"sms_enabled\": true,\n  \"in_app_enabled\": true,\n  \"preferences\": {\n    \"SHIFT_REMINDER\": { \"email\": false, \"sms\": true, \"in_app\": true },\n    \"RECORD_REJECTED\": { \"email\": true, \"sms\": false, \"in_app\": true }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** DSP\n\nUpdate notification preferences.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email_enabled | boolean | No | Global email toggle |\n| sms_enabled | boolean | No | Global SMS toggle |\n| in_app_enabled | boolean | No | Global in-app toggle |\n| preferences | object | No | Per-type channel overrides |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"read\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/notifications/{{notificationId}}/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"notifications",
+								"{{notificationId}}",
+								"read"
+							]
+						},
+						"description": "**Roles:** DSP\n\nMark a specific notification as read or unread.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| read | boolean | Yes | true to mark read, false to mark unread |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"SHIFT_REMINDER\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/staff/notifications/mark-all-read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"notifications",
+								"mark-all-read"
+							]
+						},
+						"description": "**Roles:** DSP\n\nMark all notifications as read, optionally filtered by type.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| type | string | No | Filter by notification type |"
+					},
+					"response": []
+				}
+			],
+			"description": "Staff (DSP) notification management — list, read, and preferences."
+		},
+		{
+			"name": "Clinical > Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/notifications?page=1&limit=20&type=CARE_PLAN_UPDATE&read=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "type",
+									"value": "CARE_PLAN_UPDATE",
+									"disabled": true
+								},
+								{
+									"key": "read",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nList notifications for the current clinician."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/notifications/unread-count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"notifications",
+								"unread-count"
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nGet count of unread notifications."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nGet notification preferences."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_enabled\": true,\n  \"sms_enabled\": false,\n  \"in_app_enabled\": true,\n  \"preferences\": {\n    \"CARE_PLAN_UPDATE\": { \"email\": true, \"sms\": false, \"in_app\": true },\n    \"ASSESSMENT_DUE\": { \"email\": true, \"sms\": false, \"in_app\": true }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/notifications/preferences",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"notifications",
+								"preferences"
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nUpdate notification preferences.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email_enabled | boolean | No | Global email toggle |\n| sms_enabled | boolean | No | Global SMS toggle |\n| in_app_enabled | boolean | No | Global in-app toggle |\n| preferences | object | No | Per-type channel overrides |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"read\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/notifications/{{notificationId}}/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"notifications",
+								"{{notificationId}}",
+								"read"
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nMark a specific notification as read or unread.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| read | boolean | Yes | true to mark read, false to mark unread |"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"CARE_PLAN_UPDATE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clinical/notifications/mark-all-read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"notifications",
+								"mark-all-read"
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nMark all notifications as read, optionally filtered by type.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| type | string | No | Filter by notification type |"
+					},
+					"response": []
+				}
+			],
+			"description": "Clinical notification management — list, read, and preferences."
 		}
 	]
 }

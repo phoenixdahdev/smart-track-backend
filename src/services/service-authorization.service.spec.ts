@@ -13,6 +13,7 @@ describe('ServiceAuthorizationService', () => {
   let payerConfigDal: { get: jest.Mock };
   let serviceCodeDal: { get: jest.Mock };
   let auditLogService: { logAgencyAction: jest.Mock };
+  let notificationTriggerService: { onAuthUtilizationChanged: jest.Mock };
 
   const mockRecord = {
     id: 'sa-uuid',
@@ -52,12 +53,16 @@ describe('ServiceAuthorizationService', () => {
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
     };
+    notificationTriggerService = {
+      onAuthUtilizationChanged: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new ServiceAuthorizationService(
       serviceAuthorizationDal as never,
       payerConfigDal as never,
       serviceCodeDal as never,
       auditLogService as never,
+      notificationTriggerService as never,
     );
   });
 

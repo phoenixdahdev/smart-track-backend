@@ -123,6 +123,36 @@ export class EmailService {
     }
   }
 
+  async sendNotification(
+    to: string,
+    name: string,
+    title: string,
+    message: string,
+  ): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn('Email skipped — Resend client is not configured');
+      return;
+    }
+
+    try {
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to,
+        subject: `SmartTrack - ${title}`,
+        html: `
+          <h2>${this.escapeHtml(title)}</h2>
+          <p>Hi ${this.escapeHtml(name)},</p>
+          <p>${this.escapeHtml(message)}</p>
+          <hr />
+          <p style="color: #888; font-size: 12px;">You received this notification from SmartTrack Health. Manage your notification preferences in your account settings.</p>
+        `,
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to send notification email to ${to}: ${msg}`);
+    }
+  }
+
   private escapeHtml(text: string): string {
     return text
       .replace(/&/g, '&amp;')

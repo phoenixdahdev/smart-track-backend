@@ -162,18 +162,18 @@
 
 ## Phase 7: Payment Reconciliation
 
-**Status: Not Started (entities ready)**
+**Status: Complete (8/8)**
 
-| Task                          | Status | Notes                            |
-| ----------------------------- | ------ | -------------------------------- |
-| 835 ERA file ingestion        | [ ]    | remittances entity + DAL created |
-| ERA parsing                   | [ ]    |                                  |
-| 4-priority matching algorithm | [ ]    | MatchingMethod enum ready        |
-| Payment posting module        | [ ]    | Entity + DAL created             |
-| Adjustment processing         | [ ]    | Entity + DAL created             |
-| EFT reconciliation            | [ ]    |                                  |
-| AR aging reports              | [ ]    |                                  |
-| Financial dashboard endpoints | [ ]    |                                  |
+| Task                          | Status | Notes                                                                     |
+| ----------------------------- | ------ | ------------------------------------------------------------------------- |
+| 835 ERA file ingestion        | [x]    | RemittanceService.ingestEra() — creates remittance + payment posts        |
+| ERA parsing                   | [x]    | IngestEraDto with nested EraClaimPaymentDto/EraAdjustmentDto              |
+| 4-priority matching algorithm | [x]    | CLAIM_ID → PAYER_CONTROL_NUM → SERVICE_DATE_MEMBER → MANUAL (confidence)  |
+| Payment posting module        | [x]    | PaymentPostingService — applies payments, updates claim balances/status   |
+| Adjustment processing         | [x]    | CAS group code mapping (CO→CONTRACTUAL, PR→PATIENT, OA→OTHER, PI→PAYER)  |
+| EFT reconciliation            | [x]    | ArReportService.getEftReconciliation() — EFT total vs posted variance    |
+| AR aging reports              | [x]    | 5 aging buckets (0-30, 31-60, 61-90, 91-120, 120+)                       |
+| Financial dashboard endpoints | [x]    | 4 reports: AR aging, EFT reconciliation, financial dashboard, payer perf  |
 
 ---
 
@@ -202,17 +202,17 @@
 
 ## Phase 9: Notification Engine
 
-**Status: Not Started (entities ready)**
+**Status: Complete (7/7)**
 
-| Task                        | Status | Notes                                                            |
-| --------------------------- | ------ | ---------------------------------------------------------------- |
-| Notification service        | [ ]    | notifications + notification_preferences entities + DALs created |
-| Auth threshold alerts       | [ ]    |                                                                  |
-| Claim status notifications  | [ ]    |                                                                  |
-| Supervisor review reminders | [ ]    |                                                                  |
-| Shift notifications         | [ ]    |                                                                  |
-| Onboarding status updates   | [ ]    |                                                                  |
-| Break-glass notifications   | [ ]    |                                                                  |
+| Task                        | Status | Notes                                                                                   |
+| --------------------------- | ------ | --------------------------------------------------------------------------------------- |
+| Notification service        | [x]    | NotificationService, NotificationPreferenceService, NotificationDispatchService + specs |
+| Auth threshold alerts       | [x]    | 80%/95%/100% usage + 30d/7d/1d/expired expiry alerts with 24h dedup                    |
+| Claim status notifications  | [x]    | Fire-and-forget hook in ClaimService.transitionStatus()                                 |
+| Supervisor review reminders | [x]    | Manual trigger endpoint, checks PENDING_REVIEW > N hours                                |
+| Shift notifications         | [x]    | Hooks in ShiftService.publish() and cancel()                                            |
+| Onboarding status updates   | [x]    | Hooks in OnboardingService.completeTask() and completeChecklist()                       |
+| Break-glass notifications   | [x]    | Hooks in BreakGlassService.request() and approve()                                     |
 
 ---
 
@@ -278,13 +278,15 @@
 | 4 - EVV                    | 7/7        | Complete — 3 consoles, GPS validation, correction workflow |
 | 5 - Scheduling             | 6/6        | Complete — 3 consoles, state machine, conflict detection |
 | 6 - Billing & Claims       | 16/16      | Complete — 10 services, 12 controllers, 21 DTOs, 304 new tests |
-| 7 - Payment Reconciliation | 0/8        | Entities ready                           |
-| 8 - SuperAdmin Console     | 0/14       | Entities ready                           |
-| 9 - Notifications          | 0/7        | Entities ready                           |
+| 7 - Payment Reconciliation | 8/8        | Complete — ERA ingestion, matching, posting, AR reports |
+| 8 - SuperAdmin Console     | 14/14      | Complete — 10 services, 10 controllers, platform dashboard |
+| 9 - Notifications          | 7/7        | Complete — 4 services, 5 controllers, 5 integration hooks |
 | 10 - Guardian Portal       | 0/5        | Phase 3 completion                       |
 | 11 - Reporting             | 0/9        | Phases 6-8                               |
 | 12 - Hardening             | 0/10       | All phases                               |
-| **Total**                  | **70/123** |                                          |
+| **Total**                  | **99/123** |                                          |
+
+**Phase 9 (2026-03-16):** Notification Engine complete. Multi-channel dispatch (in-app + email via Resend, SMS stubbed). 4 services (NotificationService, NotificationPreferenceService, NotificationDispatchService, NotificationTriggerService), 5 controllers (admin/billing/supervisor/staff/clinical), 7 DTOs, 1 types file, 9 spec files. 5 existing services modified with fire-and-forget hooks (claim, shift, service-authorization, onboarding, break-glass). Auth threshold alerts (80%/95%/100% + expiry 30d/7d/1d) with 24h dedup. Preference-respecting dispatch (channel toggles + per-type JSONB overrides). Manual trigger endpoints for auth thresholds and review reminders. 107 new tests (1327 total, 138 suites). 36 Postman endpoints added.
 
 **Entity Layer Complete:** 49 entities (+IndividualPayerCoverage, ClaimStatusHistory), 23 enums, 49 DALs — all registered in imports.ts and base.service.ts. Build passes, 826 tests green across 90 suites.
 

@@ -7,12 +7,14 @@ import { BreakGlassSessionDal } from '@dals/break-glass-session.dal';
 import { AuditLogService } from './audit-log.service';
 import { type RequestBreakGlassDto } from '@dtos/request-break-glass.dto';
 import { type PaginationValidator } from '@utils/pagination-utils';
+import { NotificationTriggerService } from './notification-trigger.service';
 
 @Injectable()
 export class BreakGlassService {
   constructor(
     private readonly sessionDal: BreakGlassSessionDal,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   async request(
@@ -43,6 +45,10 @@ export class BreakGlassService {
       ip_address: ip,
       user_agent: ua,
     });
+
+    this.notificationTriggerService
+      .onBreakGlassRequested(dto.org_id, session.id)
+      .catch(() => {});
 
     return session;
   }
@@ -83,6 +89,10 @@ export class BreakGlassService {
       ip_address: ip,
       user_agent: ua,
     });
+
+    this.notificationTriggerService
+      .onBreakGlassApproved(session.org_id, sessionId)
+      .catch(() => {});
 
     return updated;
   }

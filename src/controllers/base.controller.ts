@@ -105,6 +105,13 @@ import { SuperadminBreakGlassController } from './superadmin-break-glass.control
 import { SuperadminAuditLogController } from './superadmin-audit-log.controller';
 import { SuperadminDashboardController } from './superadmin-dashboard.controller';
 
+// Phase 9 — Notifications
+import { AdminNotificationController } from './admin-notification.controller';
+import { BillingNotificationController } from './billing-notification.controller';
+import { SupervisorNotificationController } from './supervisor-notification.controller';
+import { StaffNotificationController } from './staff-notification.controller';
+import { ClinicalNotificationController } from './clinical-notification.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -187,4 +194,10 @@ export const controllers: ModuleMetadata['controllers'] = [
   SuperadminBreakGlassController,
   SuperadminAuditLogController,
   SuperadminDashboardController,
+  // Phase 9 — Notifications
+  AdminNotificationController,
+  BillingNotificationController,
+  SupervisorNotificationController,
+  StaffNotificationController,
+  ClinicalNotificationController,
 ];

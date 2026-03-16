@@ -80,6 +80,12 @@ import { GlobalPayerService } from './global-payer.service';
 import { SubscriptionManagementService } from './subscription-management.service';
 import { BreakGlassService } from './break-glass.service';
 
+// Phase 9 Services
+import { NotificationService } from './notification.service';
+import { NotificationPreferenceService } from './notification-preference.service';
+import { NotificationDispatchService } from './notification-dispatch.service';
+import { NotificationTriggerService } from './notification-trigger.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -232,6 +238,12 @@ export const services: Provider[] = [
   GlobalPayerService,
   SubscriptionManagementService,
   BreakGlassService,
+
+  // Phase 9 Services
+  NotificationService,
+  NotificationPreferenceService,
+  NotificationDispatchService,
+  NotificationTriggerService,
 
   // Guards
   {

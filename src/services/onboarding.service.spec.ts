@@ -8,6 +8,10 @@ describe('OnboardingService', () => {
   let checklistDal: { get: jest.Mock; create: jest.Mock; update: jest.Mock };
   let taskDal: { get: jest.Mock; find: jest.Mock; create: jest.Mock; update: jest.Mock };
   let auditLogService: { logPlatformAction: jest.Mock };
+  let notificationTriggerService: {
+    onOnboardingTaskCompleted: jest.Mock;
+    onOnboardingCompleted: jest.Mock;
+  };
 
   const mockChecklist = {
     id: 'checklist-uuid',
@@ -42,11 +46,16 @@ describe('OnboardingService', () => {
       update: jest.fn().mockResolvedValue({ ...mockTask, status: OnboardingTaskStatus.COMPLETED }),
     };
     auditLogService = { logPlatformAction: jest.fn().mockResolvedValue(undefined) };
+    notificationTriggerService = {
+      onOnboardingTaskCompleted: jest.fn().mockResolvedValue(undefined),
+      onOnboardingCompleted: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new OnboardingService(
       checklistDal as never,
       taskDal as never,
       auditLogService as never,
+      notificationTriggerService as never,
     );
   });
 

@@ -43,6 +43,33 @@ describe('EmailService', () => {
     ).resolves.not.toThrow();
   });
 
+  it('should send notification email without throwing', async () => {
+    await expect(
+      service.sendNotification(
+        'user@test.com',
+        'Test User',
+        'Auth Threshold Alert',
+        'Authorization is at 80% utilization',
+      ),
+    ).resolves.not.toThrow();
+  });
+
+  it('should gracefully skip notification email when resend not configured', async () => {
+    const configService = {
+      get: jest.fn().mockReturnValue(''),
+    } as unknown as ConfigService;
+    const svc = new EmailService(configService);
+
+    await expect(
+      svc.sendNotification(
+        'user@test.com',
+        'Test',
+        'Test Title',
+        'Test message',
+      ),
+    ).resolves.not.toThrow();
+  });
+
   it('should not throw when resend fails', async () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Resend } = require('resend') as { Resend: jest.Mock };

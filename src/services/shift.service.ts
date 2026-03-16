@@ -12,6 +12,7 @@ import { type ShiftEntity } from '@entities/shift.entity';
 import { ShiftStatus, SHIFT_TRANSITIONS } from '@enums/shift-status.enum';
 import { validateTransition } from '@utils/state-machine';
 import { type PaginationValidator } from '@utils/pagination-utils';
+import { NotificationTriggerService } from './notification-trigger.service';
 
 @Injectable()
 export class ShiftService {
@@ -19,6 +20,7 @@ export class ShiftService {
     private readonly shiftDal: ShiftDal,
     private readonly staffAssignmentDal: StaffAssignmentDal,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   async create(
@@ -242,6 +244,10 @@ export class ShiftService {
       user_agent: userAgent,
     });
 
+    this.notificationTriggerService
+      .onShiftPublished(orgId, id, shift.staff_id)
+      .catch(() => {});
+
     return updated;
   }
 
@@ -278,6 +284,10 @@ export class ShiftService {
       ip_address: ip,
       user_agent: userAgent,
     });
+
+    this.notificationTriggerService
+      .onShiftCancelled(orgId, id, shift.staff_id)
+      .catch(() => {});
 
     return updated;
   }

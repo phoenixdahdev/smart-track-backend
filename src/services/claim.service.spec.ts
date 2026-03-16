@@ -10,6 +10,7 @@ describe('ClaimService', () => {
   let claimValidationService: { validateAndStore: jest.Mock };
   let serviceAuthorizationService: { findAuthForBilling: jest.Mock };
   let auditLogService: { logAgencyAction: jest.Mock };
+  let notificationTriggerService: { onClaimStatusChanged: jest.Mock };
 
   const mockClaim = {
     id: 'claim-uuid',
@@ -95,6 +96,9 @@ describe('ClaimService', () => {
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
     };
+    notificationTriggerService = {
+      onClaimStatusChanged: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new ClaimService(
       claimDal as never,
@@ -103,6 +107,7 @@ describe('ClaimService', () => {
       claimValidationService as never,
       serviceAuthorizationService as never,
       auditLogService as never,
+      notificationTriggerService as never,
     );
   });
 

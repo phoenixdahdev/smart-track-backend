@@ -13,6 +13,7 @@ import { type UpdateClaimDto } from '@dtos/update-claim.dto';
 import { type PaginationValidator } from '@utils/pagination-utils';
 import { ClaimStatus, CLAIM_TRANSITIONS } from '@enums/claim-status.enum';
 import { validateTransition } from '@utils/state-machine';
+import { NotificationTriggerService } from './notification-trigger.service';
 
 @Injectable()
 export class ClaimService {
@@ -23,6 +24,7 @@ export class ClaimService {
     private readonly claimValidationService: ClaimValidationService,
     private readonly serviceAuthorizationService: ServiceAuthorizationService,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   async findById(id: string, orgId: string) {
@@ -160,6 +162,10 @@ export class ClaimService {
       ip_address: ip,
       user_agent: userAgent,
     });
+
+    this.notificationTriggerService
+      .onClaimStatusChanged(orgId, id, claim.status, newStatus)
+      .catch(() => {});
 
     return updated;
   }

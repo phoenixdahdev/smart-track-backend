@@ -11,6 +11,7 @@ import { type CreateServiceAuthorizationDto } from '@dtos/create-service-authori
 import { type UpdateServiceAuthorizationDto } from '@dtos/update-service-authorization.dto';
 import { type PaginationValidator } from '@utils/pagination-utils';
 import { AuthorizationStatus } from '@enums/authorization-status.enum';
+import { NotificationTriggerService } from './notification-trigger.service';
 
 @Injectable()
 export class ServiceAuthorizationService {
@@ -19,6 +20,7 @@ export class ServiceAuthorizationService {
     private readonly payerConfigDal: PayerConfigDal,
     private readonly serviceCodeDal: ServiceCodeDal,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   async create(
@@ -147,6 +149,10 @@ export class ServiceAuthorizationService {
       ip_address: ip,
       user_agent: userAgent,
     });
+
+    this.notificationTriggerService
+      .onAuthUtilizationChanged(orgId, id)
+      .catch(() => {});
 
     return updated;
   }

@@ -8,6 +8,7 @@ import { OnboardingTaskDal } from '@dals/onboarding-task.dal';
 import { AuditLogService } from './audit-log.service';
 import { OnboardingStatus } from '@enums/onboarding-status.enum';
 import { OnboardingTaskStatus } from '@enums/onboarding-task-status.enum';
+import { NotificationTriggerService } from './notification-trigger.service';
 
 const STANDARD_TASKS = [
   { task_key: 'configure_org', task_name: 'Configure Organization Profile' },
@@ -28,6 +29,7 @@ export class OnboardingService {
     private readonly checklistDal: OnboardingChecklistDal,
     private readonly taskDal: OnboardingTaskDal,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   async getChecklist(orgId: string) {
@@ -160,6 +162,12 @@ export class OnboardingService {
       user_agent: ua,
     });
 
+    if (checklist?.org_id) {
+      this.notificationTriggerService
+        .onOnboardingTaskCompleted(checklist.org_id, taskId)
+        .catch(() => {});
+    }
+
     return updated;
   }
 
@@ -255,6 +263,12 @@ export class OnboardingService {
       ip_address: ip,
       user_agent: ua,
     });
+
+    if (checklist.org_id) {
+      this.notificationTriggerService
+        .onOnboardingCompleted(checklist.org_id, checklistId)
+        .catch(() => {});
+    }
 
     return updated;
   }

@@ -5,6 +5,10 @@ describe('BreakGlassService', () => {
   let service: BreakGlassService;
   let sessionDal: { get: jest.Mock; find: jest.Mock; create: jest.Mock; update: jest.Mock };
   let auditLogService: { logPlatformAction: jest.Mock };
+  let notificationTriggerService: {
+    onBreakGlassRequested: jest.Mock;
+    onBreakGlassApproved: jest.Mock;
+  };
 
   const mockSession = {
     id: 'session-uuid',
@@ -28,8 +32,16 @@ describe('BreakGlassService', () => {
       update: jest.fn().mockResolvedValue(mockSession),
     };
     auditLogService = { logPlatformAction: jest.fn().mockResolvedValue(undefined) };
+    notificationTriggerService = {
+      onBreakGlassRequested: jest.fn().mockResolvedValue(undefined),
+      onBreakGlassApproved: jest.fn().mockResolvedValue(undefined),
+    };
 
-    service = new BreakGlassService(sessionDal as never, auditLogService as never);
+    service = new BreakGlassService(
+      sessionDal as never,
+      auditLogService as never,
+      notificationTriggerService as never,
+    );
   });
 
   it('should be defined', () => {
