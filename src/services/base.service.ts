@@ -62,6 +62,12 @@ import { DenialHandlerService } from './denial-handler.service';
 import { EdiGeneratorService } from './edi-generator.service';
 import { ClaimSubmissionService } from './claim-submission.service';
 
+// Phase 7 Services
+import { RemittanceService } from './remittance.service';
+import { PaymentMatchingService } from './payment-matching.service';
+import { PaymentPostingService } from './payment-posting.service';
+import { ArReportService } from './ar-report.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -196,6 +202,12 @@ export const services: Provider[] = [
   // Phase 6C Services
   EdiGeneratorService,
   ClaimSubmissionService,
+
+  // Phase 7 Services
+  RemittanceService,
+  PaymentMatchingService,
+  PaymentPostingService,
+  ArReportService,
 
   // Guards
   {

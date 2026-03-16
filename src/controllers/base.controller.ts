@@ -84,6 +84,15 @@ import { AdminClaimController } from './admin-claim.controller';
 // Phase 6C — Billing Console (Submissions)
 import { BillingClaimSubmissionController } from './billing-claim-submission.controller';
 
+// Phase 7 — Billing Console (Payment Reconciliation)
+import { BillingRemittanceController } from './billing-remittance.controller';
+import { BillingPaymentPostController } from './billing-payment-post.controller';
+import { BillingAdjustmentController } from './billing-adjustment.controller';
+import { BillingArReportController } from './billing-ar-report.controller';
+
+// Phase 7 — Admin Console (Remittances)
+import { AdminRemittanceController } from './admin-remittance.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -148,4 +157,11 @@ export const controllers: ModuleMetadata['controllers'] = [
   AdminClaimController,
   // Phase 6C — Billing Console (Submissions)
   BillingClaimSubmissionController,
+  // Phase 7 — Billing Console (Payment Reconciliation)
+  BillingRemittanceController,
+  BillingPaymentPostController,
+  BillingAdjustmentController,
+  BillingArReportController,
+  // Phase 7 — Admin Console (Remittances)
+  AdminRemittanceController,
 ];

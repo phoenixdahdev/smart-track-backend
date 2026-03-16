@@ -1,0 +1,861 @@
+{
+  "project": {
+    "name": "SmartTrack Health",
+    "description": "Enterprise HIPAA-compliant care documentation and billing platform for IDD (Intellectual and Developmental Disabilities) service providers",
+    "version": "0.0.1",
+    "license": "UNLICENSED",
+    "repository": "github.com/phoenixdahdev/smarttrack",
+    "last_updated": "2026-03-14"
+  },
+  "tech_stack": {
+    "runtime": "Node.js + TypeScript 5.9",
+    "framework": "NestJS 11",
+    "database": "PostgreSQL with Row-Level Security (RLS)",
+    "orm": "TypeORM 0.3.28 (AbstractModelAction + DAL pattern)",
+    "auth": "Local JWT (HS256) + bcrypt 6.0 + Google OAuth ID token",
+    "package_manager": "pnpm",
+    "testing": "Jest 30 + Supertest 7",
+    "linting": "ESLint 10 (flat config) + Prettier 3.8",
+    "api_docs": "Swagger/OpenAPI (@nestjs/swagger 11)",
+    "email": "Resend SDK 6.9",
+    "security": ["Helmet 8", "CORS", "Compression", "AES-256-GCM field-level encryption"]
+  },
+  "architecture": {
+    "pattern": "Flat (Single AppModule, NO NestJS feature modules)",
+    "registries": {
+      "controllers": "src/controllers/base.controller.ts",
+      "services": "src/services/base.service.ts",
+      "modules": "src/imports.ts"
+    },
+    "consoles": [
+      { "name": "SuperAdmin", "route_prefix": "/api/v1/superadmin", "status": "not_started", "users": "Platform operators" },
+      { "name": "Admin/Provider", "route_prefix": "/api/v1/admin", "status": "active", "users": "Agency owners, administrators" },
+      { "name": "Supervisor", "route_prefix": "/api/v1/supervisor", "status": "active", "users": "Program supervisors, managers" },
+      { "name": "Staff/DSP", "route_prefix": "/api/v1/staff", "status": "active", "users": "Direct Support Professionals" },
+      { "name": "Clinician", "route_prefix": "/api/v1/clinical", "status": "active", "users": "Clinical staff (BTP, assessments)" },
+      { "name": "Billing", "route_prefix": "/api/v1/billing", "status": "active", "users": "Billing specialists, finance managers" },
+      { "name": "Guardian Portal", "route_prefix": "/api/v1/portal", "status": "not_started", "users": "Individuals, guardians (read-only)" }
+    ],
+    "path_aliases": [
+      "@controllers/*", "@services/*", "@dals/*", "@entities/*", "@enums/*",
+      "@utils/*", "@decorators/*", "@guards/*", "@interceptors/*", "@exceptions/*",
+      "@dtos/*", "@database/*", "@app-types/*"
+    ]
+  },
+  "codebase_stats": {
+    "source_lines": 12044,
+    "test_lines": 14321,
+    "total_lines": 26365,
+    "test_count": 826,
+    "test_suites": 90,
+    "entities": 51,
+    "dals": 49,
+    "services": 37,
+    "controllers": 42,
+    "dtos": 68,
+    "enums": 27,
+    "guards": 3,
+    "interceptors": 2,
+    "decorators": 5,
+    "utils": 6,
+    "types": 4,
+    "migrations": 5,
+    "spec_files": 90
+  },
+  "progress": {
+    "overall": {
+      "tasks_completed": 70,
+      "tasks_total": 123,
+      "percentage": 56.9,
+      "phases_completed": 7,
+      "phases_total": 13
+    }
+  },
+  "phases": [
+    {
+      "id": 0,
+      "name": "Project Foundation",
+      "status": "complete",
+      "progress": "20/21",
+      "tasks": [
+        { "name": "Initialize NestJS project", "status": "complete", "notes": "NestJS 11, pnpm, TypeScript" },
+        { "name": "ESLint + Prettier config", "status": "complete", "notes": "Flat config, single quotes, trailing commas" },
+        { "name": "TypeScript config", "status": "complete", "notes": "Path aliases, strictNullChecks, decorators" },
+        { "name": "PostgreSQL connection (TypeORM)", "status": "complete", "notes": "DatabaseModule, data-source.ts, AbstractModelAction + DAL pattern" },
+        { "name": "Environment config module", "status": "complete", "notes": "@nestjs/config (global) + .env.example" },
+        { "name": "Database migrations infrastructure", "status": "complete", "notes": "TypeORM CLI scripts (generate, run, revert)" },
+        { "name": "Flat architecture setup", "status": "complete", "notes": "controllers/, services/, dals/, entities/, decorators/, guards/, interceptors/, exceptions/" },
+        { "name": "Response interceptor", "status": "complete", "notes": "Standard envelope, camelToSnake, PHI field stripping" },
+        { "name": "Exception filter", "status": "complete", "notes": "AllExceptionsFilter — PHI-safe error responses" },
+        { "name": "Guards (JWT + Roles)", "status": "complete", "notes": "JwtAuthGuard, RolesGuard with @Public/@Roles decorators" },
+        { "name": "Decorators", "status": "complete", "notes": "@CurrentUser, @Roles, @Public, @PrivateFields, @SkipResponseInterceptor" },
+        { "name": "Enums + state machines", "status": "complete", "notes": "PlatformRole, AgencyRole, ServiceRecordStatus, ClaimStatus + transitions" },
+        { "name": "Base entities", "status": "complete", "notes": "BaseEntity (UUID+timestamps), TenantBaseEntity (adds org_id)" },
+        { "name": "Utils", "status": "complete", "notes": "camelToSnake, pagination, responseFormatter, validateTransition" },
+        { "name": "Security middleware (CORS, helmet, compression)", "status": "complete", "notes": "main.ts bootstrap" },
+        { "name": "Swagger/OpenAPI", "status": "complete", "notes": "/api/docs" },
+        { "name": "ValidationPipe", "status": "complete", "notes": "Global with whitelist + transform" },
+        { "name": "Test infrastructure + specs", "status": "complete", "notes": "84 initial tests, 11 suites" },
+        { "name": "CI/CD pipeline", "status": "not_started", "notes": "Deferred" },
+        { "name": "Project documentation", "status": "complete", "notes": "CLAUDE.md, plan.md, agent.md, progress.md" },
+        { "name": "Complete entity layer", "status": "complete", "notes": "47 entities, 22 enums, 47 DALs — all phases scaffolded" }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Authentication & Multi-Tenancy",
+      "status": "complete",
+      "progress": "11/11",
+      "tasks": [
+        { "name": "Auth module (JWT + refresh)", "status": "complete", "notes": "Local HS256 JWT, bcrypt passwords, Google OAuth ID token signin" },
+        { "name": "Signup / Signin routes", "status": "complete", "notes": "POST signup, POST signin, POST signin/google, POST refresh" },
+        { "name": "MFA support (TOTP + FIDO2)", "status": "complete", "notes": "mfa_enabled/mfa_type on UserEntity for display, enforcement deferred" },
+        { "name": "Organizations table", "status": "complete", "notes": "Entity + DAL created" },
+        { "name": "RLS policies", "status": "complete", "notes": "Migration for 29 tenant tables, append-only audit_logs" },
+        { "name": "Tenant context middleware", "status": "complete", "notes": "TenantContextInterceptor — SET LOCAL app.current_org_id per request" },
+        { "name": "RBAC guard decorators", "status": "complete", "notes": "@Roles(), @Permissions() + PermissionsGuard" },
+        { "name": "Sub-permissions model", "status": "complete", "notes": "SubPermissionsService + PermissionsGuard (APP_GUARD)" },
+        { "name": "Session management", "status": "complete", "notes": "AuthService.getSession(), session_timeout on AuthenticatedUser" },
+        { "name": "Audit log module", "status": "complete", "notes": "AuditLogService — agency + platform, PHI stripped, never throws" },
+        { "name": "Encryption service (AES-256)", "status": "complete", "notes": "AES-256-GCM, random IV, iv:authTag:ciphertext format" }
+      ],
+      "auth_routes": [
+        "POST /api/v1/auth/signup",
+        "POST /api/v1/auth/verify-email",
+        "POST /api/v1/auth/resend-otp",
+        "POST /api/v1/auth/signin",
+        "POST /api/v1/auth/signin/google",
+        "GET  /api/v1/auth/me",
+        "GET  /api/v1/auth/session",
+        "POST /api/v1/auth/forgot-password",
+        "POST /api/v1/auth/reset-password",
+        "POST /api/v1/auth/signout",
+        "POST /api/v1/auth/refresh"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Core Entity Layer",
+      "status": "complete",
+      "progress": "9/9",
+      "tasks": [
+        { "name": "Users module", "status": "complete", "notes": "UserService + UserController, full CRUD, role assignment, sub-permissions, deactivate" },
+        { "name": "Organizations module", "status": "complete", "notes": "OrganizationService + OrganizationController — create/get/update" },
+        { "name": "Programs module", "status": "complete", "notes": "ProgramService + ProgramController, org-scoped CRUD" },
+        { "name": "Sites module", "status": "complete", "notes": "SiteService + SiteController, program-scoped + org list" },
+        { "name": "Individuals module", "status": "complete", "notes": "IndividualService + IndividualController, PHI fields encrypted (SSN, DOB, medicaid_id, etc.)" },
+        { "name": "Staff assignments module", "status": "complete", "notes": "StaffAssignmentService + StaffAssignmentController, by-individual / by-staff listing" },
+        { "name": "Console-scoped API routing", "status": "complete", "notes": "/api/v1/admin/{resource} — @Roles enforced at controller level" },
+        { "name": "Permission matrix enforcement", "status": "complete", "notes": "@Roles(AGENCY_OWNER, ADMIN) on admin routes" },
+        { "name": "Seed data / dev fixtures", "status": "complete", "notes": "src/database/seeds/dev.seed.ts — org, users, program, site, individual" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Service Documentation",
+      "status": "complete",
+      "progress": "10/10",
+      "new_tests": 116,
+      "tasks": [
+        { "name": "Service records module", "status": "complete", "notes": "ServiceRecordService + 3 controllers (staff/supervisor/admin), state machine, staff ownership" },
+        { "name": "Daily notes module", "status": "complete", "notes": "DailyNoteService + StaffDailyNoteController, nested under service records, PHI encrypted" },
+        { "name": "ISP goals module", "status": "complete", "notes": "IspGoalService + ClinicalIspGoalController, PHI encrypted (description)" },
+        { "name": "ISP data points module", "status": "complete", "notes": "IspDataPointService + StaffIspDataPointController, goal validation" },
+        { "name": "Incident reporting module", "status": "complete", "notes": "IncidentService + 3 controllers (staff/supervisor/admin), INCIDENT_TRANSITIONS state machine" },
+        { "name": "BTP module (Clinician)", "status": "complete", "notes": "BehaviorPlanService + ClinicalBehaviorPlanController, versioning, PHI encrypted" },
+        { "name": "MAR module", "status": "complete", "notes": "MarEntryService + StaffMarEntryController, MarResult enum, PHI encrypted (drug_name/dose/route)" },
+        { "name": "Supervisor review queue", "status": "complete", "notes": "GET /supervisor/service-records/review-queue + approve/reject actions" },
+        { "name": "Immutability enforcement", "status": "complete", "notes": "BadRequestException on update/modify of APPROVED records, validateTransition() enforced" },
+        { "name": "Correction request workflow", "status": "complete", "notes": "CorrectionRequestService + 2 controllers (staff/supervisor), CORRECTION_TRANSITIONS" }
+      ],
+      "controllers_added": [
+        "StaffServiceRecordController",
+        "SupervisorServiceRecordController",
+        "AdminServiceRecordController",
+        "StaffDailyNoteController",
+        "ClinicalIspGoalController",
+        "StaffIspDataPointController",
+        "StaffIncidentController",
+        "SupervisorIncidentController",
+        "AdminIncidentController",
+        "StaffMarEntryController",
+        "ClinicalBehaviorPlanController",
+        "StaffCorrectionRequestController",
+        "SupervisorCorrectionRequestController"
+      ],
+      "services_added": [
+        "ServiceRecordService",
+        "DailyNoteService",
+        "IspGoalService",
+        "IspDataPointService",
+        "IncidentService",
+        "MarEntryService",
+        "BehaviorPlanService",
+        "CorrectionRequestService"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "EVV (Electronic Visit Verification)",
+      "status": "complete",
+      "progress": "7/7",
+      "tasks": [
+        { "name": "Clock-in / clock-out endpoints", "status": "complete", "notes": "EvvPunchService + 3 controllers (staff/supervisor/admin), server-side timestamp" },
+        { "name": "GPS capture + validation", "status": "complete", "notes": "haversine utility, isWithinRadius vs site coords, non-blocking (location_confirmed flag)" },
+        { "name": "Shift association", "status": "complete", "notes": "Optional shift_id on punch, inherited from clock-in on clock-out" },
+        { "name": "Missed punch detection", "status": "complete", "notes": "findMissedPunches (threshold-based), supervisor flag-missed auto-creates correction" },
+        { "name": "Double clock-in prevention", "status": "complete", "notes": "findOpenSession check — BadRequestException if staff+individual already has open session" },
+        { "name": "Correction workflow", "status": "complete", "notes": "EvvCorrectionService, approve creates new EvvPunch, CORRECTION_TRANSITIONS state machine" },
+        { "name": "EVV to service record linkage", "status": "complete", "notes": "linkToServiceRecord validates staff+individual match, updates evv_punch_in/out_id columns" }
+      ],
+      "controllers_added": [
+        "StaffEvvPunchController",
+        "StaffEvvCorrectionController",
+        "SupervisorEvvPunchController",
+        "SupervisorEvvCorrectionController",
+        "AdminEvvPunchController"
+      ],
+      "services_added": [
+        "EvvPunchService",
+        "EvvCorrectionService"
+      ],
+      "utils_added": [
+        "gps-distance.ts (haversine formula, isWithinRadius)"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Scheduling",
+      "status": "complete",
+      "progress": "6/6",
+      "new_tests": 68,
+      "tasks": [
+        { "name": "Schedule creation", "status": "complete", "notes": "ShiftService.create, DRAFT default, staff assignment + conflict validation" },
+        { "name": "Shift assignment", "status": "complete", "notes": "SHIFT_TRANSITIONS state machine, publish/cancel/accept/reject methods" },
+        { "name": "Staff schedule view", "status": "complete", "notes": "StaffShiftController — list my shifts, get by ID, date/status filters" },
+        { "name": "Accept/reject workflow", "status": "complete", "notes": "PUBLISHED to ACCEPTED/REJECTED, staff ownership enforced, responded_at set" },
+        { "name": "Conflict detection", "status": "complete", "notes": "Same staff + date + overlapping time, excludes terminal states, standalone query endpoint" },
+        { "name": "Schedule-to-EVV linkage", "status": "complete", "notes": "Phase 4 already stores shift_id on EvvPunch; no additional work needed" }
+      ],
+      "controllers_added": [
+        "StaffShiftController",
+        "SupervisorShiftController",
+        "AdminShiftController"
+      ],
+      "services_added": [
+        "ShiftService"
+      ],
+      "state_machine": {
+        "name": "SHIFT_TRANSITIONS",
+        "states": ["DRAFT", "PUBLISHED", "ACCEPTED", "REJECTED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "NO_SHOW"],
+        "transitions_count": 10
+      }
+    },
+    {
+      "id": 6,
+      "name": "Billing & Claims Engine",
+      "status": "complete",
+      "progress": "16/16",
+      "new_tests": 304,
+      "sub_phases": [
+        {
+          "id": "6A",
+          "name": "Configuration",
+          "tasks": [
+            { "name": "Payer configuration module", "status": "complete", "notes": "PayerConfigService + AdminPayerConfigController, CRUD + deactivate, copies from global" },
+            { "name": "Service codes module", "status": "complete", "notes": "ServiceCodeService + AdminServiceCodeController, CRUD + deactivate, copies from global" },
+            { "name": "Rate tables module", "status": "complete", "notes": "RateTableService + AdminRateTableController, CRUD + date-range lookup" },
+            { "name": "Service authorization management", "status": "complete", "notes": "ServiceAuthorizationService + billing/admin controllers, CRUD + void + unit tracking" },
+            { "name": "Authorization threshold alerts", "status": "complete", "notes": "checkThresholds (80%, 95%, exceeded, expiring within 30 days)" },
+            { "name": "Individual payer coverage", "status": "complete", "notes": "IndividualPayerCoverageService + admin/billing controllers, priority-ordered coverage" }
+          ]
+        },
+        {
+          "id": "6B",
+          "name": "Claims Processing",
+          "tasks": [
+            { "name": "Billing queue", "status": "complete", "notes": "BillingQueueService + BillingQueueController, enriched queue items with coverage/auth info" },
+            { "name": "Claim generation (service record to claim)", "status": "complete", "notes": "ClaimMappingService — 7-step mapping (payer, rate, auth, type, build, charge, history)" },
+            { "name": "Claim type determination (837P vs 837I)", "status": "complete", "notes": "Program.billing_type + PayerConfig.config.claim_type_override" },
+            { "name": "Pre-submission validation (13 checks)", "status": "complete", "notes": "ClaimValidationService — 13 checks, validateAndStore persists results" },
+            { "name": "Claim status lifecycle", "status": "complete", "notes": "ClaimService — state machine transitions, DRAFT-only edits, replacement claims" },
+            { "name": "Claim line management", "status": "complete", "notes": "ClaimLineService + BillingClaimLineController, DRAFT-only, auto line numbering" },
+            { "name": "Denial handling workflow", "status": "complete", "notes": "DenialHandlerService — 7 CARC codes, appeal/write-off/correct-and-resubmit" }
+          ]
+        },
+        {
+          "id": "6C",
+          "name": "EDI & Submission",
+          "tasks": [
+            { "name": "EDI 837 generation", "status": "complete", "notes": "EdiGeneratorService — clearinghouse JSON payload (V1), batch support. Raw X12 deferred V2" },
+            { "name": "Claim submission tracking", "status": "complete", "notes": "ClaimSubmissionService + BillingClaimSubmissionController, submit/batch/response tracking" },
+            { "name": "277 status response processing", "status": "complete", "notes": "recordResponse maps ACCEPTED/REJECTED 277, updates claim status" }
+          ]
+        }
+      ],
+      "controllers_added": [
+        "AdminPayerConfigController",
+        "AdminServiceCodeController",
+        "AdminRateTableController",
+        "BillingServiceAuthorizationController",
+        "AdminServiceAuthorizationController",
+        "AdminIndividualPayerCoverageController",
+        "BillingIndividualPayerCoverageController",
+        "BillingQueueController",
+        "BillingClaimController",
+        "AdminClaimController",
+        "BillingClaimLineController",
+        "BillingClaimSubmissionController"
+      ],
+      "services_added": [
+        "PayerConfigService",
+        "ServiceCodeService",
+        "RateTableService",
+        "ServiceAuthorizationService",
+        "IndividualPayerCoverageService",
+        "BillingQueueService",
+        "ClaimService",
+        "ClaimLineService",
+        "ClaimMappingService",
+        "ClaimValidationService",
+        "DenialHandlerService",
+        "EdiGeneratorService",
+        "ClaimSubmissionService"
+      ],
+      "entities_added": [
+        "IndividualPayerCoverageEntity",
+        "ClaimStatusHistoryEntity"
+      ],
+      "entities_modified": [
+        "ClaimEntity (validation_results, payment fields)",
+        "ProgramEntity (billing_type)",
+        "OrganizationEntity (taxonomy_code)"
+      ],
+      "denial_carc_codes": ["CO-4", "CO-11", "CO-16", "CO-18", "CO-50", "CO-97", "CO-170"],
+      "validation_checks": 13,
+      "claim_mapping_steps": 7
+    },
+    {
+      "id": 7,
+      "name": "Payment Reconciliation",
+      "status": "not_started",
+      "progress": "0/8",
+      "notes": "Entities and DALs ready",
+      "tasks": [
+        { "name": "835 ERA file ingestion", "status": "not_started" },
+        { "name": "ERA parsing", "status": "not_started" },
+        { "name": "4-priority matching algorithm", "status": "not_started" },
+        { "name": "Payment posting module", "status": "not_started" },
+        { "name": "Adjustment processing", "status": "not_started" },
+        { "name": "EFT reconciliation", "status": "not_started" },
+        { "name": "AR aging reports", "status": "not_started" },
+        { "name": "Financial dashboard endpoints", "status": "not_started" }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "SuperAdmin Console API",
+      "status": "not_started",
+      "progress": "0/14",
+      "notes": "Entities and DALs ready",
+      "tasks": [
+        { "name": "Operator management", "status": "not_started" },
+        { "name": "Agency signup pipeline (7-stage)", "status": "not_started" },
+        { "name": "Application review queue", "status": "not_started" },
+        { "name": "Risk scoring", "status": "not_started" },
+        { "name": "Tenant provisioning automation", "status": "not_started" },
+        { "name": "Onboarding checklists", "status": "not_started" },
+        { "name": "Agency management", "status": "not_started" },
+        { "name": "Global service code library", "status": "not_started" },
+        { "name": "Global payer configuration", "status": "not_started" },
+        { "name": "Subscription plan management", "status": "not_started" },
+        { "name": "Feature flags + module toggles", "status": "not_started" },
+        { "name": "Platform health monitoring", "status": "not_started" },
+        { "name": "Break-glass access protocol", "status": "not_started" },
+        { "name": "Platform audit log", "status": "not_started" }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Notification Engine",
+      "status": "not_started",
+      "progress": "0/7",
+      "notes": "Entities and DALs ready",
+      "tasks": [
+        { "name": "Notification service", "status": "not_started" },
+        { "name": "Auth threshold alerts", "status": "not_started" },
+        { "name": "Claim status notifications", "status": "not_started" },
+        { "name": "Supervisor review reminders", "status": "not_started" },
+        { "name": "Shift notifications", "status": "not_started" },
+        { "name": "Onboarding status updates", "status": "not_started" },
+        { "name": "Break-glass notifications", "status": "not_started" }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Guardian Portal API",
+      "status": "not_started",
+      "progress": "0/5",
+      "tasks": [
+        { "name": "ISP summaries endpoint", "status": "not_started" },
+        { "name": "Progress reports endpoint", "status": "not_started" },
+        { "name": "Incident summaries endpoint", "status": "not_started" },
+        { "name": "Scheduled services endpoint", "status": "not_started" },
+        { "name": "Guardian authentication", "status": "not_started" }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Reporting & Analytics",
+      "status": "not_started",
+      "progress": "0/9",
+      "tasks": [
+        { "name": "Billing reconciliation reports", "status": "not_started" },
+        { "name": "AR aging reports", "status": "not_started" },
+        { "name": "Claims lifecycle analytics", "status": "not_started" },
+        { "name": "Documentation compliance reports", "status": "not_started" },
+        { "name": "EVV compliance reports", "status": "not_started" },
+        { "name": "Staff utilization reports", "status": "not_started" },
+        { "name": "Authorization usage reports", "status": "not_started" },
+        { "name": "Platform analytics (SuperAdmin)", "status": "not_started" },
+        { "name": "Export (CSV, PDF)", "status": "not_started" }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Hardening & Compliance",
+      "status": "not_started",
+      "progress": "0/10",
+      "tasks": [
+        { "name": "OWASP security audit", "status": "not_started" },
+        { "name": "HIPAA compliance review", "status": "not_started" },
+        { "name": "Penetration testing prep", "status": "not_started" },
+        { "name": "Performance / load testing", "status": "not_started" },
+        { "name": "DB query optimization", "status": "not_started" },
+        { "name": "Rate limiting tuning", "status": "not_started" },
+        { "name": "Error handling audit", "status": "not_started" },
+        { "name": "Audit log completeness", "status": "not_started" },
+        { "name": "Encryption verification", "status": "not_started" },
+        { "name": "Disaster recovery testing", "status": "not_started" }
+      ]
+    }
+  ],
+  "entities": {
+    "total": 51,
+    "base": [
+      { "name": "BaseEntity", "file": "base.entity.ts", "description": "UUID primary key + created_at/updated_at timestamps" },
+      { "name": "TenantBaseEntity", "file": "tenant-base.entity.ts", "description": "Extends BaseEntity, adds org_id for RLS" }
+    ],
+    "agency_level": [
+      { "name": "UserEntity", "file": "user.entity.ts", "table": "users", "rls": true },
+      { "name": "OrganizationEntity", "file": "organization.entity.ts", "table": "organizations", "rls": false },
+      { "name": "ProgramEntity", "file": "program.entity.ts", "table": "programs", "rls": true },
+      { "name": "SiteEntity", "file": "site.entity.ts", "table": "sites", "rls": true },
+      { "name": "IndividualEntity", "file": "individual.entity.ts", "table": "individuals", "rls": true, "phi_encrypted": ["ssn", "date_of_birth", "medicaid_id", "diagnosis"] },
+      { "name": "StaffAssignmentEntity", "file": "staff-assignment.entity.ts", "table": "staff_assignments", "rls": true },
+      { "name": "ServiceRecordEntity", "file": "service-record.entity.ts", "table": "service_records", "rls": true },
+      { "name": "DailyNoteEntity", "file": "daily-note.entity.ts", "table": "daily_notes", "rls": true, "phi_encrypted": ["note_content"] },
+      { "name": "IspGoalEntity", "file": "isp-goal.entity.ts", "table": "isp_goals", "rls": true, "phi_encrypted": ["description"] },
+      { "name": "IspDataPointEntity", "file": "isp-data-point.entity.ts", "table": "isp_data_points", "rls": true },
+      { "name": "IncidentEntity", "file": "incident.entity.ts", "table": "incidents", "rls": true, "phi_encrypted": ["description", "actions_taken"] },
+      { "name": "BehaviorPlanEntity", "file": "behavior-plan.entity.ts", "table": "behavior_plans", "rls": true, "phi_encrypted": ["plan_content", "target_behaviors"] },
+      { "name": "MarEntryEntity", "file": "mar-entry.entity.ts", "table": "mar_entries", "rls": true, "phi_encrypted": ["drug_name", "dose", "route"] },
+      { "name": "CorrectionRequestEntity", "file": "correction-request.entity.ts", "table": "correction_requests", "rls": true },
+      { "name": "EvvPunchEntity", "file": "evv-punch.entity.ts", "table": "evv_punches", "rls": true },
+      { "name": "EvvCorrectionEntity", "file": "evv-correction.entity.ts", "table": "evv_corrections", "rls": true },
+      { "name": "ShiftEntity", "file": "shift.entity.ts", "table": "shifts", "rls": true },
+      { "name": "PayerConfigEntity", "file": "payer-config.entity.ts", "table": "payer_config", "rls": true },
+      { "name": "ServiceCodeEntity", "file": "service-code.entity.ts", "table": "service_codes", "rls": true },
+      { "name": "RateTableEntity", "file": "rate-table.entity.ts", "table": "rate_tables", "rls": true },
+      { "name": "ServiceAuthorizationEntity", "file": "service-authorization.entity.ts", "table": "service_authorizations", "rls": true },
+      { "name": "IndividualPayerCoverageEntity", "file": "individual-payer-coverage.entity.ts", "table": "individual_payer_coverages", "rls": true },
+      { "name": "ClaimEntity", "file": "claim.entity.ts", "table": "claims", "rls": true },
+      { "name": "ClaimLineEntity", "file": "claim-line.entity.ts", "table": "claim_lines", "rls": true },
+      { "name": "ClaimSubmissionEntity", "file": "claim-submission.entity.ts", "table": "claim_submissions", "rls": true },
+      { "name": "ClaimStatusHistoryEntity", "file": "claim-status-history.entity.ts", "table": "claim_status_history", "rls": true },
+      { "name": "RemittanceEntity", "file": "remittance.entity.ts", "table": "remittances", "rls": true },
+      { "name": "PaymentPostEntity", "file": "payment-post.entity.ts", "table": "payment_posts", "rls": true },
+      { "name": "AdjustmentEntity", "file": "adjustment.entity.ts", "table": "adjustments", "rls": true },
+      { "name": "AuditLogEntity", "file": "audit-log.entity.ts", "table": "audit_logs", "rls": true },
+      { "name": "NotificationEntity", "file": "notification.entity.ts", "table": "notifications", "rls": true },
+      { "name": "NotificationPreferenceEntity", "file": "notification-preference.entity.ts", "table": "notification_preferences", "rls": true }
+    ],
+    "platform_level": [
+      { "name": "SmarttrackOperatorEntity", "file": "smarttrack-operator.entity.ts", "table": "smarttrack_operators" },
+      { "name": "SignupApplicationEntity", "file": "signup-application.entity.ts", "table": "signup_applications" },
+      { "name": "ApplicationDocumentEntity", "file": "application-document.entity.ts", "table": "application_documents" },
+      { "name": "ApplicationNoteEntity", "file": "application-note.entity.ts", "table": "application_notes" },
+      { "name": "OrgContactEntity", "file": "org-contact.entity.ts", "table": "org_contacts" },
+      { "name": "SignedAgreementEntity", "file": "signed-agreement.entity.ts", "table": "signed_agreements" },
+      { "name": "PlanDefinitionEntity", "file": "plan-definition.entity.ts", "table": "plan_definitions" },
+      { "name": "SubscriptionEntity", "file": "subscription.entity.ts", "table": "subscriptions" },
+      { "name": "InvoiceEntity", "file": "invoice.entity.ts", "table": "invoices" },
+      { "name": "OrgModuleEntity", "file": "org-module.entity.ts", "table": "org_modules" },
+      { "name": "OrgFeatureFlagEntity", "file": "org-feature-flag.entity.ts", "table": "org_feature_flags" },
+      { "name": "OnboardingChecklistEntity", "file": "onboarding-checklist.entity.ts", "table": "onboarding_checklists" },
+      { "name": "OnboardingTaskEntity", "file": "onboarding-task.entity.ts", "table": "onboarding_tasks" },
+      { "name": "BreakGlassSessionEntity", "file": "break-glass-session.entity.ts", "table": "break_glass_sessions" },
+      { "name": "GlobalServiceCodeEntity", "file": "global-service-code.entity.ts", "table": "global_service_codes" },
+      { "name": "GlobalPayerEntity", "file": "global-payer.entity.ts", "table": "global_payers" },
+      { "name": "PlatformAuditLogEntity", "file": "platform-audit-log.entity.ts", "table": "platform_audit_log" }
+    ]
+  },
+  "enums": [
+    { "name": "PlatformRole", "file": "role.enum.ts", "values": ["PLATFORM_OWNER", "PLATFORM_ADMIN", "ONBOARDING_SPECIALIST", "SUPPORT_ENGINEER", "BILLING_OPERATOR", "COMPLIANCE_AUDITOR"] },
+    { "name": "AgencyRole", "file": "role.enum.ts", "values": ["AGENCY_OWNER", "ADMIN", "SUPERVISOR", "DSP", "CLINICIAN", "BILLING_SPECIALIST", "FINANCE_MANAGER", "GUARDIAN"] },
+    { "name": "ServiceRecordStatus", "file": "service-record-status.enum.ts" },
+    { "name": "ClaimStatus", "file": "claim-status.enum.ts" },
+    { "name": "ClaimType", "file": "claim-type.enum.ts" },
+    { "name": "OrgStatus", "file": "org-status.enum.ts" },
+    { "name": "UserStatus", "file": "user-status.enum.ts" },
+    { "name": "MfaType", "file": "mfa-type.enum.ts" },
+    { "name": "ApplicationStatus", "file": "application-status.enum.ts" },
+    { "name": "OnboardingStatus", "file": "onboarding-status.enum.ts" },
+    { "name": "OnboardingTaskStatus", "file": "onboarding-task-status.enum.ts" },
+    { "name": "AuthorizationStatus", "file": "authorization-status.enum.ts" },
+    { "name": "UnitType", "file": "unit-type.enum.ts" },
+    { "name": "AdjustmentType", "file": "adjustment-type.enum.ts" },
+    { "name": "RemittanceStatus", "file": "remittance-status.enum.ts" },
+    { "name": "MatchingMethod", "file": "matching-method.enum.ts" },
+    { "name": "PunchType", "file": "punch-type.enum.ts" },
+    { "name": "SubscriptionStatus", "file": "subscription-status.enum.ts" },
+    { "name": "InvoiceStatus", "file": "invoice-status.enum.ts" },
+    { "name": "BillingCycle", "file": "billing-cycle.enum.ts" },
+    { "name": "NotificationType", "file": "notification-type.enum.ts" },
+    { "name": "PlaceOfService", "file": "place-of-service.enum.ts" },
+    { "name": "AgreementType", "file": "agreement-type.enum.ts" },
+    { "name": "IncidentStatus", "file": "incident-status.enum.ts" },
+    { "name": "CorrectionStatus", "file": "correction-status.enum.ts" },
+    { "name": "MarResult", "file": "mar-result.enum.ts" },
+    { "name": "ShiftStatus", "file": "shift-status.enum.ts" }
+  ],
+  "state_machines": [
+    {
+      "name": "SERVICE_RECORD_TRANSITIONS",
+      "entity": "ServiceRecord",
+      "states": ["DRAFT", "PENDING_REVIEW", "APPROVED", "REJECTED"],
+      "key_rule": "APPROVED records are immutable — corrections are append-only"
+    },
+    {
+      "name": "CLAIM_TRANSITIONS",
+      "entity": "Claim",
+      "states": ["DRAFT", "SUBMITTED", "ACCEPTED_277", "REJECTED_277", "PENDING", "PAID", "DENIED", "PARTIAL_PAYMENT", "ADJUSTED", "VOID", "APPEALED"]
+    },
+    {
+      "name": "INCIDENT_TRANSITIONS",
+      "entity": "Incident",
+      "states": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "RESOLVED", "CLOSED"]
+    },
+    {
+      "name": "CORRECTION_TRANSITIONS",
+      "entity": "CorrectionRequest",
+      "states": ["PENDING", "APPROVED", "REJECTED"]
+    },
+    {
+      "name": "SHIFT_TRANSITIONS",
+      "entity": "Shift",
+      "states": ["DRAFT", "PUBLISHED", "ACCEPTED", "REJECTED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "NO_SHOW"],
+      "transitions_count": 10
+    },
+    {
+      "name": "APPLICATION_TRANSITIONS",
+      "entity": "SignupApplication",
+      "states": ["PENDING_REVIEW", "UNDER_REVIEW", "DOCS_REQUESTED", "DOCS_RECEIVED", "APPROVED", "PROVISIONING", "ONBOARDING", "ACTIVE", "REJECTED"]
+    }
+  ],
+  "services": {
+    "total": 37,
+    "list": [
+      { "name": "AppService", "file": "app.service.ts", "phase": 0 },
+      { "name": "AuthService", "file": "auth.service.ts", "phase": 1, "description": "Signup, signin, JWT, refresh, password reset, Google OAuth" },
+      { "name": "EncryptionService", "file": "encryption.service.ts", "phase": 1, "description": "AES-256-GCM field-level encryption/decryption" },
+      { "name": "AuditLogService", "file": "audit-log.service.ts", "phase": 1, "description": "Append-only audit logging, PHI stripped" },
+      { "name": "SubPermissionsService", "file": "sub-permissions.service.ts", "phase": 1, "description": "Sub-permission checking for granular access control" },
+      { "name": "EmailService", "file": "email.service.ts", "phase": 1, "description": "Resend SDK — OTP and password reset emails" },
+      { "name": "UserService", "file": "user.service.ts", "phase": 2 },
+      { "name": "OrganizationService", "file": "organization.service.ts", "phase": 2 },
+      { "name": "ProgramService", "file": "program.service.ts", "phase": 2 },
+      { "name": "SiteService", "file": "site.service.ts", "phase": 2 },
+      { "name": "IndividualService", "file": "individual.service.ts", "phase": 2, "description": "PHI encryption on SSN, DOB, medicaid_id, diagnosis" },
+      { "name": "StaffAssignmentService", "file": "staff-assignment.service.ts", "phase": 2 },
+      { "name": "ServiceRecordService", "file": "service-record.service.ts", "phase": 3, "description": "State machine, staff ownership, immutability on APPROVED" },
+      { "name": "DailyNoteService", "file": "daily-note.service.ts", "phase": 3 },
+      { "name": "IspGoalService", "file": "isp-goal.service.ts", "phase": 3 },
+      { "name": "IspDataPointService", "file": "isp-data-point.service.ts", "phase": 3 },
+      { "name": "IncidentService", "file": "incident.service.ts", "phase": 3 },
+      { "name": "MarEntryService", "file": "mar-entry.service.ts", "phase": 3 },
+      { "name": "BehaviorPlanService", "file": "behavior-plan.service.ts", "phase": 3 },
+      { "name": "CorrectionRequestService", "file": "correction-request.service.ts", "phase": 3 },
+      { "name": "EvvPunchService", "file": "evv-punch.service.ts", "phase": 4 },
+      { "name": "EvvCorrectionService", "file": "evv-correction.service.ts", "phase": 4 },
+      { "name": "ShiftService", "file": "shift.service.ts", "phase": 5 },
+      { "name": "PayerConfigService", "file": "payer-config.service.ts", "phase": 6 },
+      { "name": "ServiceCodeService", "file": "service-code.service.ts", "phase": 6 },
+      { "name": "RateTableService", "file": "rate-table.service.ts", "phase": 6 },
+      { "name": "ServiceAuthorizationService", "file": "service-authorization.service.ts", "phase": 6 },
+      { "name": "IndividualPayerCoverageService", "file": "individual-payer-coverage.service.ts", "phase": 6 },
+      { "name": "BillingQueueService", "file": "billing-queue.service.ts", "phase": 6 },
+      { "name": "ClaimService", "file": "claim.service.ts", "phase": 6 },
+      { "name": "ClaimLineService", "file": "claim-line.service.ts", "phase": 6 },
+      { "name": "ClaimMappingService", "file": "claim-mapping.service.ts", "phase": 6, "description": "7-step mapping: payer, rate, auth, type, build, charge, history" },
+      { "name": "ClaimValidationService", "file": "claim-validation.service.ts", "phase": 6, "description": "13 pre-submission validation checks" },
+      { "name": "DenialHandlerService", "file": "denial-handler.service.ts", "phase": 6, "description": "7 CARC codes, appeal/write-off/correct-and-resubmit" },
+      { "name": "EdiGeneratorService", "file": "edi-generator.service.ts", "phase": 6, "description": "Clearinghouse JSON payload (V1), raw X12 deferred" },
+      { "name": "ClaimSubmissionService", "file": "claim-submission.service.ts", "phase": 6, "description": "Submit/batch/response tracking, 277 processing" }
+    ]
+  },
+  "controllers": {
+    "total": 42,
+    "by_console": {
+      "auth": ["AuthController"],
+      "admin": [
+        "OrganizationController",
+        "UserController",
+        "ProgramController",
+        "SiteController",
+        "IndividualController",
+        "StaffAssignmentController",
+        "AdminServiceRecordController",
+        "AdminIncidentController",
+        "AdminEvvPunchController",
+        "AdminShiftController",
+        "AdminPayerConfigController",
+        "AdminServiceCodeController",
+        "AdminRateTableController",
+        "AdminServiceAuthorizationController",
+        "AdminIndividualPayerCoverageController",
+        "AdminClaimController"
+      ],
+      "staff": [
+        "StaffServiceRecordController",
+        "StaffDailyNoteController",
+        "StaffIspDataPointController",
+        "StaffIncidentController",
+        "StaffMarEntryController",
+        "StaffCorrectionRequestController",
+        "StaffEvvPunchController",
+        "StaffEvvCorrectionController",
+        "StaffShiftController"
+      ],
+      "supervisor": [
+        "SupervisorServiceRecordController",
+        "SupervisorIncidentController",
+        "SupervisorCorrectionRequestController",
+        "SupervisorEvvPunchController",
+        "SupervisorEvvCorrectionController",
+        "SupervisorShiftController"
+      ],
+      "clinical": [
+        "ClinicalIspGoalController",
+        "ClinicalBehaviorPlanController"
+      ],
+      "billing": [
+        "BillingServiceAuthorizationController",
+        "BillingIndividualPayerCoverageController",
+        "BillingQueueController",
+        "BillingClaimController",
+        "BillingClaimLineController",
+        "BillingClaimSubmissionController"
+      ],
+      "other": [
+        "AppController"
+      ]
+    }
+  },
+  "dtos": {
+    "total": 68,
+    "by_domain": {
+      "auth": ["SignupDto", "SigninDto", "GoogleSigninDto", "VerifyEmailDto", "ForgotPasswordDto", "ResetPasswordDto"],
+      "organization": ["CreateOrganizationDto", "UpdateOrganizationDto"],
+      "user": ["CreateUserDto", "UpdateUserDto", "AssignRoleDto", "UpdateSubPermissionsDto"],
+      "program": ["CreateProgramDto", "UpdateProgramDto"],
+      "site": ["CreateSiteDto", "UpdateSiteDto"],
+      "individual": ["CreateIndividualDto", "UpdateIndividualDto"],
+      "staff_assignment": ["CreateStaffAssignmentDto", "UpdateStaffAssignmentDto", "EndAssignmentDto"],
+      "service_record": ["CreateServiceRecordDto", "UpdateServiceRecordDto", "ReviewServiceRecordDto"],
+      "daily_note": ["CreateDailyNoteDto", "UpdateDailyNoteDto"],
+      "isp": ["CreateIspGoalDto", "UpdateIspGoalDto", "CreateIspDataPointDto"],
+      "incident": ["CreateIncidentDto", "UpdateIncidentDto"],
+      "mar": ["CreateMarEntryDto"],
+      "behavior_plan": ["CreateBehaviorPlanDto", "UpdateBehaviorPlanDto"],
+      "correction": ["CreateCorrectionRequestDto", "ReviewCorrectionRequestDto"],
+      "evv": ["CreateEvvPunchDto", "CreateEvvCorrectionDto", "ReviewEvvCorrectionDto", "LinkEvvServiceRecordDto", "EvvPunchQueryDto", "FlagMissedPunchDto"],
+      "shift": ["CreateShiftDto", "UpdateShiftDto", "ShiftQueryDto", "RejectShiftDto"],
+      "billing_config": ["CreatePayerConfigDto", "UpdatePayerConfigDto", "CreateServiceCodeDto", "UpdateServiceCodeDto", "CreateRateTableDto", "UpdateRateTableDto"],
+      "authorization": ["CreateServiceAuthorizationDto", "UpdateServiceAuthorizationDto", "VoidServiceAuthorizationDto"],
+      "coverage": ["CreateIndividualPayerCoverageDto", "UpdateIndividualPayerCoverageDto"],
+      "claims": ["BillingQueueQueryDto", "GenerateClaimsDto", "UpdateClaimDto", "TransitionClaimStatusDto", "VoidClaimDto", "ClaimQueryDto", "CreateClaimLineDto", "UpdateClaimLineDto", "AppealClaimDto", "WriteOffClaimDto", "SubmitClaimDto", "RecordClaimResponseDto"]
+    }
+  },
+  "migrations": [
+    { "name": "InitialSchema", "timestamp": "1772831675410", "file": "1772831675410-initial-schema.ts", "description": "Full schema — 47 tables, indexes, RLS policies for 29 tenant tables" },
+    { "name": "AddUserPassword", "timestamp": "1772832668044", "file": "1772832668044-add-user-password.ts", "description": "Add nullable password column to users table" },
+    { "name": "AuthEnhancements", "timestamp": "1772835687581", "file": "1772835687581-auth-enhancements.ts", "description": "Drop auth0_sub, nullable org_id, email verification fields, OTP, reset token" },
+    { "name": "AddEvvCorrectionIndividualId", "timestamp": "1773393877790", "file": "1773393877790-add-evv-correction-individual-id.ts", "description": "Add individual_id column to evv_corrections table" },
+    { "name": "Phase6BillingClaims", "timestamp": "1773399777551", "file": "1773399777551-Phase6BillingClaims.ts", "description": "New tables (individual_payer_coverages, claim_status_history), claim/program/org modifications" }
+  ],
+  "guards": [
+    { "name": "JwtAuthGuard", "file": "jwt-auth.guard.ts", "scope": "APP_GUARD", "description": "JWT authentication, respects @Public()" },
+    { "name": "RolesGuard", "file": "roles.guard.ts", "scope": "APP_GUARD", "description": "Role-based access via @Roles() decorator" },
+    { "name": "PermissionsGuard", "file": "permissions.guard.ts", "scope": "APP_GUARD", "description": "Sub-permission checking via @Permissions() decorator" }
+  ],
+  "interceptors": [
+    { "name": "TenantContextInterceptor", "file": "tenant-context.interceptor.ts", "scope": "APP_INTERCEPTOR", "description": "SET LOCAL app.current_org_id per request for RLS, wraps handler in DB transaction" },
+    { "name": "ResponseInterceptor", "file": "response.interceptor.ts", "scope": "APP_INTERCEPTOR", "description": "Standard response envelope, camelToSnake transform, PHI field stripping via @PrivateFields()" }
+  ],
+  "decorators": [
+    { "name": "@CurrentUser", "file": "current-user.decorator.ts", "description": "Extract authenticated user from request" },
+    { "name": "@Roles", "file": "roles.decorator.ts", "description": "Set required roles for endpoint" },
+    { "name": "@Public", "file": "roles.decorator.ts", "description": "Mark endpoint as public (skip JWT)" },
+    { "name": "@Permissions", "file": "permissions.decorator.ts", "description": "Set required sub-permissions" },
+    { "name": "@PrivateFields", "file": "private.decorator.ts", "description": "Strip fields from response (PHI protection)" },
+    { "name": "@SkipResponseInterceptor", "file": "skip-response-interceptor.decorator.ts", "description": "Bypass response envelope" }
+  ],
+  "utils": [
+    { "name": "camelToSnakeCase", "file": "camel-to-snake-case.ts", "description": "Deep key transformation for API responses" },
+    { "name": "pagination", "file": "pagination-utils.ts", "description": "Paginated query helpers, page/limit extraction" },
+    { "name": "responseFormatter", "file": "response-formatter.ts", "description": "Standard API response envelope builder" },
+    { "name": "validateTransition", "file": "state-machine.ts", "description": "State machine transition validator" },
+    { "name": "aesGcm", "file": "aes-gcm.util.ts", "description": "AES-256-GCM encrypt/decrypt utilities" },
+    { "name": "gpsDistance", "file": "gps-distance.ts", "description": "Haversine formula, isWithinRadius for EVV" }
+  ],
+  "security": {
+    "authentication": {
+      "method": "Local JWT (HS256)",
+      "access_token_expiry": "15 minutes",
+      "refresh_token_expiry": "7 days",
+      "password_hashing": "bcrypt (12 rounds)",
+      "google_oauth": "ID token verification via google-auth-library",
+      "mfa": "Fields ready (mfa_enabled, mfa_type), enforcement deferred"
+    },
+    "authorization": {
+      "layers": ["JWT Auth Guard", "Roles Guard", "Permissions Guard"],
+      "guard_order": "JwtAuthGuard -> RolesGuard -> PermissionsGuard"
+    },
+    "data_protection": {
+      "rls": "PostgreSQL RLS on 29 tenant tables, SET LOCAL app.current_org_id per request",
+      "field_encryption": "AES-256-GCM for PHI columns (SSN, DOB, medicaid_id, diagnosis, notes, etc.)",
+      "phi_stripping": "ResponseInterceptor strips @PrivateFields from responses",
+      "error_safety": "AllExceptionsFilter — no PHI in error responses",
+      "audit_logging": "Append-only, no UPDATE/DELETE on audit_logs table"
+    },
+    "critical_rules": [
+      "Money in cents (integer arithmetic, never float)",
+      "No PHI in URLs, logs, or error messages",
+      "404 not 403 for out-of-scope resources",
+      "Approved service records are immutable",
+      "Claims only from APPROVED service records",
+      "Append-only audit logs",
+      "AES-256 field-level encryption for PHI",
+      "State machine integrity — no skipping states"
+    ]
+  },
+  "golden_thread": {
+    "description": "Core data flow from service delivery to payment reconciliation",
+    "steps": [
+      "DSP creates service record (DRAFT)",
+      "DSP submits for review (PENDING_REVIEW)",
+      "Supervisor reviews and approves/rejects",
+      "Billing pulls APPROVED records into billing queue",
+      "Claim generated via 7-step mapping",
+      "Pre-submission validation (13 checks)",
+      "EDI 837 payload generated (JSON V1)",
+      "Claim submitted to payer/clearinghouse",
+      "277 status response processed",
+      "835 ERA received and reconciled (Phase 7 — not started)",
+      "Payment posted to AR (Phase 7 — not started)"
+    ]
+  },
+  "dependencies": {
+    "production": {
+      "@nestjs/common": "^11.1.16",
+      "@nestjs/config": "^4.0.3",
+      "@nestjs/core": "^11.1.16",
+      "@nestjs/jwt": "^11.0.2",
+      "@nestjs/passport": "^11.0.5",
+      "@nestjs/platform-express": "^11.1.16",
+      "@nestjs/swagger": "^11.2.6",
+      "@nestjs/typeorm": "^11.0.0",
+      "bcrypt": "^6.0.0",
+      "class-transformer": "^0.5.1",
+      "class-validator": "^0.15.1",
+      "compression": "^1.8.1",
+      "google-auth-library": "^10.6.1",
+      "helmet": "^8.1.0",
+      "passport": "^0.7.0",
+      "passport-jwt": "^4.0.1",
+      "pg": "^8.20.0",
+      "reflect-metadata": "^0.2.2",
+      "resend": "^6.9.3",
+      "rxjs": "^7.8.2",
+      "swagger-ui-express": "^5.0.1",
+      "typeorm": "^0.3.28"
+    },
+    "dev": {
+      "@nestjs/cli": "^11.0.16",
+      "@nestjs/testing": "^11.1.16",
+      "eslint": "^10.0.3",
+      "jest": "^30.3.0",
+      "prettier": "^3.8.1",
+      "supertest": "^7.2.2",
+      "typescript": "^5.9.3"
+    }
+  },
+  "git_history": [
+    { "hash": "f064fb0", "message": "feat: Phase 6 — Billing & Claims Engine" },
+    { "hash": "b86e99b", "message": "feat: Phase 5 — Scheduling (shift management)" },
+    { "hash": "5920bfc", "message": "feat: Phase 4 — EVV (Electronic Visit Verification)" },
+    { "hash": "2a6aa66", "message": "feat: Phase 3 — service documentation layer" },
+    { "hash": "fa6769b", "message": "Merge pull request #1 from phoenixdahdev/copilot/phase-2-implementation" },
+    { "hash": "136b76c", "message": "fix: e2e test fix" },
+    { "hash": "0d981e8", "message": "fix: e2e test fix" },
+    { "hash": "c12dc86", "message": "build fix" },
+    { "hash": "65a5029", "message": "build fix" },
+    { "hash": "b7a416c", "message": "fix: address all Gemini review comments and fix e2e test" },
+    { "hash": "52576c2", "message": "fix: resolve all 68 ESLint errors" },
+    { "hash": "c91416e", "message": "ci: add PostgreSQL 16 service container and full test pipeline" },
+    { "hash": "65e5068", "message": "feat: Phase 2 — core entity layer" },
+    { "hash": "4cd5dc4", "message": "Initial plan" },
+    { "hash": "020967d", "message": "removed comments" },
+    { "hash": "9fbc9aa", "message": "feat: add email verification, password reset, org CRUD, and Swagger decorators" },
+    { "hash": "74d5380", "message": "feat: complete Phase 1 auth layer" },
+    { "hash": "79628e9", "message": "feat: add complete entity layer — 47 entities, 22 enums, 47 DALs" },
+    { "hash": "5937352", "message": "feat: scaffold SmartTrack Health backend with flat architecture" }
+  ],
+  "next_phase": {
+    "id": 7,
+    "name": "Payment Reconciliation",
+    "tasks": [
+      "835 ERA file ingestion",
+      "ERA parsing (segment extraction)",
+      "4-priority matching algorithm (claim_id, CLP reference, service date + member, manual)",
+      "Payment posting module",
+      "Adjustment processing",
+      "EFT reconciliation",
+      "AR aging reports",
+      "Financial dashboard data endpoints"
+    ],
+    "entities_ready": ["RemittanceEntity", "PaymentPostEntity", "AdjustmentEntity"],
+    "enums_ready": ["RemittanceStatus", "MatchingMethod", "AdjustmentType"]
+  },
+  "documentation": {
+    "project_docs": [
+      "CLAUDE.md — Project conventions, rules, and code standards",
+      "plan.md — Full 12-phase development plan",
+      "progress.md — Phase/feature tracking",
+      "agent.md — Agent workflow configuration"
+    ],
+    "spec_docs": [
+      "docs/SmartTrack Developer Specification Vol 01.pdf",
+      "docs/SmartTrack Health – Enterprise EVV, Scheduling & Agency Management System.pdf",
+      "docs/SmartTrack_Billing_Console_Dev_Walkthrough.pdf",
+      "docs/SmartTrack_SuperAdmin_Console_Spec.pdf",
+      "docs/SmartTrack_Developer_Specification (2).pdf"
+    ],
+    "api_collection": "docs/smarttrack-health-api.postman_collection.json",
+    "code_snippets": [
+      "docs/typescript-snippets.md",
+      "docs/javascript-snippets.md"
+    ]
+  }
+}

@@ -215,6 +215,24 @@ export class ServiceAuthorizationService {
     return matching ?? null;
   }
 
+  async incrementUnitsUsed(
+    authId: string,
+    orgId: string,
+    unitsToAdd: number,
+  ) {
+    const auth = await this.findById(authId, orgId);
+
+    const newUsed = Number(auth.units_used) + unitsToAdd;
+
+    const updated = await this.serviceAuthorizationDal.update({
+      identifierOptions: { id: authId, org_id: orgId } as never,
+      updatePayload: { units_used: newUsed } as never,
+      transactionOptions: { useTransaction: false },
+    });
+
+    return updated;
+  }
+
   async recalculateUnits(authId: string, orgId: string) {
     const auth = await this.findById(authId, orgId);
     return auth;

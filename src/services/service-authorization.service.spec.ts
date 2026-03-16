@@ -257,6 +257,33 @@ describe('ServiceAuthorizationService', () => {
     });
   });
 
+  describe('incrementUnitsUsed', () => {
+    it('should atomically increment units_used', async () => {
+      serviceAuthorizationDal.get.mockResolvedValue({
+        ...mockRecord,
+        units_used: 10,
+      });
+
+      await service.incrementUnitsUsed('sa-uuid', 'org-uuid', 4);
+
+      expect(serviceAuthorizationDal.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatePayload: expect.objectContaining({
+            units_used: 14,
+          }) as unknown,
+        }),
+      );
+    });
+
+    it('should throw NotFoundException when auth not found', async () => {
+      serviceAuthorizationDal.get.mockResolvedValue(null);
+
+      await expect(
+        service.incrementUnitsUsed('bad-id', 'org-uuid', 4),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
   describe('findAuthForBilling', () => {
     it('should return matching auth for service date', async () => {
       serviceAuthorizationDal.find.mockResolvedValue({
