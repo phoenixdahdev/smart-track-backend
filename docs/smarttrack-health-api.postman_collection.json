@@ -130,6 +130,26 @@
 			"key": "submissionId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "remittanceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "paymentPostId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adlCategoryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adlEntryId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"auth": {
@@ -5918,6 +5938,1286 @@
 				}
 			],
 			"description": "Claim submission management for EDI processing. Submit individual or batch claims, track submission status, and record 277 payer responses."
+		},
+		{
+			"name": "Auth > MFA",
+			"item": [
+				{
+					"name": "Get MFA Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"status"
+							]
+						},
+						"description": "**Roles:** All authenticated users\n\nGet current MFA status for the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Setup TOTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/totp/setup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"totp",
+								"setup"
+							]
+						},
+						"description": "**Roles:** All authenticated users\n\nInitiate TOTP MFA setup. Returns a secret and QR code URI."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm TOTP Setup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/totp/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"totp",
+								"confirm"
+							]
+						},
+						"description": "**Roles:** All authenticated users\n\nConfirm TOTP setup with a 6-digit verification code.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"123456\"\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Setup Email OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/email-otp/setup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"email-otp",
+								"setup"
+							]
+						},
+						"description": "**Roles:** All authenticated users\n\nSetup Email OTP MFA. Sends a verification code to the user email."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify MFA Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"verify"
+							]
+						},
+						"description": "**Roles:** All authenticated (MFA pending)\n\nVerify MFA code during login flow.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"123456\"\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Backup Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/verify/backup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"verify",
+								"backup"
+							]
+						},
+						"description": "**Roles:** All authenticated (MFA pending)\n\nVerify a backup code during login flow.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"ABCD-1234-EFGH\"\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend MFA OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/resend",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"resend"
+							]
+						},
+						"description": "**Roles:** All authenticated (MFA pending)\n\nResend MFA OTP code via email."
+					},
+					"response": []
+				},
+				{
+					"name": "Disable MFA",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/disable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"disable"
+							]
+						},
+						"description": "**Roles:** All authenticated users\n\nDisable MFA. Requires password confirmation.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"myPassword123\"\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Regenerate Backup Codes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/backup-codes/regenerate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"backup-codes",
+								"regenerate"
+							]
+						},
+						"description": "**Roles:** All authenticated users\n\nRegenerate backup codes. Requires password confirmation.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"myPassword123\"\n}"
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Multi-Factor Authentication (MFA) management — TOTP and Email OTP setup, verification, and backup codes."
+		},
+		{
+			"name": "Admin > ADL Categories",
+			"item": [
+				{
+					"name": "Create ADL Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/adl-categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"adl-categories"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nCreate a custom ADL category.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cooking\",\n  \"description\": \"Ability to prepare meals independently\",\n  \"category_type\": \"IADL\",\n  \"display_order\": 10\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List ADL Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/adl-categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"adl-categories"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList all active ADL categories for the organization."
+					},
+					"response": []
+				},
+				{
+					"name": "Get ADL Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/adl-categories/{{adlCategoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"adl-categories",
+								"{{adlCategoryId}}"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet an ADL category by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update ADL Category",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/adl-categories/{{adlCategoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"adl-categories",
+								"{{adlCategoryId}}"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nUpdate an ADL category.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cooking & Meal Prep\",\n  \"display_order\": 5\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate ADL Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/adl-categories/{{adlCategoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"adl-categories",
+								"{{adlCategoryId}}"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nDeactivate an ADL category (soft delete)."
+					},
+					"response": []
+				},
+				{
+					"name": "Seed Standard ADL Categories",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/adl-categories/seed",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"adl-categories",
+								"seed"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nSeed standard ADL and IADL categories for the organization."
+					},
+					"response": []
+				}
+			],
+			"description": "ADL (Activities of Daily Living) category management. Admin console."
+		},
+		{
+			"name": "Staff > ADL Entries",
+			"item": [
+				{
+					"name": "Create ADL Entry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/staff/adl-entries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"adl-entries"
+							]
+						},
+						"description": "**Roles:** DSP\n\nRecord a single ADL entry for an individual during a service session.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"service_record_id\": \"{{serviceRecordId}}\",\n  \"individual_id\": \"{{individualId}}\",\n  \"adl_category_id\": \"{{adlCategoryId}}\",\n  \"assistance_level\": \"VERBAL_PROMPT\",\n  \"notes\": \"Individual needed verbal reminders.\"\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Create ADL Entries",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/staff/adl-entries/bulk",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"adl-entries",
+								"bulk"
+							]
+						},
+						"description": "**Roles:** DSP\n\nRecord multiple ADL entries for a shift at once.",
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\n    \"service_record_id\": \"{{serviceRecordId}}\",\n    \"individual_id\": \"{{individualId}}\",\n    \"adl_category_id\": \"{{adlCategoryId}}\",\n    \"assistance_level\": \"INDEPENDENT\",\n    \"notes\": \"\"\n  }\n]"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List ADL Entries by Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/adl-entries/service-record/{{serviceRecordId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"adl-entries",
+								"service-record",
+								"{{serviceRecordId}}"
+							]
+						},
+						"description": "**Roles:** DSP\n\nList ADL entries for a service record."
+					},
+					"response": []
+				},
+				{
+					"name": "Get ADL Entry",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/staff/adl-entries/{{adlEntryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"adl-entries",
+								"{{adlEntryId}}"
+							]
+						},
+						"description": "**Roles:** DSP\n\nGet an ADL entry by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update ADL Entry",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/staff/adl-entries/{{adlEntryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"staff",
+								"adl-entries",
+								"{{adlEntryId}}"
+							]
+						},
+						"description": "**Roles:** DSP\n\nUpdate an ADL entry (only if service record is still in DRAFT).",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"assistance_level\": \"SUPERVISED\",\n  \"notes\": \"Updated observation.\"\n}"
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "ADL entry recording for DSP staff during service sessions."
+		},
+		{
+			"name": "Supervisor > ADL Entries",
+			"item": [
+				{
+					"name": "List ADL Entries by Service Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/adl-entries/service-record/{{serviceRecordId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"adl-entries",
+								"service-record",
+								"{{serviceRecordId}}"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nView ADL entries for a service record during review."
+					},
+					"response": []
+				},
+				{
+					"name": "Get ADL Entry",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/adl-entries/{{adlEntryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"adl-entries",
+								"{{adlEntryId}}"
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nView a single ADL entry."
+					},
+					"response": []
+				},
+				{
+					"name": "List ADL Entries by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/supervisor/adl-entries/individual/{{individualId}}?date_from=2026-03-01&date_to=2026-03-31&page=1&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"supervisor",
+								"adl-entries",
+								"individual",
+								"{{individualId}}"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "2026-03-01",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "2026-03-31",
+									"description": ""
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": ""
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** SUPERVISOR\n\nView ADL history for an individual."
+					},
+					"response": []
+				}
+			],
+			"description": "ADL entry review for supervisors."
+		},
+		{
+			"name": "Clinical > ADL Entries",
+			"item": [
+				{
+					"name": "ADL Trends by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/adl-entries/individual/{{individualId}}?date_from=2026-03-01&date_to=2026-03-31&adl_category_id=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"adl-entries",
+								"individual",
+								"{{individualId}}"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "2026-03-01",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "2026-03-31",
+									"description": ""
+								},
+								{
+									"key": "adl_category_id",
+									"value": "",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nView ADL trends for an individual over time."
+					},
+					"response": []
+				},
+				{
+					"name": "ADL Summary by Individual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/clinical/adl-entries/individual/{{individualId}}/summary",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"clinical",
+								"adl-entries",
+								"individual",
+								"{{individualId}}",
+								"summary"
+							]
+						},
+						"description": "**Roles:** CLINICIAN\n\nGet latest assistance level per ADL category for an individual."
+					},
+					"response": []
+				}
+			],
+			"description": "ADL trends and summaries for clinical staff."
+		},
+		{
+			"name": "Billing > Remittances",
+			"item": [
+				{
+					"name": "Ingest ERA (835)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/billing/remittances",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"remittances"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nIngest an ERA (835) remittance from a payer. Creates remittance record, payment posts, runs auto-matching, and applies payments to matched claims.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"payer_config_id\": \"{{payerConfigId}}\",\n  \"payment_date\": \"2026-03-15\",\n  \"eft_trace_number\": \"EFT-2026031500001\",\n  \"eft_total_cents\": 150000,\n  \"claim_payments\": [\n    {\n      \"claim_id\": \"{{claimId}}\",\n      \"billed_cents\": 10000,\n      \"paid_cents\": 8000,\n      \"patient_responsibility_cents\": 1000,\n      \"status_code\": \"1\",\n      \"adjustments\": [\n        {\n          \"group_code\": \"CO\",\n          \"reason_code\": \"45\",\n          \"amount_cents\": 1000\n        }\n      ]\n    }\n  ]\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Remittances",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/remittances?status=&date_from=&date_to=&payer_config_id=&page=1&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"remittances"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "",
+									"description": "RECEIVED, FULLY_POSTED, PARTIAL, UNMATCHED"
+								},
+								{
+									"key": "date_from",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "payer_config_id",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": ""
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nList remittances with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Remittance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/remittances/{{remittanceId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"remittances",
+								"{{remittanceId}}"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet a remittance by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment Posts for Remittance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/remittances/{{remittanceId}}/payment-posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"remittances",
+								"{{remittanceId}}",
+								"payment-posts"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet all payment posts associated with a remittance."
+					},
+					"response": []
+				},
+				{
+					"name": "Recalculate Remittance Status",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/remittances/{{remittanceId}}/recalculate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"remittances",
+								"{{remittanceId}}",
+								"recalculate"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nRecalculate remittance status based on current matched/unmatched posts."
+					},
+					"response": []
+				}
+			],
+			"description": "ERA (835) remittance ingestion and management. Ingest remittances, view payment posts, and recalculate match status."
+		},
+		{
+			"name": "Billing > Payment Posts",
+			"item": [
+				{
+					"name": "List Payment Posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/payment-posts?remittance_id=&claim_id=&unmatched_only=&page=1&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"payment-posts"
+							],
+							"query": [
+								{
+									"key": "remittance_id",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "claim_id",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "unmatched_only",
+									"value": "",
+									"description": "Set to \"true\" for unmatched only"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": ""
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nList payment posts with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "List Unmatched Payment Posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/payment-posts/unmatched?page=1&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"payment-posts",
+								"unmatched"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": ""
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nList payment posts that could not be auto-matched to claims."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment Post",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/payment-posts/{{paymentPostId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"payment-posts",
+								"{{paymentPostId}}"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet a payment post by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Manual Match",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/billing/payment-posts/{{paymentPostId}}/match",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"payment-posts",
+								"{{paymentPostId}}",
+								"match"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nManually match an unmatched payment post to a claim.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"claim_id\": \"{{claimId}}\"\n}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unmatch Payment Post",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/payment-posts/{{paymentPostId}}/unmatch",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"payment-posts",
+								"{{paymentPostId}}",
+								"unmatch"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nRemove the match between a payment post and its claim."
+					},
+					"response": []
+				},
+				{
+					"name": "Post Payment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/payment-posts/{{paymentPostId}}/post",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"payment-posts",
+								"{{paymentPostId}}",
+								"post"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nPost a matched payment to its claim. Recalculates claim balance and transitions claim status."
+					},
+					"response": []
+				}
+			],
+			"description": "Payment post management — view, match/unmatch, and post payments to claims."
+		},
+		{
+			"name": "Billing > Adjustments",
+			"item": [
+				{
+					"name": "Adjustments by Claim",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/adjustments/by-claim/{{claimId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"adjustments",
+								"by-claim",
+								"{{claimId}}"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet all adjustments across all claim lines for a claim."
+					},
+					"response": []
+				},
+				{
+					"name": "Adjustments by Payment Post",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/adjustments/by-payment-post/{{paymentPostId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"adjustments",
+								"by-payment-post",
+								"{{paymentPostId}}"
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nGet all adjustments associated with a payment post."
+					},
+					"response": []
+				}
+			],
+			"description": "Adjustment records — contractual, patient responsibility, payer reductions, and write-offs."
+		},
+		{
+			"name": "Admin > Remittances",
+			"item": [
+				{
+					"name": "List Remittances",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/remittances?status=&date_from=&date_to=&payer_config_id=&page=1&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"remittances"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "date_from",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "payer_config_id",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": ""
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nList remittances (read-only admin view)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Remittance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/remittances/{{remittanceId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"remittances",
+								"{{remittanceId}}"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet a remittance by ID (read-only)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payment Posts for Remittance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/remittances/{{remittanceId}}/payment-posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"remittances",
+								"{{remittanceId}}",
+								"payment-posts"
+							]
+						},
+						"description": "**Roles:** AGENCY_OWNER, ADMIN\n\nGet payment posts for a remittance (read-only)."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin read-only access to remittance data."
+		},
+		{
+			"name": "Billing > Reports",
+			"item": [
+				{
+					"name": "AR Aging Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/reports/ar-aging?payer_config_id=&individual_id=&as_of_date=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"reports",
+								"ar-aging"
+							],
+							"query": [
+								{
+									"key": "payer_config_id",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "individual_id",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "as_of_date",
+									"value": "",
+									"description": "ISO date, defaults to today"
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nAR aging report — claims bucketed by days outstanding (0-30, 31-60, 61-90, 91-120, 120+). Excludes VOID and DRAFT claims."
+					},
+					"response": []
+				},
+				{
+					"name": "EFT Reconciliation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/reports/eft-reconciliation?date_from=&date_to=&payer_config_id=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"reports",
+								"eft-reconciliation"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "payer_config_id",
+									"value": "",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nEFT reconciliation — compare EFT totals vs posted amounts per remittance, flag variances."
+					},
+					"response": []
+				},
+				{
+					"name": "Financial Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/reports/financial-dashboard?date_from=&date_to=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"reports",
+								"financial-dashboard"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nFinancial dashboard — total billed, paid, adjustments, outstanding, collection rate %, avg days to payment."
+					},
+					"response": []
+				},
+				{
+					"name": "Payer Performance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/billing/reports/payer-performance?date_from=&date_to=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"billing",
+								"reports",
+								"payer-performance"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "",
+									"description": ""
+								},
+								{
+									"key": "date_to",
+									"value": "",
+									"description": ""
+								}
+							]
+						},
+						"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nPer-payer performance — submitted/paid/denied counts and amounts, denial rate, avg days to payment."
+					},
+					"response": []
+				}
+			],
+			"description": "Billing reports — AR aging, EFT reconciliation, financial dashboard, and payer performance."
 		}
 	]
 }
