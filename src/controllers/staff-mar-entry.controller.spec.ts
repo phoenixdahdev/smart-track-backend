@@ -13,7 +13,7 @@ describe('StaffMarEntryController', () => {
   const mockCurrentUser = {
     id: 'staff-uuid', org_id: 'org-uuid', role: 'DSP',
     email: 'dsp@test.com', name: 'DSP', sub_permissions: {},
-    session_timeout: 3600, mfa_enabled: false, email_verified: true,
+    session_timeout: 3600, mfa_enabled: false, mfa_type: 'NONE', mfa_verified: true, email_verified: true,
   };
   const mockReq = {
     ip: '127.0.0.1', socket: { remoteAddress: '127.0.0.1' },

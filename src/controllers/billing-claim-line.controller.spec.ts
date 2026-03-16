@@ -18,6 +18,8 @@ describe('BillingClaimLineController', () => {
     sub_permissions: {},
     session_timeout: 3600,
     mfa_enabled: false,
+    mfa_type: 'NONE',
+    mfa_verified: true,
     email_verified: true,
   };
 

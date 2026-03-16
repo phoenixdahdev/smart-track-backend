@@ -13,7 +13,7 @@ describe('SupervisorIncidentController', () => {
   const mockCurrentUser = {
     id: 'supervisor-uuid', org_id: 'org-uuid', role: 'SUPERVISOR',
     email: 'sup@test.com', name: 'Supervisor', sub_permissions: {},
-    session_timeout: 1800, mfa_enabled: false, email_verified: true,
+    session_timeout: 1800, mfa_enabled: false, mfa_type: 'NONE', mfa_verified: true, email_verified: true,
   };
   const mockReq = {
     ip: '127.0.0.1', socket: { remoteAddress: '127.0.0.1' },

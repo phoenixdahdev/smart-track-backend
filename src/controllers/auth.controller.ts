@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { type Request } from 'express';
 import { AuthService } from '@services/auth.service';
+import { MfaService } from '@services/mfa.service';
+import { MfaType } from '@enums/mfa-type.enum';
 import { SignupDto } from '@dtos/signup.dto';
 import { SigninDto } from '@dtos/signin.dto';
 import { GoogleSigninDto } from '@dtos/google-signin.dto';
@@ -13,9 +15,19 @@ import { PrivateFields } from '@decorators/private.decorator';
 import { type AuthenticatedUser } from '@app-types/auth.types';
 
 @Controller('auth')
-@PrivateFields(['password', 'otp_code', 'reset_token'])
+@PrivateFields([
+  'password',
+  'otp_code',
+  'reset_token',
+  'mfa_secret',
+  'mfa_otp_code',
+  'mfa_backup_codes',
+])
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mfaService: MfaService,
+  ) {}
 
   @Public()
   @Post('signup')
@@ -47,6 +59,21 @@ export class AuthController {
   async signin(@Body() dto: SigninDto, @Req() req: Request) {
     const { ip, userAgent } = this.extractRequestMeta(req);
     const result = await this.authService.signin(dto, ip, userAgent);
+
+    if (result.mfaRequired) {
+      if (result.mfaType === MfaType.EMAIL_OTP) {
+        await this.mfaService.sendMfaEmailOtp(result.userId);
+      }
+      return {
+        message: 'MFA verification required',
+        data: {
+          mfaPendingToken: result.mfaPendingToken,
+          mfaRequired: true,
+          mfaType: result.mfaType,
+        },
+      };
+    }
+
     return {
       message: 'Signed in successfully',
       data: result,
@@ -58,6 +85,21 @@ export class AuthController {
   async googleSignin(@Body() dto: GoogleSigninDto, @Req() req: Request) {
     const { ip, userAgent } = this.extractRequestMeta(req);
     const result = await this.authService.googleSignin(dto, ip, userAgent);
+
+    if (result.mfaRequired) {
+      if (result.mfaType === MfaType.EMAIL_OTP) {
+        await this.mfaService.sendMfaEmailOtp(result.userId);
+      }
+      return {
+        message: 'MFA verification required',
+        data: {
+          mfaPendingToken: result.mfaPendingToken,
+          mfaRequired: true,
+          mfaType: result.mfaType,
+        },
+      };
+    }
+
     return {
       message: 'Signed in with Google successfully',
       data: result,

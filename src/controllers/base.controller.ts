@@ -1,6 +1,7 @@
 import { type ModuleMetadata } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AuthController } from './auth.controller';
+import { MfaController } from './mfa.controller';
 import { OrganizationController } from './organization.controller';
 import { UserController } from './user.controller';
 import { ProgramController } from './program.controller';
@@ -74,6 +75,7 @@ import { BillingClaimSubmissionController } from './billing-claim-submission.con
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
+  MfaController,
   OrganizationController,
   // Phase 2 — Admin Console
   UserController,

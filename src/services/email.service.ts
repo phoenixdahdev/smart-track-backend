@@ -97,6 +97,32 @@ export class EmailService {
     }
   }
 
+  async sendMfaOtp(to: string, name: string, otp: string): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn('Email skipped — Resend client is not configured');
+      return;
+    }
+
+    try {
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to,
+        subject: 'SmartTrack - Your login verification code',
+        html: `
+          <h2>Login Verification</h2>
+          <p>Hi ${this.escapeHtml(name)},</p>
+          <p>Your login verification code is:</p>
+          <h1 style="letter-spacing: 8px; font-size: 36px; text-align: center; padding: 16px; background: #f4f4f4; border-radius: 8px;">${otp}</h1>
+          <p>This code expires in 5 minutes.</p>
+          <p>If you did not attempt to sign in, please secure your account immediately.</p>
+        `,
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to send MFA OTP email to ${to}: ${message}`);
+    }
+  }
+
   private escapeHtml(text: string): string {
     return text
       .replace(/&/g, '&amp;')

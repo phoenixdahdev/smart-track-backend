@@ -19,6 +19,8 @@ describe('ClinicalIspGoalController', () => {
     sub_permissions: {},
     session_timeout: 1800,
     mfa_enabled: false,
+    mfa_type: 'NONE',
+    mfa_verified: true,
     email_verified: true,
   };
   const mockReq = {

@@ -14,6 +14,8 @@ describe('SubPermissionsService', () => {
     sub_permissions: perms,
     session_timeout: 30,
     mfa_enabled: false,
+    mfa_type: 'NONE',
+    mfa_verified: true,
     email_verified: true,
   });
 

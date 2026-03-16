@@ -1,46 +1,35 @@
 import {
-  BadRequestException,
   Injectable,
-  Logger,
+  BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { UserDal } from '@dals/user.dal';
 import { UserStatus } from '@enums/user-status.enum';
+import { MfaType } from '@enums/mfa-type.enum';
 import { AuditLogService } from './audit-log.service';
 import { EmailService } from './email.service';
+import { TokenService } from './token.service';
 import { type SignupDto } from '@dtos/signup.dto';
 import { type SigninDto } from '@dtos/signin.dto';
 import { type GoogleSigninDto } from '@dtos/google-signin.dto';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
   private readonly googleClient: OAuth2Client;
-  private readonly jwtRefreshSecret: string;
-  private readonly jwtRefreshExpiration: string;
 
   constructor(
     private readonly userDal: UserDal,
-    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly auditLogService: AuditLogService,
     private readonly emailService: EmailService,
+    private readonly tokenService: TokenService,
   ) {
     this.googleClient = new OAuth2Client(
       configService.get<string>('GOOGLE_CLIENT_ID'),
-    );
-    this.jwtRefreshSecret = configService.get<string>(
-      'JWT_REFRESH_SECRET',
-      'change-me-refresh',
-    );
-    this.jwtRefreshExpiration = configService.get<string>(
-      'JWT_REFRESH_EXPIRATION',
-      '7d',
     );
   }
 
@@ -68,7 +57,7 @@ export class AuthService {
       transactionOptions: { useTransaction: false },
     });
 
-    const tokens = this.generateTokens(user);
+    const tokens = this.tokenService.generateTokens(user, true);
 
     await this.emailService.sendOtp(user.email, user.name, otp);
 
@@ -177,8 +166,6 @@ export class AuthService {
       transactionOptions: { useTransaction: false },
     });
 
-    const tokens = this.generateTokens(user);
-
     if (user.org_id) {
       await this.auditLogService.logAgencyAction({
         org_id: user.org_id,
@@ -191,7 +178,18 @@ export class AuthService {
       });
     }
 
-    return { user, ...tokens };
+    if (user.mfa_enabled && user.mfa_type !== MfaType.NONE) {
+      const mfaPendingToken = this.tokenService.generateMfaPendingToken(user);
+      return {
+        mfaPendingToken,
+        mfaRequired: true,
+        mfaType: user.mfa_type,
+        userId: user.id,
+      };
+    }
+
+    const tokens = this.tokenService.generateTokens(user, true);
+    return { user, ...tokens, mfaRequired: false };
   }
 
   async googleSignin(dto: GoogleSigninDto, ip: string, userAgent: string) {
@@ -227,8 +225,6 @@ export class AuthService {
       transactionOptions: { useTransaction: false },
     });
 
-    const tokens = this.generateTokens(user);
-
     if (user.org_id) {
       await this.auditLogService.logAgencyAction({
         org_id: user.org_id,
@@ -241,7 +237,18 @@ export class AuthService {
       });
     }
 
-    return { user, ...tokens };
+    if (user.mfa_enabled && user.mfa_type !== MfaType.NONE) {
+      const mfaPendingToken = this.tokenService.generateMfaPendingToken(user);
+      return {
+        mfaPendingToken,
+        mfaRequired: true,
+        mfaType: user.mfa_type,
+        userId: user.id,
+      };
+    }
+
+    const tokens = this.tokenService.generateTokens(user, true);
+    return { user, ...tokens, mfaRequired: false };
   }
 
   async getMe(userId: string) {
@@ -263,6 +270,7 @@ export class AuthService {
       sub_permissions: user.sub_permissions as Record<string, boolean>,
       session_timeout: user.session_timeout,
       mfa_enabled: user.mfa_enabled,
+      mfa_type: user.mfa_type,
       email_verified: user.email_verified,
     };
   }
@@ -333,9 +341,7 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     try {
-      const payload = this.jwtService.verify<{ sub: string }>(refreshToken, {
-        secret: this.jwtRefreshSecret,
-      });
+      const payload = this.tokenService.verifyRefreshToken(refreshToken);
 
       const user = await this.userDal.get({
         identifierOptions: { id: payload.sub },
@@ -345,7 +351,7 @@ export class AuthService {
         throw new UnauthorizedException('User not found');
       }
 
-      return this.generateTokens(user);
+      return this.tokenService.generateTokens(user, true);
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -373,27 +379,5 @@ export class AuthService {
 
   private generateOtp(): string {
     return crypto.randomInt(100000, 999999).toString();
-  }
-
-  private generateTokens(user: {
-    id: string;
-    email: string;
-    role: string;
-    org_id: string | null;
-  }) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      org_id: user.org_id,
-    };
-
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: this.jwtRefreshSecret,
-      expiresIn: this.jwtRefreshExpiration as unknown as number,
-    });
-
-    return { accessToken, refreshToken };
   }
 }

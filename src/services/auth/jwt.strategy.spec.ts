@@ -44,6 +44,7 @@ describe('JwtStrategy', () => {
     email: 'test@agency.com',
     role: AgencyRole.ADMIN,
     org_id: 'org-uuid',
+    mfa_verified: true,
   };
 
   it('should be defined', () => {
@@ -64,7 +65,9 @@ describe('JwtStrategy', () => {
       sub_permissions: { 'view:reports': true },
       session_timeout: 30,
       mfa_enabled: false,
+      mfa_type: MfaType.NONE,
       email_verified: true,
+      mfa_verified: true,
     });
   });
 

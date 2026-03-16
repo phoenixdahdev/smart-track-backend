@@ -1,6 +1,8 @@
 import { AuthController } from './auth.controller';
 import { AuthService } from '@services/auth.service';
+import { MfaService } from '@services/mfa.service';
 import { AgencyRole } from '@enums/role.enum';
+import { MfaType } from '@enums/mfa-type.enum';
 import { type AuthenticatedUser } from '@app-types/auth.types';
 import { type Request } from 'express';
 
@@ -18,6 +20,9 @@ describe('AuthController', () => {
     refreshToken: jest.Mock;
     signout: jest.Mock;
   };
+  let mfaService: {
+    sendMfaEmailOtp: jest.Mock;
+  };
 
   const mockUser: AuthenticatedUser = {
     id: 'user-uuid',
@@ -28,6 +33,8 @@ describe('AuthController', () => {
     sub_permissions: {},
     session_timeout: 30,
     mfa_enabled: false,
+    mfa_type: MfaType.NONE,
+    mfa_verified: true,
     email_verified: true,
   };
 
@@ -45,10 +52,10 @@ describe('AuthController', () => {
         .fn()
         .mockResolvedValue({ message: 'Email verified successfully' }),
       resendOtp: jest.fn().mockResolvedValue({ message: 'OTP sent' }),
-      signin: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens }),
+      signin: jest.fn().mockResolvedValue({ user: mockUser, ...mockTokens, mfaRequired: false }),
       googleSignin: jest
         .fn()
-        .mockResolvedValue({ user: mockUser, ...mockTokens }),
+        .mockResolvedValue({ user: mockUser, ...mockTokens, mfaRequired: false }),
       getMe: jest.fn().mockResolvedValue(mockUser),
       forgotPassword: jest
         .fn()
@@ -57,8 +64,14 @@ describe('AuthController', () => {
       refreshToken: jest.fn().mockResolvedValue(mockTokens),
       signout: jest.fn().mockResolvedValue(undefined),
     };
+    mfaService = {
+      sendMfaEmailOtp: jest.fn().mockResolvedValue(undefined),
+    };
 
-    controller = new AuthController(authService as unknown as AuthService);
+    controller = new AuthController(
+      authService as unknown as AuthService,
+      mfaService as unknown as MfaService,
+    );
   });
 
   it('should be defined', () => {
@@ -97,7 +110,7 @@ describe('AuthController', () => {
   });
 
   describe('POST /auth/signin', () => {
-    it('should return user and tokens', async () => {
+    it('should return user and tokens when no MFA', async () => {
       const result = await controller.signin(
         { email: 'test@test.com', password: 'pass' },
         mockReq,
@@ -105,16 +118,67 @@ describe('AuthController', () => {
 
       expect(result.message).toBe('Signed in successfully');
     });
+
+    it('should return MFA pending when MFA enabled (TOTP)', async () => {
+      authService.signin.mockResolvedValue({
+        mfaPendingToken: 'pending-token',
+        mfaRequired: true,
+        mfaType: MfaType.TOTP,
+        userId: 'user-uuid',
+      });
+
+      const result = await controller.signin(
+        { email: 'test@test.com', password: 'pass' },
+        mockReq,
+      );
+
+      expect(result.message).toBe('MFA verification required');
+      expect(result.data.mfaPendingToken).toBe('pending-token');
+      expect(mfaService.sendMfaEmailOtp).not.toHaveBeenCalled();
+    });
+
+    it('should send email OTP when MFA enabled (EMAIL_OTP)', async () => {
+      authService.signin.mockResolvedValue({
+        mfaPendingToken: 'pending-token',
+        mfaRequired: true,
+        mfaType: MfaType.EMAIL_OTP,
+        userId: 'user-uuid',
+      });
+
+      const result = await controller.signin(
+        { email: 'test@test.com', password: 'pass' },
+        mockReq,
+      );
+
+      expect(result.message).toBe('MFA verification required');
+      expect(mfaService.sendMfaEmailOtp).toHaveBeenCalledWith('user-uuid');
+    });
   });
 
   describe('POST /auth/signin/google', () => {
-    it('should return user and tokens', async () => {
+    it('should return user and tokens when no MFA', async () => {
       const result = await controller.googleSignin(
         { idToken: 'token' },
         mockReq,
       );
 
       expect(result.message).toBe('Signed in with Google successfully');
+    });
+
+    it('should return MFA pending when MFA enabled', async () => {
+      authService.googleSignin.mockResolvedValue({
+        mfaPendingToken: 'pending-token',
+        mfaRequired: true,
+        mfaType: MfaType.TOTP,
+        userId: 'user-uuid',
+      });
+
+      const result = await controller.googleSignin(
+        { idToken: 'token' },
+        mockReq,
+      );
+
+      expect(result.message).toBe('MFA verification required');
     });
   });
 

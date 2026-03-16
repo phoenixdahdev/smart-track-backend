@@ -1,7 +1,7 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
 import { AuditLogService } from './audit-log.service';
 import { EmailService } from './email.service';
 import { AgencyRole } from '@enums/role.enum';
@@ -30,7 +30,11 @@ const bcrypt = require('bcrypt') as { compare: jest.Mock };
 describe('AuthService', () => {
   let service: AuthService;
   let userDal: { get: jest.Mock; create: jest.Mock; update: jest.Mock };
-  let jwtService: { sign: jest.Mock; verify: jest.Mock };
+  let tokenService: {
+    generateTokens: jest.Mock;
+    generateMfaPendingToken: jest.Mock;
+    verifyRefreshToken: jest.Mock;
+  };
   let auditLogService: { logAgencyAction: jest.Mock };
   let emailService: { sendOtp: jest.Mock; sendPasswordReset: jest.Mock };
 
@@ -54,15 +58,18 @@ describe('AuthService', () => {
     last_login: null,
   };
 
+  const mockTokens = { accessToken: 'mock-access', refreshToken: 'mock-refresh' };
+
   beforeEach(() => {
     userDal = {
       get: jest.fn().mockResolvedValue(mockUser),
       create: jest.fn().mockResolvedValue(mockUser),
       update: jest.fn().mockResolvedValue(mockUser),
     };
-    jwtService = {
-      sign: jest.fn().mockReturnValue('mock-token'),
-      verify: jest.fn(),
+    tokenService = {
+      generateTokens: jest.fn().mockReturnValue(mockTokens),
+      generateMfaPendingToken: jest.fn().mockReturnValue('mfa-pending-token'),
+      verifyRefreshToken: jest.fn().mockReturnValue({ sub: 'user-uuid' }),
     };
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
@@ -76,8 +83,6 @@ describe('AuthService', () => {
       get: jest.fn().mockImplementation((key: string, defaultVal?: string) => {
         const config: Record<string, string> = {
           GOOGLE_CLIENT_ID: 'test-google-id',
-          JWT_REFRESH_SECRET: 'test-refresh-secret',
-          JWT_REFRESH_EXPIRATION: '7d',
         };
         return config[key] ?? defaultVal ?? '';
       }),
@@ -85,10 +90,10 @@ describe('AuthService', () => {
 
     service = new AuthService(
       userDal as never,
-      jwtService as unknown as JwtService,
       configService,
       auditLogService as unknown as AuditLogService,
       emailService as unknown as EmailService,
+      tokenService as unknown as TokenService,
     );
   });
 
@@ -108,7 +113,7 @@ describe('AuthService', () => {
 
       expect(userDal.create).toHaveBeenCalled();
       expect(emailService.sendOtp).toHaveBeenCalled();
-      expect(result.accessToken).toBe('mock-token');
+      expect(result.accessToken).toBe('mock-access');
     });
 
     it('should throw BadRequestException for existing email', async () => {
@@ -195,14 +200,51 @@ describe('AuthService', () => {
   });
 
   describe('signin', () => {
-    it('should return user and tokens for valid credentials', async () => {
+    it('should return user and tokens for valid credentials (no MFA)', async () => {
       const result = await service.signin(
         { email: 'test@agency.com', password: 'password123' },
         '127.0.0.1',
         'Agent',
       );
 
-      expect(result.accessToken).toBe('mock-token');
+      expect(result.accessToken).toBe('mock-access');
+      expect(result.mfaRequired).toBe(false);
+    });
+
+    it('should return mfaPendingToken when MFA enabled (TOTP)', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        mfa_enabled: true,
+        mfa_type: MfaType.TOTP,
+      });
+
+      const result = await service.signin(
+        { email: 'test@agency.com', password: 'password123' },
+        '127.0.0.1',
+        'Agent',
+      );
+
+      expect(result.mfaRequired).toBe(true);
+      expect(result.mfaPendingToken).toBe('mfa-pending-token');
+      expect(result.mfaType).toBe(MfaType.TOTP);
+    });
+
+    it('should return mfaPendingToken when MFA enabled (EMAIL_OTP)', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        mfa_enabled: true,
+        mfa_type: MfaType.EMAIL_OTP,
+      });
+
+      const result = await service.signin(
+        { email: 'test@agency.com', password: 'password123' },
+        '127.0.0.1',
+        'Agent',
+      );
+
+      expect(result.mfaRequired).toBe(true);
+      expect(result.mfaPendingToken).toBe('mfa-pending-token');
+      expect(result.mfaType).toBe(MfaType.EMAIL_OTP);
     });
 
     it('should throw for non-existent user', async () => {
@@ -242,7 +284,7 @@ describe('AuthService', () => {
   });
 
   describe('googleSignin', () => {
-    it('should return tokens for valid Google token', async () => {
+    it('should return tokens for valid Google token (no MFA)', async () => {
       userDal.get.mockResolvedValue({
         ...mockUser,
         email: 'google@agency.com',
@@ -254,7 +296,26 @@ describe('AuthService', () => {
         'Agent',
       );
 
-      expect(result.accessToken).toBe('mock-token');
+      expect(result.accessToken).toBe('mock-access');
+      expect(result.mfaRequired).toBe(false);
+    });
+
+    it('should return mfaPendingToken when MFA enabled', async () => {
+      userDal.get.mockResolvedValue({
+        ...mockUser,
+        email: 'google@agency.com',
+        mfa_enabled: true,
+        mfa_type: MfaType.TOTP,
+      });
+
+      const result = await service.googleSignin(
+        { idToken: 'valid-token' },
+        '127.0.0.1',
+        'Agent',
+      );
+
+      expect(result.mfaRequired).toBe(true);
+      expect(result.mfaPendingToken).toBe('mfa-pending-token');
     });
 
     it('should throw when user not found', async () => {
@@ -267,11 +328,12 @@ describe('AuthService', () => {
   });
 
   describe('getMe', () => {
-    it('should return user profile', async () => {
+    it('should return user profile with mfa_type', async () => {
       const result = await service.getMe('user-uuid');
 
       expect(result.id).toBe('user-uuid');
       expect(result.email_verified).toBe(true);
+      expect(result.mfa_type).toBe(MfaType.NONE);
     });
 
     it('should throw for missing user', async () => {
@@ -345,15 +407,14 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('should return new tokens', async () => {
-      jwtService.verify.mockReturnValue({ sub: 'user-uuid' });
-
       const result = await service.refreshToken('old-token');
 
-      expect(result.accessToken).toBe('mock-token');
+      expect(result.accessToken).toBe('mock-access');
+      expect(tokenService.verifyRefreshToken).toHaveBeenCalledWith('old-token');
     });
 
     it('should throw on invalid token', async () => {
-      jwtService.verify.mockImplementation(() => {
+      tokenService.verifyRefreshToken.mockImplementation(() => {
         throw new Error('invalid');
       });
 

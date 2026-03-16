@@ -66,6 +66,24 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'enum', enum: MfaType, default: MfaType.NONE })
   mfa_type: MfaType;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  mfa_secret: string | null;
+
+  @Column({ type: 'varchar', length: 6, nullable: true })
+  mfa_otp_code: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  mfa_otp_expires_at: Date | null;
+
+  @Column({ type: 'jsonb', default: '[]' })
+  mfa_backup_codes: { hash: string; used: boolean }[];
+
+  @Column({ type: 'integer', default: 0 })
+  mfa_failed_attempts: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  mfa_locked_until: Date | null;
+
   @Column({ type: 'integer', default: 30 })
   session_timeout: number;
 

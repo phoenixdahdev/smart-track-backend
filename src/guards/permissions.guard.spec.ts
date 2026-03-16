@@ -57,6 +57,8 @@ describe('PermissionsGuard', () => {
       sub_permissions: { 'view:reports': true, 'edit:records': true },
       session_timeout: 30,
       mfa_enabled: false,
+      mfa_type: 'NONE',
+      mfa_verified: true,
       email_verified: true,
     });
     jest
@@ -77,6 +79,8 @@ describe('PermissionsGuard', () => {
       sub_permissions: { 'view:reports': true },
       session_timeout: 30,
       mfa_enabled: false,
+      mfa_type: 'NONE',
+      mfa_verified: true,
       email_verified: true,
     });
     jest

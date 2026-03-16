@@ -24,7 +24,15 @@ type ResponseData = {
   success: boolean;
 };
 
-const DEFAULT_PRIVATE_FIELDS = ['password', 'ssn', 'dateOfBirth'];
+const DEFAULT_PRIVATE_FIELDS = [
+  'password',
+  'ssn',
+  'dateOfBirth',
+  'mfaSecret',
+  'mfaOtpCode',
+  'mfaBackupCodes',
+  'mfaLockedUntil',
+];
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {

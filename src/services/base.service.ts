@@ -5,9 +5,12 @@ import { TenantContextInterceptor } from '@interceptors/tenant-context.intercept
 import { JwtAuthGuard } from '@guards/jwt-auth.guard';
 import { RolesGuard } from '@guards/roles.guard';
 import { PermissionsGuard } from '@guards/permissions.guard';
+import { MfaGuard } from '@guards/mfa.guard';
 import { AppService } from './app.service';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
+import { MfaService } from './mfa.service';
 import { AuditLogService } from './audit-log.service';
 import { EmailService } from './email.service';
 import { EncryptionService } from './encryption.service';
@@ -131,6 +134,8 @@ export const services: Provider[] = [
   // Auth
   JwtStrategy,
   AuthService,
+  TokenService,
+  MfaService,
   AuditLogService,
   EmailService,
   EncryptionService,
@@ -184,6 +189,10 @@ export const services: Provider[] = [
   {
     provide: APP_GUARD,
     useClass: JwtAuthGuard,
+  },
+  {
+    provide: APP_GUARD,
+    useClass: MfaGuard,
   },
   {
     provide: APP_GUARD,
