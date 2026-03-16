@@ -1,6 +1,6 @@
 # SmartTrack Health - Progress Tracker
 
-> Last updated: 2026-03-13
+> Last updated: 2026-03-16
 
 ## Legend
 
@@ -179,24 +179,24 @@
 
 ## Phase 8: SuperAdmin Console API
 
-**Status: Not Started (entities ready)**
+**Status: Complete (14/14) — 129 suites, 1220 tests**
 
-| Task                             | Status | Notes                                                       |
-| -------------------------------- | ------ | ----------------------------------------------------------- |
-| Operator management              | [ ]    | Entity + DAL created                                        |
-| Agency signup pipeline (7-stage) | [ ]    | Entity + DAL created, ApplicationStatus state machine ready |
-| Application review queue         | [ ]    | application_documents + application_notes entities ready    |
-| Risk scoring                     | [ ]    | NPI, EIN, BAA validation                                    |
-| Tenant provisioning automation   | [ ]    | 12-step process                                             |
-| Onboarding checklists            | [ ]    | Entity + DAL created                                        |
-| Agency management                | [ ]    | org_contacts + signed_agreements entities ready             |
-| Global service code library      | [ ]    | Entity + DAL created                                        |
-| Global payer configuration       | [ ]    | Entity + DAL created                                        |
-| Subscription plan management     | [ ]    | plan_definitions + subscriptions + invoices entities ready  |
-| Feature flags + module toggles   | [ ]    | org_modules + org_feature_flags entities ready              |
-| Platform health monitoring       | [ ]    |                                                             |
-| Break-glass access protocol      | [ ]    | Entity + DAL created                                        |
-| Platform audit log               | [ ]    | Entity + DAL created                                        |
+| Task                             | Status | Notes                                                                                  |
+| -------------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| Operator management              | [x]    | OperatorService + SuperadminOperatorController, 5 endpoints                            |
+| Agency signup pipeline (7-stage) | [x]    | SignupApplicationService + APPLICATION_TRANSITIONS state machine, 11 endpoints          |
+| Application review queue         | [x]    | Notes, documents, verify, assign reviewer                                              |
+| Risk scoring                     | [x]    | RiskScoringService — NPI, EIN, free email, enterprise tier checks                      |
+| Tenant provisioning automation   | [x]    | TenantProvisioningService — creates org, admin user, subscription, checklist, modules   |
+| Onboarding checklists            | [x]    | OnboardingService — 10 standard tasks, specialist assignment, complete/skip             |
+| Agency management                | [x]    | AgencyManagementService — status, contacts, agreements, modules, flags, 13 endpoints   |
+| Global service code library      | [x]    | GlobalServiceCodeService — CRUD + deprecate, 5 endpoints                               |
+| Global payer configuration       | [x]    | GlobalPayerService — CRUD + deactivate, 5 endpoints                                    |
+| Subscription plan management     | [x]    | SubscriptionManagementService — plans, subscriptions, invoices, 4+5 endpoints          |
+| Feature flags + module toggles   | [x]    | Upsert pattern for modules and flags                                                   |
+| Platform health monitoring       | [x]    | SuperadminDashboardController — agencies, apps, subscriptions by status                |
+| Break-glass access protocol      | [x]    | BreakGlassService — request, approve (no self-approve), end, 6 endpoints               |
+| Platform audit log               | [x]    | SuperadminAuditLogController — filtered listing via PlatformAuditLogDal                |
 
 ---
 

@@ -150,6 +150,51 @@
 			"key": "adlEntryId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "operatorId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "applicationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "applicationDocId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "globalServiceCodeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "globalPayerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "planDefinitionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "breakGlassSessionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "checklistId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "taskId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"auth": {
@@ -7218,6 +7263,1744 @@
 				}
 			],
 			"description": "Billing reports — AR aging, EFT reconciliation, financial dashboard, and payer performance."
+		},
+		{
+			"name": "SuperAdmin",
+			"item": [
+				{
+					"name": "Operators",
+					"item": [
+						{
+							"name": "Create Operator",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/operators",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"operators"
+									]
+								},
+								"description": "**Authenticated** — Create a new platform operator.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email | string | Yes | Operator email |\n| name | string | Yes | Full name |\n| role | string | Yes | PLATFORM_ADMIN or ONBOARDING_SPECIALIST |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"operator@smarttrack.com\",\n  \"name\": \"New Operator\",\n  \"role\": \"PLATFORM_ADMIN\"\n}"
+								}
+							},
+							"response": [],
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('operatorId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "List Operators",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/operators?role=PLATFORM_ADMIN&active=true&page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"operators"
+									],
+									"query": [
+										{
+											"key": "role",
+											"value": "PLATFORM_ADMIN",
+											"disabled": true
+										},
+										{
+											"key": "active",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List all platform operators with optional filters."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Operator",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/operators/{{operatorId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"operators",
+										"{{operatorId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific operator by ID."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Operator",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/operators/{{operatorId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"operators",
+										"{{operatorId}}"
+									]
+								},
+								"description": "**Authenticated** — Update an operator.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| name | string | No | Updated name |\n| role | string | No | Updated role |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Name\",\n  \"role\": \"PLATFORM_ADMIN\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deactivate Operator",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/operators/{{operatorId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"operators",
+										"{{operatorId}}"
+									]
+								},
+								"description": "**Authenticated** — Deactivate (soft-delete) an operator."
+							},
+							"response": []
+						}
+					],
+					"description": "Platform operator management (SuperAdmin only)."
+				},
+				{
+					"name": "Applications",
+					"item": [
+						{
+							"name": "Submit Application (Public)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/public/signup",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"public",
+										"signup"
+									]
+								},
+								"description": "**Public** — Submit a new organization application.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| org_name | string | Yes | Organization name |\n| npi | string | Yes | 10-digit NPI |\n| ein | string | Yes | 9-digit EIN |\n| contact_name | string | Yes | Primary contact |\n| contact_email | string | Yes | Contact email |\n| plan_tier | string | Yes | STARTER, PROFESSIONAL, ENTERPRISE |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"org_name\": \"Sunrise Care LLC\",\n  \"npi\": \"1234567890\",\n  \"ein\": \"123456789\",\n  \"contact_name\": \"John Doe\",\n  \"contact_email\": \"john@sunrisecare.com\",\n  \"plan_tier\": \"STARTER\"\n}"
+								}
+							},
+							"response": [],
+							"auth": {
+								"type": "noauth"
+							},
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('applicationId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "List Applications",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications?status=SUBMITTED&plan_tier=STARTER&date_from=2026-01-01&date_to=2026-12-31&reviewed_by={{operatorId}}&page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "SUBMITTED",
+											"disabled": true
+										},
+										{
+											"key": "plan_tier",
+											"value": "STARTER",
+											"disabled": true
+										},
+										{
+											"key": "date_from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "date_to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "reviewed_by",
+											"value": "{{operatorId}}",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List all applications with optional filters."
+							},
+							"response": []
+						},
+						{
+							"name": "Summary Counts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/summary",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"summary"
+									]
+								},
+								"description": "**Authenticated** — Get application summary counts by status."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Application",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific application by ID."
+							},
+							"response": []
+						},
+						{
+							"name": "Transition Status",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/transition",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"transition"
+									]
+								},
+								"description": "**Authenticated** — Transition an application to a new status.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| status | string | Yes | Target status |\n| reason | string | No | Reason for transition |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"UNDER_REVIEW\",\n  \"reason\": \"Starting review\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Assign Reviewer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/assign",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"assign"
+									]
+								},
+								"description": "**Authenticated** — Assign a reviewer to the application.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| reviewer_id | string | Yes | Operator UUID |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"reviewer_id\": \"{{operatorId}}\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Note",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/notes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"notes"
+									]
+								},
+								"description": "**Authenticated** — Add a note to the application.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| note_text | string | Yes | Note content |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"note_text\": \"Application looks complete\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Notes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/notes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"notes"
+									]
+								},
+								"description": "**Authenticated** — Get all notes for an application."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Documents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/documents",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"documents"
+									]
+								},
+								"description": "**Authenticated** — Get all documents for an application."
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Document",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/documents/{{applicationDocId}}/verify",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"documents",
+										"{{applicationDocId}}",
+										"verify"
+									]
+								},
+								"description": "**Authenticated** — Verify or reject an application document.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| verified | boolean | Yes | Verification status |\n| notes | string | No | Verification notes |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"verified\": true,\n  \"notes\": \"Document verified\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Provision Tenant",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/applications/{{applicationId}}/provision",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"applications",
+										"{{applicationId}}",
+										"provision"
+									]
+								},
+								"description": "**Authenticated** — Provision a tenant from an approved application. Creates the organization, admin user, and initial data."
+							},
+							"response": []
+						}
+					],
+					"description": "Organization application lifecycle (submit, review, approve, provision)."
+				},
+				{
+					"name": "Organizations",
+					"item": [
+						{
+							"name": "List Organizations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations?status=ACTIVE&plan_tier=STARTER&state=IL&page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "ACTIVE",
+											"disabled": true
+										},
+										{
+											"key": "plan_tier",
+											"value": "STARTER",
+											"disabled": true
+										},
+										{
+											"key": "state",
+											"value": "IL",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List all tenant organizations with optional filters."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Organization",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific organization by ID."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Organization Status",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"status"
+									]
+								},
+								"description": "**Authenticated** — Update organization status.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| status | string | Yes | ACTIVE, SUSPENDED, TERMINATED |\n| reason | string | No | Reason for status change |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"SUSPENDED\",\n  \"reason\": \"Compliance review\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Contacts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/contacts",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"contacts"
+									]
+								},
+								"description": "**Authenticated** — Get organization contacts."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Agreements",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/agreements",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"agreements"
+									]
+								},
+								"description": "**Authenticated** — Get organization agreements."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Modules",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/modules",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"modules"
+									]
+								},
+								"description": "**Authenticated** — Get enabled/disabled modules for an organization."
+							},
+							"response": []
+						},
+						{
+							"name": "Toggle Module",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/modules",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"modules"
+									]
+								},
+								"description": "**Authenticated** — Enable or disable a module for an organization.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| module_name | string | Yes | Module identifier |\n| enabled | boolean | Yes | Enable/disable |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"module_name\": \"billing\",\n  \"enabled\": true\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Feature Flags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/feature-flags",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"feature-flags"
+									]
+								},
+								"description": "**Authenticated** — Get feature flags for an organization."
+							},
+							"response": []
+						},
+						{
+							"name": "Set Feature Flag",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/feature-flags",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"feature-flags"
+									]
+								},
+								"description": "**Authenticated** — Set a feature flag for an organization.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| flag_name | string | Yes | Flag identifier |\n| value | boolean | Yes | Flag value |\n| notes | string | No | Notes |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"flag_name\": \"beta_feature\",\n  \"value\": true,\n  \"notes\": \"Enable beta\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Subscription",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/subscription",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"subscription"
+									]
+								},
+								"description": "**Authenticated** — Get organization subscription details."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Subscription",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/subscription",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"subscription"
+									]
+								},
+								"description": "**Authenticated** — Update organization subscription.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| plan_tier | string | No | STARTER, PROFESSIONAL, ENTERPRISE |\n| billing_cycle | string | No | MONTHLY, ANNUAL |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"plan_tier\": \"PROFESSIONAL\",\n  \"billing_cycle\": \"ANNUAL\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Invoices",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/invoices?page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"invoices"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List invoices for an organization."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Invoice",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/organizations/{{orgId}}/invoices",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"organizations",
+										"{{orgId}}",
+										"invoices"
+									]
+								},
+								"description": "**Authenticated** — Create an invoice for an organization.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| amount_cents | integer | Yes | Amount in cents |\n| due_date | string | Yes | ISO date |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"amount_cents\": 9900,\n  \"due_date\": \"2026-04-01\"\n}"
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Tenant organization management, subscriptions, modules, feature flags, and invoicing."
+				},
+				{
+					"name": "Onboarding",
+					"item": [
+						{
+							"name": "Get Checklist",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/onboarding/{{orgId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"onboarding",
+										"{{orgId}}"
+									]
+								},
+								"description": "**Authenticated** — Get the onboarding checklist for an organization."
+							},
+							"response": [],
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('checklistId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "Assign Specialist",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/onboarding/{{orgId}}/assign",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"onboarding",
+										"{{orgId}}",
+										"assign"
+									]
+								},
+								"description": "**Authenticated** — Assign an onboarding specialist.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| specialist_id | string | Yes | Operator UUID |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"specialist_id\": \"{{operatorId}}\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Complete Task",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/onboarding/tasks/{{taskId}}/complete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"onboarding",
+										"tasks",
+										"{{taskId}}",
+										"complete"
+									]
+								},
+								"description": "**Authenticated** — Mark an onboarding task as complete.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| notes | string | No | Completion notes |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"notes\": \"Task completed successfully\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Skip Task",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/onboarding/tasks/{{taskId}}/skip",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"onboarding",
+										"tasks",
+										"{{taskId}}",
+										"skip"
+									]
+								},
+								"description": "**Authenticated** — Skip an onboarding task.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| notes | string | No | Reason for skipping |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"notes\": \"Not applicable\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Complete Checklist",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/onboarding/{{checklistId}}/complete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"onboarding",
+										"{{checklistId}}",
+										"complete"
+									]
+								},
+								"description": "**Authenticated** — Mark the entire onboarding checklist as complete."
+							},
+							"response": []
+						}
+					],
+					"description": "Tenant onboarding workflow — checklists, tasks, specialist assignment."
+				},
+				{
+					"name": "Global Service Codes",
+					"item": [
+						{
+							"name": "Create Service Code",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/service-codes",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"service-codes"
+									]
+								},
+								"description": "**Authenticated** — Create a global service code.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| code | string | Yes | Service code (e.g. H2015) |\n| description | string | Yes | Human-readable description |\n| code_type | string | Yes | HCPCS, CPT, REVENUE |\n| valid_states | string[] | No | State codes where valid |\n| billing_unit | string | No | 15MIN, HOUR, DAY, EVENT |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"H2015\",\n  \"description\": \"Community living support\",\n  \"code_type\": \"HCPCS\",\n  \"valid_states\": [\n    \"IL\",\n    \"OH\"\n  ],\n  \"billing_unit\": \"15MIN\"\n}"
+								}
+							},
+							"response": [],
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('globalServiceCodeId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "List Service Codes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/service-codes?code_type=HCPCS&status=ACTIVE&page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"service-codes"
+									],
+									"query": [
+										{
+											"key": "code_type",
+											"value": "HCPCS",
+											"disabled": true
+										},
+										{
+											"key": "status",
+											"value": "ACTIVE",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List global service codes with optional filters."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Service Code",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/service-codes/{{globalServiceCodeId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"service-codes",
+										"{{globalServiceCodeId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific global service code."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Service Code",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/service-codes/{{globalServiceCodeId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"service-codes",
+										"{{globalServiceCodeId}}"
+									]
+								},
+								"description": "**Authenticated** — Update a global service code.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| description | string | No | Updated description |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"description\": \"Updated description\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deprecate Service Code",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/service-codes/{{globalServiceCodeId}}/deprecate",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"service-codes",
+										"{{globalServiceCodeId}}",
+										"deprecate"
+									]
+								},
+								"description": "**Authenticated** — Deprecate a global service code. Prevents new usage."
+							},
+							"response": []
+						}
+					],
+					"description": "Platform-wide service code catalogue management."
+				},
+				{
+					"name": "Global Payers",
+					"item": [
+						{
+							"name": "Create Payer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/payers",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"payers"
+									]
+								},
+								"description": "**Authenticated** — Create a global payer.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| payer_name | string | Yes | Payer display name |\n| payer_id_edi | string | Yes | EDI payer ID |\n| state | string | Yes | 2-letter state code |\n| program_type | string | Yes | MEDICAID, MEDICARE, COMMERCIAL |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"payer_name\": \"Aetna\",\n  \"payer_id_edi\": \"AETNA001\",\n  \"state\": \"IL\",\n  \"program_type\": \"MEDICAID\"\n}"
+								}
+							},
+							"response": [],
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('globalPayerId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "List Payers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/payers?state=IL&active=true&page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"payers"
+									],
+									"query": [
+										{
+											"key": "state",
+											"value": "IL",
+											"disabled": true
+										},
+										{
+											"key": "active",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List global payers with optional filters."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Payer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/payers/{{globalPayerId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"payers",
+										"{{globalPayerId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific global payer."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Payer",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/payers/{{globalPayerId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"payers",
+										"{{globalPayerId}}"
+									]
+								},
+								"description": "**Authenticated** — Update a global payer.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| payer_name | string | No | Updated payer name |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"payer_name\": \"Updated Payer Name\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deactivate Payer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/payers/{{globalPayerId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"payers",
+										"{{globalPayerId}}"
+									]
+								},
+								"description": "**Authenticated** — Deactivate (soft-delete) a global payer."
+							},
+							"response": []
+						}
+					],
+					"description": "Platform-wide payer directory management."
+				},
+				{
+					"name": "Plans",
+					"item": [
+						{
+							"name": "Create Plan",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/plans",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"plans"
+									]
+								},
+								"description": "**Authenticated** — Create a plan definition.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| tier_name | string | Yes | STARTER, PROFESSIONAL, ENTERPRISE |\n| max_individuals | integer | Yes | Max individuals |\n| max_users | integer | Yes | Max users |\n| storage_gb | integer | Yes | Storage in GB |\n| api_calls_monthly | integer | Yes | Monthly API call limit |\n| modules_included | string[] | Yes | Included module names |\n| price_cents_monthly | integer | Yes | Price in cents |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"tier_name\": \"STARTER\",\n  \"max_individuals\": 100,\n  \"max_users\": 20,\n  \"storage_gb\": 10,\n  \"api_calls_monthly\": 10000,\n  \"modules_included\": [\n    \"billing\",\n    \"scheduling\"\n  ],\n  \"price_cents_monthly\": 9900\n}"
+								}
+							},
+							"response": [],
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('planDefinitionId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "List Plans",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/plans",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"plans"
+									]
+								},
+								"description": "**Authenticated** — List all plan definitions."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Plan",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/plans/{{planDefinitionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"plans",
+										"{{planDefinitionId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific plan definition."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Plan",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/plans/{{planDefinitionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"plans",
+										"{{planDefinitionId}}"
+									]
+								},
+								"description": "**Authenticated** — Update a plan definition.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| price_cents_monthly | integer | No | Updated price in cents |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"price_cents_monthly\": 14900\n}"
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Platform plan/tier definition management."
+				},
+				{
+					"name": "Break Glass",
+					"item": [
+						{
+							"name": "Request Session",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/break-glass",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"break-glass"
+									]
+								},
+								"description": "**Authenticated** — Request an emergency break-glass session.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| org_id | string | Yes | Target organization UUID |\n| ticket_id | string | Yes | Support ticket reference |\n| reason | string | Yes | Justification |\n| data_scope | string | Yes | READ_ONLY or READ_WRITE |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"org_id\": \"{{orgId}}\",\n  \"ticket_id\": \"TICK-123\",\n  \"reason\": \"Urgent data investigation\",\n  \"data_scope\": \"READ_ONLY\"\n}"
+								}
+							},
+							"response": [],
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();",
+											"if (res.data && res.data.id) {",
+											"    pm.collectionVariables.set('breakGlassSessionId', res.data.id);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							]
+						},
+						{
+							"name": "Approve Session",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/break-glass/{{breakGlassSessionId}}/approve",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"break-glass",
+										"{{breakGlassSessionId}}",
+										"approve"
+									]
+								},
+								"description": "**Authenticated** — Approve a pending break-glass session (requires second operator)."
+							},
+							"response": []
+						},
+						{
+							"name": "End Session",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/break-glass/{{breakGlassSessionId}}/end",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"break-glass",
+										"{{breakGlassSessionId}}",
+										"end"
+									]
+								},
+								"description": "**Authenticated** — End an active break-glass session.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| actions_summary | string | Yes | Summary of actions taken |",
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"actions_summary\": \"Read-only investigation completed. No changes made.\"\n}"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Sessions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/break-glass?page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"break-glass"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List break-glass sessions."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Session",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/break-glass/{{breakGlassSessionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"break-glass",
+										"{{breakGlassSessionId}}"
+									]
+								},
+								"description": "**Authenticated** — Get a specific break-glass session."
+							},
+							"response": []
+						},
+						{
+							"name": "Active Sessions for Org",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/break-glass/org/{{orgId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"break-glass",
+										"org",
+										"{{orgId}}"
+									]
+								},
+								"description": "**Authenticated** — Get all active break-glass sessions for an organization."
+							},
+							"response": []
+						}
+					],
+					"description": "Emergency break-glass access to tenant data with full audit trail."
+				},
+				{
+					"name": "Audit Log",
+					"item": [
+						{
+							"name": "List Audit Logs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/audit-log?operator_id={{operatorId}}&action=CREATE&target_type=APPLICATION&date_from=2026-01-01&date_to=2026-12-31&page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"audit-log"
+									],
+									"query": [
+										{
+											"key": "operator_id",
+											"value": "{{operatorId}}",
+											"disabled": true
+										},
+										{
+											"key": "action",
+											"value": "CREATE",
+											"disabled": true
+										},
+										{
+											"key": "target_type",
+											"value": "APPLICATION",
+											"disabled": true
+										},
+										{
+											"key": "date_from",
+											"value": "2026-01-01",
+											"disabled": true
+										},
+										{
+											"key": "date_to",
+											"value": "2026-12-31",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "20",
+											"disabled": true
+										}
+									]
+								},
+								"description": "**Authenticated** — List platform-level audit logs with optional filters."
+							},
+							"response": []
+						}
+					],
+					"description": "Platform-level audit log viewer."
+				},
+				{
+					"name": "Dashboard",
+					"item": [
+						{
+							"name": "Platform Dashboard",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/health",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"superadmin",
+										"platform",
+										"health"
+									]
+								},
+								"description": "**Authenticated** — Platform health dashboard with aggregate metrics (org count, active users, pending applications, etc.)."
+							},
+							"response": []
+						}
+					],
+					"description": "Platform health and metrics dashboard."
+				}
+			],
+			"description": "SuperAdmin console — platform-level operations. Requires a platform operator JWT.\n\n## Operator Roles\n- **PLATFORM_ADMIN** — Full platform access\n- **ONBOARDING_SPECIALIST** — Application review & onboarding only\n\n## Key Concepts\n- **Applications** follow a state machine: SUBMITTED → UNDER_REVIEW → APPROVED | REJECTED → PROVISIONED\n- **Break Glass** provides audited emergency access to tenant data\n- **Global Service Codes / Payers** are platform-wide references that tenants map locally"
 		}
 	]
 }

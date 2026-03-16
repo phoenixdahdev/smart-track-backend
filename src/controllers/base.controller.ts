@@ -93,6 +93,18 @@ import { BillingArReportController } from './billing-ar-report.controller';
 // Phase 7 — Admin Console (Remittances)
 import { AdminRemittanceController } from './admin-remittance.controller';
 
+// Phase 8 — SuperAdmin Console
+import { SuperadminOperatorController } from './superadmin-operator.controller';
+import { SuperadminApplicationController } from './superadmin-application.controller';
+import { SuperadminOrgController } from './superadmin-org.controller';
+import { SuperadminOnboardingController } from './superadmin-onboarding.controller';
+import { SuperadminGlobalServiceCodeController } from './superadmin-global-service-code.controller';
+import { SuperadminGlobalPayerController } from './superadmin-global-payer.controller';
+import { SuperadminPlanController } from './superadmin-plan.controller';
+import { SuperadminBreakGlassController } from './superadmin-break-glass.controller';
+import { SuperadminAuditLogController } from './superadmin-audit-log.controller';
+import { SuperadminDashboardController } from './superadmin-dashboard.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -164,4 +176,15 @@ export const controllers: ModuleMetadata['controllers'] = [
   BillingArReportController,
   // Phase 7 — Admin Console (Remittances)
   AdminRemittanceController,
+  // Phase 8 — SuperAdmin Console
+  SuperadminOperatorController,
+  SuperadminApplicationController,
+  SuperadminOrgController,
+  SuperadminOnboardingController,
+  SuperadminGlobalServiceCodeController,
+  SuperadminGlobalPayerController,
+  SuperadminPlanController,
+  SuperadminBreakGlassController,
+  SuperadminAuditLogController,
+  SuperadminDashboardController,
 ];

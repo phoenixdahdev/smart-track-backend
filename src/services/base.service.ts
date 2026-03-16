@@ -68,6 +68,18 @@ import { PaymentMatchingService } from './payment-matching.service';
 import { PaymentPostingService } from './payment-posting.service';
 import { ArReportService } from './ar-report.service';
 
+// Phase 8 Services
+import { OperatorService } from './operator.service';
+import { SignupApplicationService } from './signup-application.service';
+import { RiskScoringService } from './risk-scoring.service';
+import { TenantProvisioningService } from './tenant-provisioning.service';
+import { OnboardingService } from './onboarding.service';
+import { AgencyManagementService } from './agency-management.service';
+import { GlobalServiceCodeService } from './global-service-code.service';
+import { GlobalPayerService } from './global-payer.service';
+import { SubscriptionManagementService } from './subscription-management.service';
+import { BreakGlassService } from './break-glass.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -208,6 +220,18 @@ export const services: Provider[] = [
   PaymentMatchingService,
   PaymentPostingService,
   ArReportService,
+
+  // Phase 8 Services
+  OperatorService,
+  SignupApplicationService,
+  RiskScoringService,
+  TenantProvisioningService,
+  OnboardingService,
+  AgencyManagementService,
+  GlobalServiceCodeService,
+  GlobalPayerService,
+  SubscriptionManagementService,
+  BreakGlassService,
 
   // Guards
   {
