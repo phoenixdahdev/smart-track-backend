@@ -200,6 +200,16 @@
 			"key": "notificationId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "guardianIndividualId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ispGoalId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"auth": {
@@ -10040,6 +10050,382 @@
 				}
 			],
 			"description": "Clinical notification management — list, read, and preferences."
+		},
+		{
+			"name": "Guardian Portal",
+			"item": [
+				{
+					"name": "Individuals",
+					"item": [
+						{
+							"name": "List Linked Individuals",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList all individuals linked to the current guardian."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Individual Profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nGet detailed profile for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Dashboard",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/dashboard",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"dashboard"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nGet dashboard summary for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "List Service Records",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/service-records",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"service-records"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList service records for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "List Incidents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/incidents",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"incidents"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList incidents for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "List ISP Goals",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/isp/goals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"isp",
+										"goals"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList ISP goals for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Goal Progress",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/isp/goals/{{ispGoalId}}/progress",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"isp",
+										"goals",
+										"{{ispGoalId}}",
+										"progress"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nGet progress data for a specific ISP goal."
+							},
+							"response": []
+						},
+						{
+							"name": "List Upcoming Shifts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/schedule",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"schedule"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList upcoming scheduled shifts for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "List MAR Summaries",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/medications",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"medications"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList medication administration record summaries for a linked individual."
+							},
+							"response": []
+						},
+						{
+							"name": "List ADL Summaries",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/individuals/{{guardianIndividualId}}/adl",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"individuals",
+										"{{guardianIndividualId}}",
+										"adl"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList ADL (Activities of Daily Living) summaries for a linked individual."
+							},
+							"response": []
+						}
+					],
+					"description": "Guardian portal individual management — view linked individuals, profiles, service records, incidents, ISP goals, schedules, medications, and ADL summaries."
+				},
+				{
+					"name": "Notifications",
+					"item": [
+						{
+							"name": "List Notifications",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/notifications",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"notifications"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nList notifications for the current guardian."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Unread Count",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/notifications/unread-count",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"notifications",
+										"unread-count"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nGet count of unread notifications."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Preferences",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portal/notifications/preferences",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"notifications",
+										"preferences"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nGet notification preferences."
+							},
+							"response": []
+						},
+						{
+							"name": "Update Preferences",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email_enabled\": true,\n  \"sms_enabled\": false,\n  \"in_app_enabled\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/portal/notifications/preferences",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"notifications",
+										"preferences"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nUpdate notification preferences.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| email_enabled | boolean | No | Global email toggle |\n| sms_enabled | boolean | No | Global SMS toggle |\n| in_app_enabled | boolean | No | Global in-app toggle |"
+							},
+							"response": []
+						},
+						{
+							"name": "Mark Notification Read",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"read\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/portal/notifications/{{notificationId}}/read",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"notifications",
+										"{{notificationId}}",
+										"read"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nMark a specific notification as read or unread.\n\n| Field | Type | Required | Notes |\n|-------|------|----------|-------|\n| read | boolean | Yes | true to mark read, false to mark unread |"
+							},
+							"response": []
+						},
+						{
+							"name": "Mark All Read",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/portal/notifications/mark-all-read",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portal",
+										"notifications",
+										"mark-all-read"
+									]
+								},
+								"description": "**Roles:** GUARDIAN\n\nMark all notifications as read."
+							},
+							"response": []
+						}
+					],
+					"description": "Guardian portal notification management — list, read, and preferences."
+				}
+			],
+			"description": "Guardian Portal — read-only access for guardians to view linked individuals, service records, incidents, ISP goals, schedules, medications, ADL summaries, and manage notifications."
 		}
 	]
 }

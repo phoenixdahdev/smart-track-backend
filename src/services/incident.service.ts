@@ -7,6 +7,7 @@ import {
 import { IncidentDal } from '@dals/incident.dal';
 import { EncryptionService } from './encryption.service';
 import { AuditLogService } from './audit-log.service';
+import { NotificationTriggerService } from './notification-trigger.service';
 import { type CreateIncidentDto } from '@dtos/create-incident.dto';
 import { type UpdateIncidentDto } from '@dtos/update-incident.dto';
 import { type IncidentEntity } from '@entities/incident.entity';
@@ -25,6 +26,7 @@ export class IncidentService {
     private readonly incidentDal: IncidentDal,
     private readonly encryptionService: EncryptionService,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   private encryptPhiFields(
@@ -269,7 +271,7 @@ export class IncidentService {
     ip: string,
     userAgent: string,
   ) {
-    return this.transitionStatus(
+    const incident = await this.transitionStatus(
       id,
       orgId,
       IncidentStatus.SUBMITTED,
@@ -278,6 +280,14 @@ export class IncidentService {
       ip,
       userAgent,
     );
+
+    if (incident) {
+      this.notificationTriggerService
+        .onIncidentReportedForGuardian(orgId, incident.individual_id, id)
+        .catch(() => {});
+    }
+
+    return incident;
   }
 
   async startReview(

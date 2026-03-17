@@ -86,6 +86,9 @@ import { NotificationPreferenceService } from './notification-preference.service
 import { NotificationDispatchService } from './notification-dispatch.service';
 import { NotificationTriggerService } from './notification-trigger.service';
 
+// Phase 10 Services
+import { GuardianPortalService } from './guardian-portal.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -156,6 +159,9 @@ import { PlatformAuditLogDal } from '@dals/platform-audit-log.dal';
 // Phase 9 DALs
 import { NotificationDal } from '@dals/notification.dal';
 import { NotificationPreferenceDal } from '@dals/notification-preference.dal';
+
+// Phase 10 DALs
+import { GuardianIndividualDal } from '@dals/guardian-individual.dal';
 
 export const services: Provider[] = [
   Logger,
@@ -244,6 +250,9 @@ export const services: Provider[] = [
   NotificationPreferenceService,
   NotificationDispatchService,
   NotificationTriggerService,
+
+  // Phase 10 Services
+  GuardianPortalService,
 
   // Guards
   {
@@ -343,4 +352,7 @@ export const services: Provider[] = [
   // Phase 9 DALs
   NotificationDal,
   NotificationPreferenceDal,
+
+  // Phase 10 DALs
+  GuardianIndividualDal,
 ];

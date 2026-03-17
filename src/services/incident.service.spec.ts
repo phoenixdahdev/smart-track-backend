@@ -15,6 +15,7 @@ describe('IncidentService', () => {
   };
   let encryptionService: { encrypt: jest.Mock; decrypt: jest.Mock };
   let auditLogService: { logAgencyAction: jest.Mock };
+  let notificationTriggerService: { onIncidentReportedForGuardian: jest.Mock };
 
   const mockIncident = {
     id: 'inc-uuid',
@@ -43,11 +44,15 @@ describe('IncidentService', () => {
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
     };
+    notificationTriggerService = {
+      onIncidentReportedForGuardian: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new IncidentService(
       incidentDal as never,
       encryptionService as never,
       auditLogService as never,
+      notificationTriggerService as never,
     );
   });
 

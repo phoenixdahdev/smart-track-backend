@@ -6,8 +6,9 @@ describe('IspDataPointService', () => {
   let ispDataPointDal: { find: jest.Mock; create: jest.Mock };
   let ispGoalDal: { get: jest.Mock };
   let auditLogService: { logAgencyAction: jest.Mock };
+  let notificationTriggerService: { onIspGoalProgressUpdated: jest.Mock };
 
-  const mockGoal = { id: 'goal-uuid', org_id: 'org-uuid', active: true };
+  const mockGoal = { id: 'goal-uuid', org_id: 'org-uuid', individual_id: 'ind-uuid', active: true };
   const mockDataPoint = {
     id: 'dp-uuid',
     org_id: 'org-uuid',
@@ -32,11 +33,15 @@ describe('IspDataPointService', () => {
     auditLogService = {
       logAgencyAction: jest.fn().mockResolvedValue(undefined),
     };
+    notificationTriggerService = {
+      onIspGoalProgressUpdated: jest.fn().mockResolvedValue(undefined),
+    };
 
     service = new IspDataPointService(
       ispDataPointDal as never,
       ispGoalDal as never,
       auditLogService as never,
+      notificationTriggerService as never,
     );
   });
 

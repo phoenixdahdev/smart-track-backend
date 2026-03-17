@@ -5,6 +5,7 @@ import {
 import { IspDataPointDal } from '@dals/isp-data-point.dal';
 import { IspGoalDal } from '@dals/isp-goal.dal';
 import { AuditLogService } from './audit-log.service';
+import { NotificationTriggerService } from './notification-trigger.service';
 import { type CreateIspDataPointDto } from '@dtos/create-isp-data-point.dto';
 import { type PaginationValidator } from '@utils/pagination-utils';
 
@@ -14,6 +15,7 @@ export class IspDataPointService {
     private readonly ispDataPointDal: IspDataPointDal,
     private readonly ispGoalDal: IspGoalDal,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationTriggerService: NotificationTriggerService,
   ) {}
 
   async create(
@@ -55,6 +57,10 @@ export class IspDataPointService {
       ip_address: ip,
       user_agent: userAgent,
     });
+
+    this.notificationTriggerService
+      .onIspGoalProgressUpdated(orgId, goal.individual_id, dto.goal_id)
+      .catch(() => {});
 
     return dataPoint;
   }

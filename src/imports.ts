@@ -76,6 +76,9 @@ import { PlatformAuditLogEntity } from '@entities/platform-audit-log.entity';
 import { NotificationEntity } from '@entities/notification.entity';
 import { NotificationPreferenceEntity } from '@entities/notification-preference.entity';
 
+// Phase 10
+import { GuardianIndividualEntity } from '@entities/guardian-individual.entity';
+
 export const imports: ModuleMetadata['imports'] = [
   ConfigModule.forRoot({ isGlobal: true }),
   DatabaseModule,
@@ -158,5 +161,8 @@ export const imports: ModuleMetadata['imports'] = [
     // Phase 9
     NotificationEntity,
     NotificationPreferenceEntity,
+
+    // Phase 10
+    GuardianIndividualEntity,
   ]),
 ];

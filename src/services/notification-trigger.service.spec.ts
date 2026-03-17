@@ -13,6 +13,7 @@ describe('NotificationTriggerService', () => {
   let serviceRecordDal: { find: jest.Mock };
   let userDal: { find: jest.Mock };
   let notificationDal: { find: jest.Mock };
+  let guardianIndividualDal: { find: jest.Mock };
 
   const mockAuth = {
     id: 'auth-uuid',
@@ -48,12 +49,19 @@ describe('NotificationTriggerService', () => {
       find: jest.fn().mockResolvedValue({ payload: [] }),
     };
 
+    guardianIndividualDal = {
+      find: jest.fn().mockResolvedValue({
+        payload: [{ guardian_id: 'guardian-uuid' }],
+      }),
+    };
+
     service = new NotificationTriggerService(
       dispatchService as never,
       serviceAuthorizationDal as never,
       serviceRecordDal as never,
       userDal as never,
       notificationDal as never,
+      guardianIndividualDal as never,
     );
   });
 
@@ -363,6 +371,70 @@ describe('NotificationTriggerService', () => {
         'evv_punches',
         'evv-uuid',
       );
+    });
+  });
+
+  // ── Guardian Hooks ──────────────────────────────────────────
+
+  describe('onIncidentReportedForGuardian', () => {
+    it('should dispatch to linked guardians', async () => {
+      await service.onIncidentReportedForGuardian('org-uuid', 'ind-uuid', 'inc-uuid');
+
+      expect(guardianIndividualDal.find).toHaveBeenCalled();
+      expect(dispatchService.dispatchBulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userIds: ['guardian-uuid'],
+          entityType: 'incidents',
+          entityId: 'inc-uuid',
+        }),
+      );
+    });
+
+    it('should skip when no linked guardians', async () => {
+      guardianIndividualDal.find.mockResolvedValue({ payload: [] });
+
+      await service.onIncidentReportedForGuardian('org-uuid', 'ind-uuid', 'inc-uuid');
+
+      expect(dispatchService.dispatchBulk).not.toHaveBeenCalled();
+    });
+
+    it('should not throw on error', async () => {
+      guardianIndividualDal.find.mockRejectedValue(new Error('DB error'));
+
+      await expect(
+        service.onIncidentReportedForGuardian('org-uuid', 'ind-uuid', 'inc-uuid'),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('onIspGoalProgressUpdated', () => {
+    it('should dispatch to linked guardians', async () => {
+      await service.onIspGoalProgressUpdated('org-uuid', 'ind-uuid', 'goal-uuid');
+
+      expect(guardianIndividualDal.find).toHaveBeenCalled();
+      expect(dispatchService.dispatchBulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userIds: ['guardian-uuid'],
+          entityType: 'isp_goals',
+          entityId: 'goal-uuid',
+        }),
+      );
+    });
+
+    it('should skip when no linked guardians', async () => {
+      guardianIndividualDal.find.mockResolvedValue({ payload: [] });
+
+      await service.onIspGoalProgressUpdated('org-uuid', 'ind-uuid', 'goal-uuid');
+
+      expect(dispatchService.dispatchBulk).not.toHaveBeenCalled();
+    });
+
+    it('should not throw on error', async () => {
+      guardianIndividualDal.find.mockRejectedValue(new Error('DB error'));
+
+      await expect(
+        service.onIspGoalProgressUpdated('org-uuid', 'ind-uuid', 'goal-uuid'),
+      ).resolves.not.toThrow();
     });
   });
 });

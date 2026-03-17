@@ -4,6 +4,7 @@ import { ServiceAuthorizationDal } from '@dals/service-authorization.dal';
 import { ServiceRecordDal } from '@dals/service-record.dal';
 import { UserDal } from '@dals/user.dal';
 import { NotificationDal } from '@dals/notification.dal';
+import { GuardianIndividualDal } from '@dals/guardian-individual.dal';
 import { NotificationType } from '@enums/notification-type.enum';
 import { AuthorizationStatus } from '@enums/authorization-status.enum';
 import { ServiceRecordStatus } from '@enums/service-record-status.enum';
@@ -19,6 +20,7 @@ export class NotificationTriggerService {
     private readonly serviceRecordDal: ServiceRecordDal,
     private readonly userDal: UserDal,
     private readonly notificationDal: NotificationDal,
+    private readonly guardianIndividualDal: GuardianIndividualDal,
   ) {}
 
   // ── Auth Threshold Alerts ──────────────────────────────────────
@@ -443,6 +445,80 @@ export class NotificationTriggerService {
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`onEvvAlert failed: ${msg}`);
+    }
+  }
+
+  // ── Guardian Hooks ───────────────────────────────────────────
+
+  async onIncidentReportedForGuardian(
+    orgId: string,
+    individualId: string,
+    incidentId: string,
+  ): Promise<void> {
+    try {
+      const links = await this.guardianIndividualDal.find({
+        findOptions: {
+          org_id: orgId,
+          individual_id: individualId,
+          active: true,
+        } as never,
+        transactionOptions: { useTransaction: false },
+      });
+
+      const guardianIds = links.payload.map(
+        (l: { guardian_id: string }) => l.guardian_id,
+      );
+
+      if (guardianIds.length === 0) return;
+
+      await this.dispatchService.dispatchBulk({
+        orgId,
+        userIds: guardianIds,
+        type: NotificationType.GUARDIAN_UPDATE,
+        title: 'Incident reported',
+        message: 'An incident has been reported for an individual in your care',
+        entityType: 'incidents',
+        entityId: incidentId,
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`onIncidentReportedForGuardian failed: ${msg}`);
+    }
+  }
+
+  async onIspGoalProgressUpdated(
+    orgId: string,
+    individualId: string,
+    goalId: string,
+  ): Promise<void> {
+    try {
+      const links = await this.guardianIndividualDal.find({
+        findOptions: {
+          org_id: orgId,
+          individual_id: individualId,
+          active: true,
+        } as never,
+        transactionOptions: { useTransaction: false },
+      });
+
+      const guardianIds = links.payload.map(
+        (l: { guardian_id: string }) => l.guardian_id,
+      );
+
+      if (guardianIds.length === 0) return;
+
+      await this.dispatchService.dispatchBulk({
+        orgId,
+        userIds: guardianIds,
+        type: NotificationType.GUARDIAN_UPDATE,
+        title: 'ISP goal progress updated',
+        message: 'Progress has been recorded for an ISP goal',
+        entityType: 'isp_goals',
+        entityId: goalId,
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`onIspGoalProgressUpdated failed: ${msg}`);
     }
   }
 

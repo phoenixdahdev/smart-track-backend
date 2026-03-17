@@ -112,6 +112,16 @@ import { SupervisorNotificationController } from './supervisor-notification.cont
 import { StaffNotificationController } from './staff-notification.controller';
 import { ClinicalNotificationController } from './clinical-notification.controller';
 
+// Phase 10 — Guardian Portal
+import { PortalIndividualController } from './portal-individual.controller';
+import { PortalServiceRecordController } from './portal-service-record.controller';
+import { PortalIncidentController } from './portal-incident.controller';
+import { PortalIspController } from './portal-isp.controller';
+import { PortalScheduleController } from './portal-schedule.controller';
+import { PortalMarController } from './portal-mar.controller';
+import { PortalAdlController } from './portal-adl.controller';
+import { PortalNotificationController } from './portal-notification.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -200,4 +210,13 @@ export const controllers: ModuleMetadata['controllers'] = [
   SupervisorNotificationController,
   StaffNotificationController,
   ClinicalNotificationController,
+  // Phase 10 — Guardian Portal
+  PortalIndividualController,
+  PortalServiceRecordController,
+  PortalIncidentController,
+  PortalIspController,
+  PortalScheduleController,
+  PortalMarController,
+  PortalAdlController,
+  PortalNotificationController,
 ];

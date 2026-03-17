@@ -1,6 +1,6 @@
 # SmartTrack Health - Progress Tracker
 
-> Last updated: 2026-03-16
+> Last updated: 2026-03-17
 
 ## Legend
 
@@ -218,15 +218,20 @@
 
 ## Phase 10: Guardian Portal API
 
-**Status: Not Started**
+**Status: Complete (10/10)**
 
-| Task                        | Status | Notes             |
-| --------------------------- | ------ | ----------------- |
-| ISP summaries endpoint      | [ ]    | Read-only         |
-| Progress reports endpoint   | [ ]    | Read-only         |
-| Incident summaries endpoint | [ ]    | Redacted          |
-| Scheduled services endpoint | [ ]    | Read-only         |
-| Guardian authentication     | [ ]    | Limited-scope JWT |
+| Task                              | Status | Notes                                                                     |
+| --------------------------------- | ------ | ------------------------------------------------------------------------- |
+| GuardianIndividual entity + DAL   | [x]    | Many-to-many linking table, relationship enum, unique constraint          |
+| Guardian portal types + DTOs      | [x]    | 10 redacted types, 6 query DTOs                                          |
+| GuardianPortalService             | [x]    | 11 methods, PHI redaction, access validation, decrypt-on-read             |
+| Portal Individual controller      | [x]    | 3 endpoints: list, profile (redacted), dashboard (aggregates)             |
+| Portal data controllers (6)       | [x]    | Service records, incidents, ISP, schedule, medications, ADL — all GET     |
+| Portal notification controller    | [x]    | 6 endpoints: list, unread-count, preferences, update, mark-read, mark-all|
+| Guardian notification hooks       | [x]    | onIncidentReportedForGuardian, onIspGoalProgressUpdated (fire-and-forget) |
+| Flat architecture registration    | [x]    | imports.ts, base.service.ts, base.controller.ts updated                   |
+| Migration                         | [x]    | guardian_individuals table + GUARDIAN_UPDATE enum value                    |
+| Postman collection                | [x]    | 16 endpoints under Guardian Portal folder                                 |
 
 ---
 
@@ -281,10 +286,12 @@
 | 7 - Payment Reconciliation | 8/8        | Complete — ERA ingestion, matching, posting, AR reports |
 | 8 - SuperAdmin Console     | 14/14      | Complete — 10 services, 10 controllers, platform dashboard |
 | 9 - Notifications          | 7/7        | Complete — 4 services, 5 controllers, 5 integration hooks |
-| 10 - Guardian Portal       | 0/5        | Phase 3 completion                       |
+| 10 - Guardian Portal       | 10/10      | Complete — 8 controllers, 1 service, 11 methods, PHI redaction |
 | 11 - Reporting             | 0/9        | Phases 6-8                               |
 | 12 - Hardening             | 0/10       | All phases                               |
-| **Total**                  | **99/123** |                                          |
+| **Total**                  | **109/123** |                                          |
+
+**Phase 10 (2026-03-17):** Guardian Portal API complete. 7th and final console (`/api/v1/portal/*`). Read-only views for guardians/family members. GuardianIndividualEntity (many-to-many linking table with relationship enum). GuardianPortalService (11 methods: access validation, linked individuals, redacted profile with computed age, dashboard with aggregate counts, service records/incidents/ISP goals/schedule/medications/ADL — all with PHI redaction). 8 controllers (individual, service-record, incident, ISP, schedule, MAR, ADL, notification). 10 redacted type interfaces, 6 query DTOs. Guardian notification hooks (fire-and-forget in IncidentService.submit() and IspDataPointService.create()). GUARDIAN_UPDATE notification type. 54 new tests (1381 total, 148 suites). 16 Postman endpoints added.
 
 **Phase 9 (2026-03-16):** Notification Engine complete. Multi-channel dispatch (in-app + email via Resend, SMS stubbed). 4 services (NotificationService, NotificationPreferenceService, NotificationDispatchService, NotificationTriggerService), 5 controllers (admin/billing/supervisor/staff/clinical), 7 DTOs, 1 types file, 9 spec files. 5 existing services modified with fire-and-forget hooks (claim, shift, service-authorization, onboarding, break-glass). Auth threshold alerts (80%/95%/100% + expiry 30d/7d/1d) with 24h dedup. Preference-respecting dispatch (channel toggles + per-type JSONB overrides). Manual trigger endpoints for auth thresholds and review reminders. 107 new tests (1327 total, 138 suites). 36 Postman endpoints added.
 
