@@ -20,5 +20,8 @@
     "^@entities/(.*)$": "<rootDir>/../src/entities/$1",
     "^@enums/(.*)$": "<rootDir>/../src/enums/$1",
     "^@app-types/(.*)$": "<rootDir>/../src/types/$1"
-  }
+  },
+  "transformIgnorePatterns": [
+    "/node_modules/.pnpm/(?!(otplib|@otplib\\+|@scure\\+|@noble\\+|qrcode))"
+  ]
 }
