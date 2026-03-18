@@ -6,6 +6,7 @@ import { TenantBaseEntity } from './tenant-base.entity';
 @Index('idx_audit_logs_action', ['action'])
 @Index('idx_audit_logs_table_name', ['table_name'])
 @Index('idx_audit_logs_created_at', ['created_at'])
+@Index('idx_audit_logs_org_created', ['org_id', 'created_at'])
 export class AuditLogEntity extends TenantBaseEntity {
   @Column({ type: 'uuid' })
   user_id: string;

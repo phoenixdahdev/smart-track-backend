@@ -16,6 +16,7 @@ import { OrganizationEntity } from './organization.entity';
 @Index('idx_users_email', ['email'], { unique: true })
 @Index('idx_users_role', ['role'])
 @Index('idx_users_status', ['status'])
+@Index('idx_users_org_id', ['org_id'])
 export class UserEntity extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   org_id: string | null;

@@ -6,12 +6,15 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from '@exceptions/all-exceptions.filter';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import { validateCriticalEnvVars } from '@utils/validate-env';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = app.get(Logger);
   const config = app.get(ConfigService);
+
+  validateCriticalEnvVars(config, logger);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,7 +28,27 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  app.use(helmet());
+  const isProduction = config.get<string>('NODE_ENV') === 'production';
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              imgSrc: ["'self'", 'data:'],
+              objectSrc: ["'none'"],
+              frameSrc: ["'none'"],
+              baseUri: ["'self'"],
+            },
+          }
+        : false,
+      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+      frameguard: { action: 'deny' },
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    }),
+  );
   app.use(compression());
 
   const swaggerConfig = new DocumentBuilder()
@@ -42,11 +65,13 @@ async function bootstrap() {
     exclude: ['health', 'api/docs'],
   });
 
+  const corsOrigin = config.get<string>('CORS_ORIGIN', '');
   app.enableCors({
-    origin: config.get<string>('CORS_ORIGIN', '*'),
+    origin: corsOrigin ? corsOrigin.split(',').map((o) => o.trim()) : true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
+    maxAge: 86400,
   });
 
   const port = config.get<string>('PORT') || 3000;

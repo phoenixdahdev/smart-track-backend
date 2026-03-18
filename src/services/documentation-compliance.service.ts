@@ -6,6 +6,7 @@ import {
   type DocumentationComplianceReport,
   type ServiceRecordStatusCount,
 } from '@app-types/reporting.types';
+import { MAX_ANALYTICS_RECORDS } from '@utils/analytics-constants';
 
 @Injectable()
 export class DocumentationComplianceService {
@@ -24,6 +25,7 @@ export class DocumentationComplianceService {
 
     const records = await this.serviceRecordDal.find({
       findOptions: findOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -65,6 +67,7 @@ export class DocumentationComplianceService {
     // Count records with daily notes
     const dailyNotes = await this.dailyNoteDal.find({
       findOptions: { org_id: orgId } as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 

@@ -73,9 +73,13 @@ describe('EncryptionService', () => {
   });
 
   describe('with invalid key', () => {
-    it('should warn and set empty key when ENCRYPTION_KEY is missing', () => {
+    it('should warn and set keyValid=false when ENCRYPTION_KEY is missing in dev', () => {
       const configService = {
-        get: jest.fn().mockReturnValue(''),
+        get: jest.fn((key: string) => {
+          if (key === 'ENCRYPTION_KEY') return '';
+          if (key === 'NODE_ENV') return 'development';
+          return '';
+        }),
       } as unknown as ConfigService;
       const svc = new EncryptionService(configService);
       const warnSpy = jest.spyOn(svc['logger'], 'warn').mockImplementation();
@@ -83,6 +87,49 @@ describe('EncryptionService', () => {
       svc.onModuleInit();
 
       expect(warnSpy).toHaveBeenCalled();
+    });
+
+    it('should throw on encrypt when key is invalid', () => {
+      const configService = {
+        get: jest.fn((key: string) => {
+          if (key === 'ENCRYPTION_KEY') return '';
+          if (key === 'NODE_ENV') return 'development';
+          return '';
+        }),
+      } as unknown as ConfigService;
+      const svc = new EncryptionService(configService);
+      jest.spyOn(svc['logger'], 'warn').mockImplementation();
+      svc.onModuleInit();
+
+      expect(() => svc.encrypt('test')).toThrow('Encryption key not configured');
+    });
+
+    it('should throw on decrypt when key is invalid', () => {
+      const configService = {
+        get: jest.fn((key: string) => {
+          if (key === 'ENCRYPTION_KEY') return '';
+          if (key === 'NODE_ENV') return 'development';
+          return '';
+        }),
+      } as unknown as ConfigService;
+      const svc = new EncryptionService(configService);
+      jest.spyOn(svc['logger'], 'warn').mockImplementation();
+      svc.onModuleInit();
+
+      expect(() => svc.decrypt('aa:bb:cc')).toThrow('Encryption key not configured');
+    });
+
+    it('should throw on init in production mode with invalid key', () => {
+      const configService = {
+        get: jest.fn((key: string) => {
+          if (key === 'ENCRYPTION_KEY') return '';
+          if (key === 'NODE_ENV') return 'production';
+          return '';
+        }),
+      } as unknown as ConfigService;
+      const svc = new EncryptionService(configService);
+
+      expect(() => svc.onModuleInit()).toThrow('Cannot start in production');
     });
   });
 });

@@ -156,6 +156,26 @@ describe('EvvComplianceService', () => {
       );
     });
 
+    it('should pass pagination limit to DAL calls', async () => {
+      await service.getEvvComplianceReport('org-uuid');
+
+      expect(evvPunchDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+      expect(evvCorrectionDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+      expect(shiftDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+    });
+
     it('should return zeros for empty data', async () => {
       evvPunchDal.find.mockResolvedValue({ payload: [] });
       evvCorrectionDal.find.mockResolvedValue({ payload: [] });

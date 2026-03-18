@@ -12,6 +12,7 @@ import {
   type MrrByTier,
   type AgencyHealthScore,
 } from '@app-types/reporting.types';
+import { MAX_ANALYTICS_RECORDS } from '@utils/analytics-constants';
 
 @Injectable()
 export class PlatformAnalyticsService {
@@ -26,6 +27,7 @@ export class PlatformAnalyticsService {
     // Load all orgs
     const orgs = await this.organizationDal.find({
       findOptions: {} as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -39,6 +41,7 @@ export class PlatformAnalyticsService {
     // Load subscriptions for MRR
     const subscriptions = await this.subscriptionDal.find({
       findOptions: { status: SubscriptionStatus.ACTIVE } as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -63,6 +66,7 @@ export class PlatformAnalyticsService {
     // Load all claims for platform-wide stats
     const claims = await this.claimDal.find({
       findOptions: {} as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -93,16 +97,19 @@ export class PlatformAnalyticsService {
   async getAgencyHealthScores(): Promise<AgencyHealthScore[]> {
     const orgs = await this.organizationDal.find({
       findOptions: { status: OrgStatus.ACTIVE } as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
     const users = await this.userDal.find({
       findOptions: { status: UserStatus.ACTIVE } as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
     const claims = await this.claimDal.find({
       findOptions: {} as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 

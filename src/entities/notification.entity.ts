@@ -8,6 +8,7 @@ import { UserEntity } from './user.entity';
 @Index(['read'])
 @Index(['type'])
 @Index(['created_at'])
+@Index('idx_notifications_org_user', ['org_id', 'user_id'])
 export class NotificationEntity extends TenantBaseEntity {
   @Column('uuid')
   user_id: string;

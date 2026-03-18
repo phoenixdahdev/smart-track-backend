@@ -151,6 +151,26 @@ describe('StaffUtilizationService', () => {
       );
     });
 
+    it('should pass pagination limit to DAL calls', async () => {
+      await service.getStaffUtilization('org-uuid');
+
+      expect(serviceRecordDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+      expect(shiftDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+      expect(evvPunchDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+    });
+
     it('should handle multiple staff members', async () => {
       serviceRecordDal.find.mockResolvedValue({
         payload: [

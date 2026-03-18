@@ -13,6 +13,8 @@ import { UserEntity } from './user.entity';
 @Index(['status'])
 @Index(['payer_config_id'])
 @Index(['service_date_from'])
+@Index('idx_claims_org_status', ['org_id', 'status'])
+@Index('idx_claims_org_payer', ['org_id', 'payer_config_id'])
 export class ClaimEntity extends TenantBaseEntity {
   @Column('uuid')
   service_record_id: string;

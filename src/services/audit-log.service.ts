@@ -14,6 +14,13 @@ const PHI_FIELDS = new Set([
   'address',
   'phone',
   'emergency_contact',
+  'first_name',
+  'last_name',
+  'medicaid_id',
+  'drug_name',
+  'dose',
+  'route',
+  'diagnosis_codes',
 ]);
 
 function stripPhi(

@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { type Request } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from '@services/auth.service';
 import { MfaService } from '@services/mfa.service';
 import { MfaType } from '@enums/mfa-type.enum';
@@ -30,6 +31,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('signup')
   async signup(@Body() dto: SignupDto, @Req() req: Request) {
     const { ip, userAgent } = this.extractRequestMeta(req);
@@ -41,6 +43,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('verify-email')
   async verifyEmail(@Body() dto: VerifyEmailDto) {
     const result = await this.authService.verifyEmail(dto.email, dto.otp);
@@ -48,6 +51,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('resend-otp')
   async resendOtp(@Body() dto: ForgotPasswordDto) {
     const result = await this.authService.resendOtp(dto.email);
@@ -55,6 +59,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('signin')
   async signin(@Body() dto: SigninDto, @Req() req: Request) {
     const { ip, userAgent } = this.extractRequestMeta(req);
@@ -81,6 +86,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('signin/google')
   async googleSignin(@Body() dto: GoogleSigninDto, @Req() req: Request) {
     const { ip, userAgent } = this.extractRequestMeta(req);
@@ -125,6 +131,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     const result = await this.authService.forgotPassword(dto.email);
@@ -132,6 +139,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto) {
     const result = await this.authService.resetPassword(

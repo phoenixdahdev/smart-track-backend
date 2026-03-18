@@ -10,6 +10,8 @@ import { ProgramEntity } from './program.entity';
 @Index(['staff_id'])
 @Index(['shift_date'])
 @Index(['status'])
+@Index('idx_shifts_org_staff', ['org_id', 'staff_id'])
+@Index('idx_shifts_org_date', ['org_id', 'shift_date'])
 export class ShiftEntity extends TenantBaseEntity {
   @Column('uuid')
   staff_id: string;

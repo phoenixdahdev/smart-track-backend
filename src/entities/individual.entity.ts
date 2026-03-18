@@ -1,9 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { TenantBaseEntity } from './tenant-base.entity';
 import { OrganizationEntity } from './organization.entity';
 import { UserEntity } from './user.entity';
 
 @Entity('individuals')
+@Index('idx_individuals_org_id', ['org_id'])
 export class IndividualEntity extends TenantBaseEntity {
   @Column({ type: 'text' })
   first_name: string;

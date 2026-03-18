@@ -3,6 +3,7 @@ import { type ModuleMetadata } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from '@database/database.module';
 
 // Phase 1
@@ -82,6 +83,10 @@ import { GuardianIndividualEntity } from '@entities/guardian-individual.entity';
 export const imports: ModuleMetadata['imports'] = [
   ConfigModule.forRoot({ isGlobal: true }),
   DatabaseModule,
+  ThrottlerModule.forRoot([
+    { name: 'default', ttl: 60000, limit: 100 },
+    { name: 'auth', ttl: 60000, limit: 5 },
+  ]),
   PassportModule.register({ defaultStrategy: 'jwt' }),
   JwtModule.registerAsync({
     inject: [ConfigService],

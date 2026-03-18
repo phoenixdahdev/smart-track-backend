@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { TenantBaseEntity } from './tenant-base.entity';
 import { ServiceRecordEntity } from './service-record.entity';
 
 @Entity('daily_notes')
+@Index('idx_daily_notes_org_id', ['org_id'])
 export class DailyNoteEntity extends TenantBaseEntity {
   @Column('uuid')
   service_record_id: string;

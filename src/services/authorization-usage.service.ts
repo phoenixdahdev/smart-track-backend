@@ -5,6 +5,7 @@ import {
   type AuthorizationUsageReport,
   type AuthorizationUsageRow,
 } from '@app-types/reporting.types';
+import { MAX_ANALYTICS_RECORDS } from '@utils/analytics-constants';
 
 @Injectable()
 export class AuthorizationUsageService {
@@ -26,6 +27,7 @@ export class AuthorizationUsageService {
 
     const auths = await this.serviceAuthorizationDal.find({
       findOptions: findOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 

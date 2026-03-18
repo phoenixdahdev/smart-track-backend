@@ -6,6 +6,7 @@ import { PunchType } from '@enums/punch-type.enum';
 import { CorrectionStatus } from '@enums/correction-status.enum';
 import { ShiftStatus } from '@enums/shift-status.enum';
 import { type EvvComplianceReport } from '@app-types/reporting.types';
+import { MAX_ANALYTICS_RECORDS } from '@utils/analytics-constants';
 
 @Injectable()
 export class EvvComplianceService {
@@ -24,6 +25,7 @@ export class EvvComplianceService {
 
     const punches = await this.evvPunchDal.find({
       findOptions: punchFindOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -57,6 +59,7 @@ export class EvvComplianceService {
 
     const corrections = await this.evvCorrectionDal.find({
       findOptions: correctionFindOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -90,6 +93,7 @@ export class EvvComplianceService {
 
     const shifts = await this.shiftDal.find({
       findOptions: shiftFindOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 

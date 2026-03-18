@@ -10,6 +10,7 @@ import {
   type StaffUtilizationReport,
   type StaffUtilizationRow,
 } from '@app-types/reporting.types';
+import { MAX_ANALYTICS_RECORDS } from '@utils/analytics-constants';
 
 @Injectable()
 export class StaffUtilizationService {
@@ -31,6 +32,7 @@ export class StaffUtilizationService {
 
     const records = await this.serviceRecordDal.find({
       findOptions: srFindOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -41,6 +43,7 @@ export class StaffUtilizationService {
 
     const shifts = await this.shiftDal.find({
       findOptions: shiftFindOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -50,6 +53,7 @@ export class StaffUtilizationService {
 
     const punches = await this.evvPunchDal.find({
       findOptions: punchFindOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 
@@ -146,6 +150,7 @@ export class StaffUtilizationService {
     const staffIds = Array.from(staffMap.keys());
     const users = await this.userDal.find({
       findOptions: { org_id: orgId } as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
     const nameMap = new Map<string, string>();

@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { type Request } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { MfaService } from '@services/mfa.service';
 import { MfaVerifyDto } from '@dtos/mfa-verify.dto';
 import { MfaVerifyBackupDto } from '@dtos/mfa-verify-backup.dto';
@@ -79,6 +80,7 @@ export class MfaController {
   }
 
   @MfaPending()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('verify')
   async verify(
     @CurrentUser() user: AuthenticatedUser,
@@ -99,6 +101,7 @@ export class MfaController {
   }
 
   @MfaPending()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('verify/backup')
   async verifyBackup(
     @CurrentUser() user: AuthenticatedUser,
@@ -119,6 +122,7 @@ export class MfaController {
   }
 
   @MfaPending()
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
   @Post('resend')
   async resendMfaOtp(@CurrentUser('id') userId: string) {
     await this.mfaService.sendMfaEmailOtp(userId);

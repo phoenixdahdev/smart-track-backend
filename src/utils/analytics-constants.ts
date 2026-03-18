@@ -1,0 +1,1 @@
+export const MAX_ANALYTICS_RECORDS = 50000;

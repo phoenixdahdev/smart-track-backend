@@ -10,6 +10,8 @@ import { ShiftEntity } from './shift.entity';
 @Index(['individual_id'])
 @Index(['timestamp'])
 @Index(['punch_type'])
+@Index('idx_evv_punches_org_staff', ['org_id', 'staff_id'])
+@Index('idx_evv_punches_org_timestamp', ['org_id', 'timestamp'])
 export class EvvPunchEntity extends TenantBaseEntity {
   @Column('uuid')
   staff_id: string;

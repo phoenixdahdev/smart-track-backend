@@ -1,5 +1,6 @@
 import { Logger, type Provider } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { ResponseInterceptor } from '@interceptors/response.interceptor';
 import { TenantContextInterceptor } from '@interceptors/tenant-context.interceptor';
 import { JwtAuthGuard } from '@guards/jwt-auth.guard';
@@ -288,6 +289,10 @@ export const services: Provider[] = [
   {
     provide: APP_GUARD,
     useClass: PermissionsGuard,
+  },
+  {
+    provide: APP_GUARD,
+    useClass: ThrottlerGuard,
   },
 
   // Interceptors

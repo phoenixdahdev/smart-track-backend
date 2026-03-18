@@ -164,6 +164,16 @@ describe('ClaimsAnalyticsService', () => {
       );
     });
 
+    it('should pass pagination limit to DAL', async () => {
+      await service.getClaimsLifecycle('org-uuid');
+
+      expect(claimDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+    });
+
     it('should return zero averages when no qualifying claims', async () => {
       claimDal.find.mockResolvedValue({ payload: [] });
 

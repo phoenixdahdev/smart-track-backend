@@ -6,6 +6,7 @@ import {
   type ClaimStatusCount,
   type DenialReasonAnalysis,
 } from '@app-types/reporting.types';
+import { MAX_ANALYTICS_RECORDS } from '@utils/analytics-constants';
 
 const EXCLUDED_STATUSES = new Set([ClaimStatus.VOID, ClaimStatus.DRAFT]);
 
@@ -23,6 +24,7 @@ export class ClaimsAnalyticsService {
 
     const claims = await this.claimDal.find({
       findOptions: findOptions as never,
+      paginationPayload: { limit: MAX_ANALYTICS_RECORDS, page: 1 },
       transactionOptions: { useTransaction: false },
     });
 

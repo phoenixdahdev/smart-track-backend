@@ -132,6 +132,16 @@ describe('AuthorizationUsageService', () => {
       );
     });
 
+    it('should pass pagination limit to DAL', async () => {
+      await service.getAuthorizationUsage('org-uuid');
+
+      expect(serviceAuthorizationDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+    });
+
     it('should return zeros for empty data', async () => {
       serviceAuthorizationDal.find.mockResolvedValue({ payload: [] });
 

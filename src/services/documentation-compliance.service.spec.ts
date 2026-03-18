@@ -141,6 +141,21 @@ describe('DocumentationComplianceService', () => {
       );
     });
 
+    it('should pass pagination limit to DAL calls', async () => {
+      await service.getComplianceReport('org-uuid');
+
+      expect(serviceRecordDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+      expect(dailyNoteDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+    });
+
     it('should return zeros when no records', async () => {
       serviceRecordDal.find.mockResolvedValue({ payload: [] });
       dailyNoteDal.find.mockResolvedValue({ payload: [] });

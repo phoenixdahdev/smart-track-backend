@@ -32,6 +32,12 @@ const DEFAULT_PRIVATE_FIELDS = [
   'mfaOtpCode',
   'mfaBackupCodes',
   'mfaLockedUntil',
+  'otpCode',
+  'resetToken',
+  'resetTokenExpiresAt',
+  'otpExpiresAt',
+  'medicaidId',
+  'diagnosisCodes',
 ];
 
 @Injectable()

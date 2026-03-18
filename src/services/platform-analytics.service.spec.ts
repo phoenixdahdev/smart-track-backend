@@ -167,6 +167,21 @@ describe('PlatformAnalyticsService', () => {
 
       expect(result.avg_claims_per_agency).toBe(3);
     });
+
+    it('should pass pagination limit to DAL calls', async () => {
+      await service.getPlatformAnalytics();
+
+      expect(organizationDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+      expect(claimDal.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paginationPayload: { limit: 50000, page: 1 },
+        }),
+      );
+    });
   });
 
   describe('getAgencyHealthScores', () => {

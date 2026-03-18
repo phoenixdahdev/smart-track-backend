@@ -10,6 +10,9 @@ import { ProgramEntity } from './program.entity';
 @Index(['staff_id'])
 @Index(['service_date'])
 @Index(['status'])
+@Index('idx_service_records_org_status', ['org_id', 'status'])
+@Index('idx_service_records_org_staff', ['org_id', 'staff_id'])
+@Index('idx_service_records_org_date', ['org_id', 'service_date'])
 export class ServiceRecordEntity extends TenantBaseEntity {
   @Column('uuid')
   individual_id: string;
