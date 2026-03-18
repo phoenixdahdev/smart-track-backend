@@ -46,9 +46,24 @@ export class Phase12HardeningRlsIndexes1710768000000 implements MigrationInterfa
     'claim_status_history',
   ];
 
+  private async tableExists(
+    queryRunner: QueryRunner,
+    table: string,
+  ): Promise<boolean> {
+    const result = await queryRunner.query(
+      `SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = $1
+      ) AS "exists"`,
+      [table],
+    );
+    return result[0]?.exists === true;
+  }
+
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 7A: RLS policies on all tenant tables
+    // 7A: RLS policies on all tenant tables (skip tables that don't exist yet)
     for (const table of this.tenantTables) {
+      if (!(await this.tableExists(queryRunner, table))) continue;
       await queryRunner.query(`ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY`);
       await queryRunner.query(`ALTER TABLE "${table}" FORCE ROW LEVEL SECURITY`);
       await queryRunner.query(
@@ -172,6 +187,7 @@ export class Phase12HardeningRlsIndexes1710768000000 implements MigrationInterfa
 
     // Drop RLS on tenant tables
     for (const table of [...this.tenantTables].reverse()) {
+      if (!(await this.tableExists(queryRunner, table))) continue;
       await queryRunner.query(`DROP POLICY IF EXISTS "${table}_tenant_isolation" ON "${table}"`);
       await queryRunner.query(`ALTER TABLE "${table}" DISABLE ROW LEVEL SECURITY`);
     }
