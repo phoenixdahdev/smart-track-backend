@@ -122,6 +122,22 @@ import { PortalMarController } from './portal-mar.controller';
 import { PortalAdlController } from './portal-adl.controller';
 import { PortalNotificationController } from './portal-notification.controller';
 
+// Phase 11 — Billing Console (Reports)
+import { BillingClaimsAnalyticsController } from './billing-claims-analytics.controller';
+import { BillingAuthorizationUsageReportController } from './billing-authorization-usage-report.controller';
+// Phase 11 — Admin Console (Reports)
+import { AdminClaimsAnalyticsController } from './admin-claims-analytics.controller';
+import { AdminComplianceReportController } from './admin-compliance-report.controller';
+import { AdminEvvReportController } from './admin-evv-report.controller';
+import { AdminStaffUtilizationReportController } from './admin-staff-utilization-report.controller';
+import { AdminAuthorizationUsageReportController } from './admin-authorization-usage-report.controller';
+// Phase 11 — Supervisor Console (Reports)
+import { SupervisorComplianceReportController } from './supervisor-compliance-report.controller';
+import { SupervisorEvvReportController } from './supervisor-evv-report.controller';
+import { SupervisorStaffUtilizationReportController } from './supervisor-staff-utilization-report.controller';
+// Phase 11 — SuperAdmin Console (Analytics)
+import { SuperadminAnalyticsController } from './superadmin-analytics.controller';
+
 export const controllers: ModuleMetadata['controllers'] = [
   AppController,
   AuthController,
@@ -219,4 +235,19 @@ export const controllers: ModuleMetadata['controllers'] = [
   PortalMarController,
   PortalAdlController,
   PortalNotificationController,
+  // Phase 11 — Billing Console (Reports)
+  BillingClaimsAnalyticsController,
+  BillingAuthorizationUsageReportController,
+  // Phase 11 — Admin Console (Reports)
+  AdminClaimsAnalyticsController,
+  AdminComplianceReportController,
+  AdminEvvReportController,
+  AdminStaffUtilizationReportController,
+  AdminAuthorizationUsageReportController,
+  // Phase 11 — Supervisor Console (Reports)
+  SupervisorComplianceReportController,
+  SupervisorEvvReportController,
+  SupervisorStaffUtilizationReportController,
+  // Phase 11 — SuperAdmin Console (Analytics)
+  SuperadminAnalyticsController,
 ];

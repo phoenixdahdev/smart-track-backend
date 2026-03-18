@@ -89,6 +89,15 @@ import { NotificationTriggerService } from './notification-trigger.service';
 // Phase 10 Services
 import { GuardianPortalService } from './guardian-portal.service';
 
+// Phase 11 Services
+import { ClaimsAnalyticsService } from './claims-analytics.service';
+import { DocumentationComplianceService } from './documentation-compliance.service';
+import { EvvComplianceService } from './evv-compliance.service';
+import { StaffUtilizationService } from './staff-utilization.service';
+import { AuthorizationUsageService } from './authorization-usage.service';
+import { PlatformAnalyticsService } from './platform-analytics.service';
+import { CsvExportService } from './csv-export.service';
+
 // Phase 1 DALs
 import { OrganizationDal } from '@dals/organization.dal';
 import { UserDal } from '@dals/user.dal';
@@ -253,6 +262,15 @@ export const services: Provider[] = [
 
   // Phase 10 Services
   GuardianPortalService,
+
+  // Phase 11 Services
+  ClaimsAnalyticsService,
+  DocumentationComplianceService,
+  EvvComplianceService,
+  StaffUtilizationService,
+  AuthorizationUsageService,
+  PlatformAnalyticsService,
+  CsvExportService,
 
   // Guards
   {

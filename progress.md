@@ -1,6 +1,6 @@
 # SmartTrack Health - Progress Tracker
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-18
 
 ## Legend
 
@@ -237,19 +237,19 @@
 
 ## Phase 11: Reporting & Analytics
 
-**Status: Not Started**
+**Status: Complete (9/9)**
 
 | Task                             | Status | Notes |
 | -------------------------------- | ------ | ----- |
-| Billing reconciliation reports   | [ ]    |       |
-| AR aging reports                 | [ ]    |       |
-| Claims lifecycle analytics       | [ ]    |       |
-| Documentation compliance reports | [ ]    |       |
-| EVV compliance reports           | [ ]    |       |
-| Staff utilization reports        | [ ]    |       |
-| Authorization usage reports      | [ ]    |       |
-| Platform analytics (SuperAdmin)  | [ ]    |       |
-| Export (CSV, PDF)                | [ ]    |       |
+| Billing reconciliation reports   | [x]    | Already done in Phase 7 (ArReportService) |
+| AR aging reports                 | [x]    | Already done in Phase 7 (ArReportService) |
+| Claims lifecycle analytics       | [x]    | ClaimsAnalyticsService — 2 controllers (billing + admin) |
+| Documentation compliance reports | [x]    | DocumentationComplianceService — 2 controllers (supervisor + admin) |
+| EVV compliance reports           | [x]    | EvvComplianceService — 2 controllers (supervisor + admin) |
+| Staff utilization reports        | [x]    | StaffUtilizationService — 2 controllers (admin + supervisor) |
+| Authorization usage reports      | [x]    | AuthorizationUsageService — 2 controllers (billing + admin) |
+| Platform analytics (SuperAdmin)  | [x]    | PlatformAnalyticsService + SuperadminAnalyticsController |
+| Export (CSV, PDF)                | [x]    | CSV via CsvExportService + arrayToCsv utility; PDF deferred |
 
 ---
 
@@ -287,9 +287,11 @@
 | 8 - SuperAdmin Console     | 14/14      | Complete — 10 services, 10 controllers, platform dashboard |
 | 9 - Notifications          | 7/7        | Complete — 4 services, 5 controllers, 5 integration hooks |
 | 10 - Guardian Portal       | 10/10      | Complete — 8 controllers, 1 service, 11 methods, PHI redaction |
-| 11 - Reporting             | 0/9        | Phases 6-8                               |
+| 11 - Reporting             | 9/9        | Complete — 7 services, 11 controllers, CSV export |
 | 12 - Hardening             | 0/10       | All phases                               |
-| **Total**                  | **109/123** |                                          |
+| **Total**                  | **118/123** |                                          |
+
+**Phase 11 (2026-03-18):** Reporting & Analytics complete. 6 report services (ClaimsAnalytics, DocumentationCompliance, EvvCompliance, StaffUtilization, AuthorizationUsage, PlatformAnalytics) + CsvExportService. 11 controllers across 4 consoles (2 billing, 5 admin, 2 supervisor, 1 superadmin + 1 admin auth-usage). CSV export utility (arrayToCsv, centsToDollars, formatDate) with comma/quote/newline escaping. @SkipResponseInterceptor on /export endpoints. Domain-based services shared across consoles. No new entities or migrations — all in-memory aggregation from existing DALs. 24 Postman endpoints added. 134 new tests (1515 total, 167 suites).
 
 **Phase 10 (2026-03-17):** Guardian Portal API complete. 7th and final console (`/api/v1/portal/*`). Read-only views for guardians/family members. GuardianIndividualEntity (many-to-many linking table with relationship enum). GuardianPortalService (11 methods: access validation, linked individuals, redacted profile with computed age, dashboard with aggregate counts, service records/incidents/ISP goals/schedule/medications/ADL — all with PHI redaction). 8 controllers (individual, service-record, incident, ISP, schedule, MAR, ADL, notification). 10 redacted type interfaces, 6 query DTOs. Guardian notification hooks (fire-and-forget in IncidentService.submit() and IspDataPointService.create()). GUARDIAN_UPDATE notification type. 54 new tests (1381 total, 148 suites). 16 Postman endpoints added.
 

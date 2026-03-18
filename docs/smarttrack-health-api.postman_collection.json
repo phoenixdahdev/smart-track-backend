@@ -10426,6 +10426,472 @@
 				}
 			],
 			"description": "Guardian Portal — read-only access for guardians to view linked individuals, service records, incidents, ISP goals, schedules, medications, ADL summaries, and manage notifications."
+		},
+		{
+			"name": "Reporting & Analytics",
+			"item": [
+				{
+					"name": "Billing > Claims Lifecycle",
+					"item": [
+						{
+							"name": "Claims Lifecycle Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/billing/reports/claims-lifecycle?date_from=2026-01-01&date_to=2026-12-31",
+									"host": ["{{baseUrl}}"],
+									"path": ["billing", "reports", "claims-lifecycle"],
+									"query": [
+										{"key": "date_from", "value": "2026-01-01"},
+										{"key": "date_to", "value": "2026-12-31"},
+										{"key": "payer_config_id", "value": "", "disabled": true},
+										{"key": "individual_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nClaims lifecycle report with status counts, avg days between stages, and denial analysis."
+							},
+							"response": []
+						},
+						{
+							"name": "Denial Analysis",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/billing/reports/claims-lifecycle/denial-analysis",
+									"host": ["{{baseUrl}}"],
+									"path": ["billing", "reports", "claims-lifecycle", "denial-analysis"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nDenial reason code breakdown."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Claims Lifecycle CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/billing/reports/claims-lifecycle/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["billing", "reports", "claims-lifecycle", "export"]
+								},
+								"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nExport claims lifecycle report as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Billing > Authorization Usage",
+					"item": [
+						{
+							"name": "Authorization Usage Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/billing/reports/authorization-usage",
+									"host": ["{{baseUrl}}"],
+									"path": ["billing", "reports", "authorization-usage"],
+									"query": [
+										{"key": "individual_id", "value": "", "disabled": true},
+										{"key": "payer_config_id", "value": "", "disabled": true},
+										{"key": "service_code_id", "value": "", "disabled": true},
+										{"key": "alerts_only", "value": "true", "disabled": true}
+									]
+								},
+								"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nAuthorization usage with utilization %, approaching/exceeded/expiring alerts."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Authorization Usage CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/billing/reports/authorization-usage/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["billing", "reports", "authorization-usage", "export"]
+								},
+								"description": "**Roles:** BILLING_SPECIALIST, FINANCE_MANAGER\n\nExport authorization usage as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admin > Claims Lifecycle",
+					"item": [
+						{
+							"name": "Claims Lifecycle Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/claims-lifecycle",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "claims-lifecycle"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nClaims lifecycle report."
+							},
+							"response": []
+						},
+						{
+							"name": "Denial Analysis",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/claims-lifecycle/denial-analysis",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "claims-lifecycle", "denial-analysis"]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nDenial reason code breakdown."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Claims Lifecycle CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/claims-lifecycle/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "claims-lifecycle", "export"]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nExport claims lifecycle as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admin > Documentation Compliance",
+					"item": [
+						{
+							"name": "Documentation Compliance Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/documentation",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "documentation"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true},
+										{"key": "staff_id", "value": "", "disabled": true},
+										{"key": "program_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nDocumentation compliance report with approval rates, review times, and completeness."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Documentation Compliance CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/documentation/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "documentation", "export"]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nExport documentation compliance as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admin > EVV Compliance",
+					"item": [
+						{
+							"name": "EVV Compliance Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/evv",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "evv"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true},
+										{"key": "staff_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nEVV compliance report with GPS rates, missed punches, and corrections."
+							},
+							"response": []
+						},
+						{
+							"name": "Export EVV Compliance CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/evv/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "evv", "export"]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nExport EVV compliance as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admin > Staff Utilization",
+					"item": [
+						{
+							"name": "Staff Utilization Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/staff-utilization",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "staff-utilization"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true},
+										{"key": "staff_id", "value": "", "disabled": true},
+										{"key": "program_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER, HR_MANAGER\n\nPer-staff utilization with hours, units, shift fulfillment."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Staff Utilization CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/staff-utilization/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "staff-utilization", "export"]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER, HR_MANAGER\n\nExport staff utilization as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admin > Authorization Usage",
+					"item": [
+						{
+							"name": "Authorization Usage Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/authorization-usage",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "authorization-usage"],
+									"query": [
+										{"key": "alerts_only", "value": "true", "disabled": true}
+									]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nAuthorization usage report."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Authorization Usage CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/admin/reports/authorization-usage/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "reports", "authorization-usage", "export"]
+								},
+								"description": "**Roles:** ADMIN, AGENCY_OWNER\n\nExport authorization usage as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Supervisor > Documentation Compliance",
+					"item": [
+						{
+							"name": "Documentation Compliance Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/supervisor/reports/documentation",
+									"host": ["{{baseUrl}}"],
+									"path": ["supervisor", "reports", "documentation"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true},
+										{"key": "staff_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** SUPERVISOR\n\nDocumentation compliance report."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Documentation Compliance CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/supervisor/reports/documentation/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["supervisor", "reports", "documentation", "export"]
+								},
+								"description": "**Roles:** SUPERVISOR\n\nExport documentation compliance as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Supervisor > EVV Compliance",
+					"item": [
+						{
+							"name": "EVV Compliance Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/supervisor/reports/evv",
+									"host": ["{{baseUrl}}"],
+									"path": ["supervisor", "reports", "evv"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true},
+										{"key": "staff_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** SUPERVISOR\n\nEVV compliance report."
+							},
+							"response": []
+						},
+						{
+							"name": "Export EVV Compliance CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/supervisor/reports/evv/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["supervisor", "reports", "evv", "export"]
+								},
+								"description": "**Roles:** SUPERVISOR\n\nExport EVV compliance as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Supervisor > Staff Utilization",
+					"item": [
+						{
+							"name": "Staff Utilization Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/supervisor/reports/staff-utilization",
+									"host": ["{{baseUrl}}"],
+									"path": ["supervisor", "reports", "staff-utilization"],
+									"query": [
+										{"key": "date_from", "value": "", "disabled": true},
+										{"key": "date_to", "value": "", "disabled": true},
+										{"key": "staff_id", "value": "", "disabled": true}
+									]
+								},
+								"description": "**Roles:** SUPERVISOR\n\nStaff utilization report."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Staff Utilization CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/supervisor/reports/staff-utilization/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["supervisor", "reports", "staff-utilization", "export"]
+								},
+								"description": "**Roles:** SUPERVISOR\n\nExport staff utilization as CSV."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "SuperAdmin > Platform Analytics",
+					"item": [
+						{
+							"name": "Platform Analytics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/analytics",
+									"host": ["{{baseUrl}}"],
+									"path": ["superadmin", "platform", "analytics"]
+								},
+								"description": "**Roles:** PLATFORM_OWNER, PLATFORM_ADMIN\n\nFull platform analytics: agencies, MRR, claims, health scores."
+							},
+							"response": []
+						},
+						{
+							"name": "Agency Health Scores",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/analytics/agency-health",
+									"host": ["{{baseUrl}}"],
+									"path": ["superadmin", "platform", "analytics", "agency-health"]
+								},
+								"description": "**Roles:** PLATFORM_OWNER, PLATFORM_ADMIN\n\nPer-agency health scores (HEALTHY/AT_RISK/CRITICAL)."
+							},
+							"response": []
+						},
+						{
+							"name": "Export Platform Analytics CSV",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/superadmin/platform/analytics/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["superadmin", "platform", "analytics", "export"]
+								},
+								"description": "**Roles:** PLATFORM_OWNER, PLATFORM_ADMIN\n\nExport platform analytics as CSV."
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Phase 11 — Reporting & Analytics. CSV export endpoints across Billing, Admin, Supervisor, and SuperAdmin consoles."
 		}
 	]
 }
