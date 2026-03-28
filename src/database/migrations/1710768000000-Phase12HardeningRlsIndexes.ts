@@ -77,59 +77,40 @@ export class Phase12HardeningRlsIndexes1710768000000 implements MigrationInterfa
     }
 
     // Special case: users (nullable org_id, extends BaseEntity not TenantBaseEntity)
-    await queryRunner.query(`ALTER TABLE "users" ENABLE ROW LEVEL SECURITY`);
-    await queryRunner.query(`ALTER TABLE "users" FORCE ROW LEVEL SECURITY`);
-    await queryRunner.query(
-      `DROP POLICY IF EXISTS "users_tenant_isolation" ON "users"`,
-    );
-    await queryRunner.query(
-      `CREATE POLICY "users_tenant_isolation" ON "users"
-        USING (org_id IS NULL OR org_id = current_setting('app.current_org_id', true)::uuid)`,
-    );
+    if (await this.tableExists(queryRunner, 'users')) {
+      await queryRunner.query(`ALTER TABLE "users" ENABLE ROW LEVEL SECURITY`);
+      await queryRunner.query(`ALTER TABLE "users" FORCE ROW LEVEL SECURITY`);
+      await queryRunner.query(
+        `DROP POLICY IF EXISTS "users_tenant_isolation" ON "users"`,
+      );
+      await queryRunner.query(
+        `CREATE POLICY "users_tenant_isolation" ON "users"
+          USING (org_id IS NULL OR org_id = current_setting('app.current_org_id', true)::uuid)`,
+      );
+    }
 
-    // 7B: Composite indexes
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_service_records_org_status ON service_records(org_id, status)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_service_records_org_staff ON service_records(org_id, staff_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_service_records_org_date ON service_records(org_id, service_date)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_claims_org_status ON claims(org_id, status)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_claims_org_payer ON claims(org_id, payer_config_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_evv_punches_org_staff ON evv_punches(org_id, staff_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_evv_punches_org_timestamp ON evv_punches(org_id, "timestamp")`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_shifts_org_staff ON shifts(org_id, staff_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_shifts_org_date ON shifts(org_id, shift_date)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_users_org_id ON users(org_id) WHERE org_id IS NOT NULL`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_daily_notes_org_id ON daily_notes(org_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_individuals_org_id ON individuals(org_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_notifications_org_user ON notifications(org_id, user_id)`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS idx_audit_logs_org_created ON audit_logs(org_id, created_at)`,
-    );
+    // 7B: Composite indexes (each guarded — tables may not exist on fresh DB)
+    const indexMap: [string, string][] = [
+      ['service_records', 'CREATE INDEX IF NOT EXISTS idx_service_records_org_status ON service_records(org_id, status)'],
+      ['service_records', 'CREATE INDEX IF NOT EXISTS idx_service_records_org_staff ON service_records(org_id, staff_id)'],
+      ['service_records', 'CREATE INDEX IF NOT EXISTS idx_service_records_org_date ON service_records(org_id, service_date)'],
+      ['claims', 'CREATE INDEX IF NOT EXISTS idx_claims_org_status ON claims(org_id, status)'],
+      ['claims', 'CREATE INDEX IF NOT EXISTS idx_claims_org_payer ON claims(org_id, payer_config_id)'],
+      ['evv_punches', 'CREATE INDEX IF NOT EXISTS idx_evv_punches_org_staff ON evv_punches(org_id, staff_id)'],
+      ['evv_punches', 'CREATE INDEX IF NOT EXISTS idx_evv_punches_org_timestamp ON evv_punches(org_id, "timestamp")'],
+      ['shifts', 'CREATE INDEX IF NOT EXISTS idx_shifts_org_staff ON shifts(org_id, staff_id)'],
+      ['shifts', 'CREATE INDEX IF NOT EXISTS idx_shifts_org_date ON shifts(org_id, shift_date)'],
+      ['users', 'CREATE INDEX IF NOT EXISTS idx_users_org_id ON users(org_id) WHERE org_id IS NOT NULL'],
+      ['daily_notes', 'CREATE INDEX IF NOT EXISTS idx_daily_notes_org_id ON daily_notes(org_id)'],
+      ['individuals', 'CREATE INDEX IF NOT EXISTS idx_individuals_org_id ON individuals(org_id)'],
+      ['notifications', 'CREATE INDEX IF NOT EXISTS idx_notifications_org_user ON notifications(org_id, user_id)'],
+      ['audit_logs', 'CREATE INDEX IF NOT EXISTS idx_audit_logs_org_created ON audit_logs(org_id, created_at)'],
+    ];
+    for (const [table, sql] of indexMap) {
+      if (await this.tableExists(queryRunner, table)) {
+        await queryRunner.query(sql);
+      }
+    }
 
     // 7C: Audit log immutability triggers
     await queryRunner.query(`
@@ -141,23 +122,23 @@ export class Phase12HardeningRlsIndexes1710768000000 implements MigrationInterfa
       $$ LANGUAGE plpgsql
     `);
 
-    await queryRunner.query(`
-      DROP TRIGGER IF EXISTS audit_logs_immutable ON audit_logs
-    `);
-    await queryRunner.query(`
-      CREATE TRIGGER audit_logs_immutable
-        BEFORE UPDATE OR DELETE ON audit_logs
-        FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_modification()
-    `);
+    if (await this.tableExists(queryRunner, 'audit_logs')) {
+      await queryRunner.query(`DROP TRIGGER IF EXISTS audit_logs_immutable ON audit_logs`);
+      await queryRunner.query(`
+        CREATE TRIGGER audit_logs_immutable
+          BEFORE UPDATE OR DELETE ON audit_logs
+          FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_modification()
+      `);
+    }
 
-    await queryRunner.query(`
-      DROP TRIGGER IF EXISTS platform_audit_log_immutable ON platform_audit_log
-    `);
-    await queryRunner.query(`
-      CREATE TRIGGER platform_audit_log_immutable
-        BEFORE UPDATE OR DELETE ON platform_audit_log
-        FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_modification()
-    `);
+    if (await this.tableExists(queryRunner, 'platform_audit_log')) {
+      await queryRunner.query(`DROP TRIGGER IF EXISTS platform_audit_log_immutable ON platform_audit_log`);
+      await queryRunner.query(`
+        CREATE TRIGGER platform_audit_log_immutable
+          BEFORE UPDATE OR DELETE ON platform_audit_log
+          FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_modification()
+      `);
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -183,8 +164,10 @@ export class Phase12HardeningRlsIndexes1710768000000 implements MigrationInterfa
     await queryRunner.query(`DROP INDEX IF EXISTS idx_service_records_org_status`);
 
     // Drop RLS on users
-    await queryRunner.query(`DROP POLICY IF EXISTS "users_tenant_isolation" ON "users"`);
-    await queryRunner.query(`ALTER TABLE "users" DISABLE ROW LEVEL SECURITY`);
+    if (await this.tableExists(queryRunner, 'users')) {
+      await queryRunner.query(`DROP POLICY IF EXISTS "users_tenant_isolation" ON "users"`);
+      await queryRunner.query(`ALTER TABLE "users" DISABLE ROW LEVEL SECURITY`);
+    }
 
     // Drop RLS on tenant tables
     for (const table of [...this.tenantTables].reverse()) {
