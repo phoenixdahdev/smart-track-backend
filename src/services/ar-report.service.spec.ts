@@ -215,8 +215,8 @@ describe('ArReportService', () => {
             paid_amount_cents: 8000,
             balance_cents: 2000,
             status: ClaimStatus.PAID,
-            submitted_at: daysAgo(30),
-            paid_at: daysAgo(15),
+            submitted_at: new Date('2026-01-01T00:00:00Z'),
+            paid_at: new Date('2026-01-16T00:00:00Z'),
           }),
         ],
       });
