@@ -50,7 +50,8 @@ export class Phase12HardeningRlsIndexes1710768000000 implements MigrationInterfa
     queryRunner: QueryRunner,
     table: string,
   ): Promise<boolean> {
-    const result = await queryRunner.query(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const result: { exists: boolean }[] = await queryRunner.query(
       `SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
         WHERE table_schema = 'public' AND table_name = $1
