@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+*.tsbuildinfo
 
 # package manager lock files (project uses pnpm-lock.yaml)
 package-lock.json
